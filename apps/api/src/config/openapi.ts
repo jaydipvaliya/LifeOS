@@ -146,5 +146,119 @@ export const openApiSpec = {
         },
       },
     },
+    '/dashboard': {
+      get: {
+        summary: 'Get database-aggregated Home dashboard overview',
+        tags: ['Dashboard'],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Dashboard data' },
+        },
+      },
+    },
+    '/categories': {
+      get: {
+        summary: 'List system and custom document categories',
+        tags: ['Categories'],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Document categories' },
+        },
+      },
+      post: {
+        summary: 'Create a custom document category',
+        tags: ['Categories'],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '201': { description: 'Category created' },
+        },
+      },
+    },
+    '/documents': {
+      get: {
+        summary: 'List, filter, and search owned documents',
+        tags: ['Documents'],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Paginated documents' },
+        },
+      },
+    },
+    '/documents/upload-init': {
+      post: {
+        summary: 'Create pending document record and issue short-lived signed upload URL',
+        tags: ['Documents'],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '201': { description: 'Signed upload details' },
+        },
+      },
+    },
+    '/documents/{id}/upload-complete': {
+      post: {
+        summary: 'Verify uploaded binary and activate document version',
+        tags: ['Documents'],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Document activated' },
+        },
+      },
+    },
+    '/documents/{id}': {
+      get: {
+        summary: 'Get document details, versions, access history, and linked items',
+        tags: ['Documents'],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Document details' },
+        },
+      },
+      patch: {
+        summary: 'Update document metadata',
+        tags: ['Documents'],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Metadata updated' },
+        },
+      },
+      delete: {
+        summary: 'Soft-delete document and purge private stored binary',
+        tags: ['Documents'],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Document deleted' },
+        },
+      },
+    },
+    '/documents/{id}/archive': {
+      post: {
+        summary: 'Archive document',
+        tags: ['Documents'],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Document archived' },
+        },
+      },
+    },
+    '/documents/{id}/restore': {
+      post: {
+        summary: 'Restore archived document',
+        tags: ['Documents'],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Document restored' },
+        },
+      },
+    },
+    '/documents/{id}/download-url': {
+      get: {
+        summary: 'Generate short-lived signed download URL after ownership verification',
+        tags: ['Documents'],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Signed download URL' },
+        },
+      },
+    },
   },
 } as const;
