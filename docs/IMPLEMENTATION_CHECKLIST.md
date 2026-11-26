@@ -18,13 +18,14 @@ Tasks are marked `[x]` only after implementation and verification.
 
 ## Day 2 — Authentication & Backend Foundation
 
-- [ ] Configure PostgreSQL & Prisma ORM
-- [ ] Create initial normalized Prisma schema and run first migration
-- [ ] Implement Argon2id/bcrypt password hashing, registration, login, JWT access tokens, and refresh-token rotation
-- [ ] Implement device session tracking, logout, and ownership auth middleware
-- [ ] Implement mobile auth screens (Welcome, Register, Login, Forgot/Reset Password) connected to `/api/v1/auth/*`
-- [ ] Implement SecureStore token persistence and Axios refresh interceptor
-- [ ] Add authentication integration and unit tests
+- [x] Configure PostgreSQL & Prisma ORM
+- [x] Create initial normalized Prisma schema and generate initial SQL migration (`0001_init/migration.sql`)
+- [x] Implement Argon2id password hashing, registration, login, JWT access tokens, and refresh-token rotation
+- [x] Implement device session tracking, logout, and ownership auth middleware
+- [x] Implement mobile auth screens (Welcome, Register, Login, Forgot/Reset Password, Onboarding) connected to `/api/v1/auth/*`
+- [x] Implement SecureStore token persistence and Axios refresh interceptor
+- [x] Add authentication integration and unit tests
+- [ ] Run `prisma migrate deploy` & `prisma:seed` against local PostgreSQL once `apps/api/.env` `DATABASE_URL` is configured
 
 ## Day 3 — Home Dashboard & Document Vault
 

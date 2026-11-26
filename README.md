@@ -110,7 +110,8 @@ npm run test
 ## Five-Day Build Status
 
 - **Day 1 (Completed)**: Monorepo setup, shared TypeScript packages, Warm Minimal × Editorial design tokens & mobile UI primitives, Expo Router foundation, Express API skeleton (`/api/v1/health`, OpenAPI spec), BullMQ worker skeleton, architecture & planning docs.
-- **Day 2 (Next)**: PostgreSQL + Prisma schema, migrations, authentication, refresh-token rotation, and mobile auth integration.
-- **Day 3–5 (Planned)**: Document Vault & S3 storage, Life Administration modules, Life Intelligence OCR/AI pipeline, and offline SQLite sync.
+- **Day 2 (Completed)**: PostgreSQL + Prisma 22-table schema and `0001_init` migration SQL, Argon2id + JWT access/refresh-token rotation (`auth` & `users` modules), mobile SecureStore + Axios refresh interceptor + editorial Welcome/Auth/Onboarding/Dashboard shell, unit & Supertest integration tests.
+- **Day 3 (Next)**: 5-tab navigation (`Home`, `Vault`, `Calendar`, `Assets`, `Profile`), Home dashboard, Document Vault, private S3 storage, and Android Document Scanner.
+- **Day 4–5 (Planned)**: Life Administration modules, BullMQ reminders, Life Intelligence OCR/AI extraction verification, and offline SQLite sync.
 
 See [docs/DEVELOPMENT_LOG.md](docs/DEVELOPMENT_LOG.md) and [docs/IMPLEMENTATION_CHECKLIST.md](docs/IMPLEMENTATION_CHECKLIST.md) for detailed progress.
