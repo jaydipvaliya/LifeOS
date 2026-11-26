@@ -26,6 +26,18 @@ export default function AuthenticatedAppLayout() {
           animation: 'slide_from_right',
         }}
       />
+      <Stack.Screen
+        name="assets/[id]"
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+      <Stack.Screen
+        name="notifications"
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
     </Stack>
   );
 }

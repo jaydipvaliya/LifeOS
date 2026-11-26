@@ -93,7 +93,7 @@ export default function HomeDashboardScreen() {
                 <Search size={20} strokeWidth={1.75} color={theme.colors.m3.onSurface} />
               </Pressable>
               <Pressable
-                onPress={() => setQuickSheetOpen(true)}
+                onPress={() => router.push('/(app)/notifications')}
                 accessibilityRole="button"
                 accessibilityLabel="Notifications and alerts"
                 style={[
@@ -312,6 +312,60 @@ export default function HomeDashboardScreen() {
                           </EditorialText>
                         </View>
                         <Badge label="Expiring" tone="warning" />
+                      </Pressable>
+                    ))}
+                    {data.todaysTasks.map((task) => (
+                      <Pressable
+                        key={task.id}
+                        onPress={() => router.push('/(app)/(tabs)/calendar')}
+                        style={styles.attentionRow}
+                      >
+                        <CheckSquare size={18} strokeWidth={1.75} color={theme.colors.m3.primary} />
+                        <View style={{ flex: 1 }}>
+                          <EditorialText variant="bodyMedium" tone="primary">
+                            {task.title}
+                          </EditorialText>
+                          <EditorialText variant="caption" tone="muted">
+                            Priority: {task.subtitle ?? 'medium'}
+                          </EditorialText>
+                        </View>
+                        <Badge label="Task" tone="sage" />
+                      </Pressable>
+                    ))}
+                    {data.warrantyReminders.map((asset) => (
+                      <Pressable
+                        key={asset.id}
+                        onPress={() => router.push(`/(app)/assets/${asset.id}`)}
+                        style={styles.attentionRow}
+                      >
+                        <Laptop size={18} strokeWidth={1.75} color={theme.colors.m3.secondary} />
+                        <View style={{ flex: 1 }}>
+                          <EditorialText variant="bodyMedium" tone="primary">
+                            {asset.title}
+                          </EditorialText>
+                          <EditorialText variant="caption" tone="muted">
+                            Warranty expires {asset.date}
+                          </EditorialText>
+                        </View>
+                        <Badge label="Warranty" tone="warning" />
+                      </Pressable>
+                    ))}
+                    {data.subscriptionRenewals.map((sub) => (
+                      <Pressable
+                        key={sub.id}
+                        onPress={() => router.push('/(app)/(tabs)/assets')}
+                        style={styles.attentionRow}
+                      >
+                        <Repeat size={18} strokeWidth={1.75} color={theme.colors.m3.tertiary} />
+                        <View style={{ flex: 1 }}>
+                          <EditorialText variant="bodyMedium" tone="primary">
+                            {sub.title}
+                          </EditorialText>
+                          <EditorialText variant="caption" tone="muted">
+                            {sub.subtitle} · Renews {sub.date}
+                          </EditorialText>
+                        </View>
+                        <Badge label="Renewal" tone="neutral" />
                       </Pressable>
                     ))}
                   </EditorialCard>
