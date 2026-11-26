@@ -1,5 +1,5 @@
 import { darkColors, lightColors, type ColorPalette } from './colors';
-import { borderWidths, radii, shadows, spacing } from './spacing';
+import { borderWidths, motion, radii, shadows, shapes, spacing } from './spacing';
 import { fontFamilies, typographyScale } from './typography';
 
 export type ThemeMode = 'light' | 'dark';
@@ -11,6 +11,8 @@ export interface LifeOSTheme {
   fonts: typeof fontFamilies;
   spacing: typeof spacing;
   radii: typeof radii;
+  shapes: typeof shapes;
+  motion: typeof motion;
   borderWidths: typeof borderWidths;
   shadows: typeof shadows;
 }
@@ -22,6 +24,8 @@ export const lightTheme: LifeOSTheme = {
   fonts: fontFamilies,
   spacing,
   radii,
+  shapes,
+  motion,
   borderWidths,
   shadows,
 };
@@ -33,6 +37,8 @@ export const darkTheme: LifeOSTheme = {
   fonts: fontFamilies,
   spacing,
   radii,
+  shapes,
+  motion,
   borderWidths,
   shadows,
 };

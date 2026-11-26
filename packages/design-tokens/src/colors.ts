@@ -1,3 +1,36 @@
+export interface M3ColorScheme {
+  primary: string;
+  onPrimary: string;
+  primaryContainer: string;
+  onPrimaryContainer: string;
+  secondary: string;
+  onSecondary: string;
+  secondaryContainer: string;
+  onSecondaryContainer: string;
+  tertiary: string;
+  onTertiary: string;
+  tertiaryContainer: string;
+  onTertiaryContainer: string;
+  surface: string;
+  surfaceDim: string;
+  surfaceBright: string;
+  surfaceContainerLowest: string;
+  surfaceContainerLow: string;
+  surfaceContainer: string;
+  surfaceContainerHigh: string;
+  surfaceContainerHighest: string;
+  onSurface: string;
+  onSurfaceVariant: string;
+  outline: string;
+  outlineVariant: string;
+  inverseSurface: string;
+  inverseOnSurface: string;
+  error: string;
+  onError: string;
+  errorContainer: string;
+  onErrorContainer: string;
+}
+
 export interface ColorPalette {
   background: {
     primary: string;
@@ -32,11 +65,12 @@ export interface ColorPalette {
     danger: string;
     dangerSurface: string;
   };
+  m3: M3ColorScheme;
 }
 
 /**
- * LifeOS Warm Minimal x Editorial Light Palette.
- * All hex tokens are strictly aligned with the product visual identity.
+ * LifeOS Material 3 Expressive x Warm Minimal Light Palette.
+ * Preserves the signature forest & sage identity with M3 tonal surface hierarchy.
  */
 export const lightColors: ColorPalette = {
   background: {
@@ -72,11 +106,42 @@ export const lightColors: ColorPalette = {
     danger: '#D66A64',
     dangerSurface: '#FBECEB',
   },
+  m3: {
+    primary: '#253A32',
+    onPrimary: '#F7F8F5',
+    primaryContainer: '#E6EEE7',
+    onPrimaryContainer: '#1B2D26',
+    secondary: '#526F60',
+    onSecondary: '#FFFFFF',
+    secondaryContainer: '#DCE7DE',
+    onSecondaryContainer: '#1F332A',
+    tertiary: '#9C6A23',
+    onTertiary: '#FFFFFF',
+    tertiaryContainer: '#F9F1E3',
+    onTertiaryContainer: '#4E3409',
+    surface: '#F7F8F5',
+    surfaceDim: '#E8EAE3',
+    surfaceBright: '#FFFFFF',
+    surfaceContainerLowest: '#FFFFFF',
+    surfaceContainerLow: '#F1F2EC',
+    surfaceContainer: '#EEF1EA',
+    surfaceContainerHigh: '#E6EAE2',
+    surfaceContainerHighest: '#DDE3D9',
+    onSurface: '#25332D',
+    onSurfaceVariant: '#5E6C64',
+    outline: '#78857D',
+    outlineVariant: '#E6EAE5',
+    inverseSurface: '#25332D',
+    inverseOnSurface: '#F7F8F5',
+    error: '#D66A64',
+    onError: '#FFFFFF',
+    errorContainer: '#FBECEB',
+    onErrorContainer: '#641F1B',
+  },
 };
 
 /**
- * Semantic dark theme scaffold for future Dark Mode support.
- * Preserves deep forest calm without neon glare.
+ * Semantic Material 3 Expressive Dark Palette.
  */
 export const darkColors: ColorPalette = {
   background: {
@@ -111,5 +176,37 @@ export const darkColors: ColorPalette = {
     warningSurface: '#342A1C',
     danger: '#E2847F',
     dangerSurface: '#382221',
+  },
+  m3: {
+    primary: '#A5BDA8',
+    onPrimary: '#13221C',
+    primaryContainer: '#283F35',
+    onPrimaryContainer: '#D6E8D8',
+    secondary: '#8AA996',
+    onSecondary: '#16251E',
+    secondaryContainer: '#26372F',
+    onSecondaryContainer: '#D4E4D9',
+    tertiary: '#E0AA5E',
+    onTertiary: '#2F1F06',
+    tertiaryContainer: '#473315',
+    onTertiaryContainer: '#F9E6C8',
+    surface: '#131A17',
+    surfaceDim: '#0F1512',
+    surfaceBright: '#293731',
+    surfaceContainerLowest: '#0D1210',
+    surfaceContainerLow: '#1A231F',
+    surfaceContainer: '#1F2A25',
+    surfaceContainerHigh: '#26332D',
+    surfaceContainerHighest: '#2F3E37',
+    onSurface: '#EEF1EA',
+    onSurfaceVariant: '#B2BCB5',
+    outline: '#88968E',
+    outlineVariant: '#2B3933',
+    inverseSurface: '#EEF1EA',
+    inverseOnSurface: '#131A17',
+    error: '#E2847F',
+    onError: '#3A110F',
+    errorContainer: '#541E1B',
+    onErrorContainer: '#FBECEB',
   },
 };

@@ -25,6 +25,15 @@ describe('LifeOS Design System Tokens', () => {
     expect(Object.keys(darkTheme.colors)).toEqual(Object.keys(lightTheme.colors));
   });
 
+  it('provides Material 3 Expressive tonal roles, shapes, and motion presets', () => {
+    expect(lightTheme.colors.m3.primary).toBe('#253A32');
+    expect(lightTheme.colors.m3.primaryContainer).toBe('#E6EEE7');
+    expect(lightTheme.colors.m3.surfaceContainer).toBe('#EEF1EA');
+    expect(lightTheme.shapes.large).toBe(24);
+    expect(lightTheme.shapes.extraLarge).toBe(28);
+    expect(lightTheme.motion.expressiveSpatial.stiffness).toBe(220);
+  });
+
   it('maintains typography hierarchy within editorial specifications', () => {
     expect(lightTheme.typography.display.fontSize).toBeGreaterThanOrEqual(34);
     expect(lightTheme.typography.display.fontSize).toBeLessThanOrEqual(40);

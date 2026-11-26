@@ -10,12 +10,43 @@ export const spacing = {
   editorialGap: 48,
 } as const;
 
+/**
+ * Material 3 Expressive shape tokens combined with LifeOS card specs.
+ */
 export const radii = {
   sm: 8,
-  md: 12,
-  card: 18,
-  cardLarge: 22,
+  md: 14,
+  card: 20,
+  cardLarge: 28,
   full: 999,
+} as const;
+
+export const shapes = {
+  extraSmall: 8,
+  small: 12,
+  medium: 16,
+  squircle: 22,
+  large: 24,
+  extraLarge: 28,
+  full: 9999,
+} as const;
+
+export const motion = {
+  expressiveSpatial: {
+    damping: 16,
+    stiffness: 220,
+    mass: 0.9,
+  },
+  expressiveEffects: {
+    damping: 22,
+    stiffness: 320,
+    mass: 0.8,
+  },
+  standardSpatial: {
+    damping: 20,
+    stiffness: 260,
+    mass: 1,
+  },
 } as const;
 
 export const borderWidths = {
@@ -34,15 +65,15 @@ export const shadows = {
   subtle: {
     shadowColor: '#25332D',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
     elevation: 1,
   },
   floating: {
     shadowColor: '#25332D',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.06,
-    shadowRadius: 16,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.09,
+    shadowRadius: 20,
+    elevation: 4,
   },
 } as const;
