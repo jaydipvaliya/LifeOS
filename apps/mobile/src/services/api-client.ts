@@ -1,5 +1,5 @@
 import type { ApiErrorResponse, ApiSuccessResponse } from '@lifeos/shared-types';
-import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '../stores/auth-store';
 
 const baseURL = process.env.EXPO_PUBLIC_API_URL ?? 'http://10.0.2.2:4000/api/v1';

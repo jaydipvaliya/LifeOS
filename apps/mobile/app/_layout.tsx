@@ -10,11 +10,17 @@ import {
 } from '@expo-google-fonts/manrope';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import * as LocalAuthentication from 'expo-local-authentication';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
+import { Lock } from 'lucide-react-native';
 import React, { useEffect } from 'react';
+import { StyleSheet } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Button, EditorialText, Screen } from '../src/components/ui';
+import { authApi } from '../src/services/auth-api';
+import { useAuthStore } from '../src/stores/auth-store';
 import { ThemeProvider, useTheme } from '../src/theme';
 
 void SplashScreen.preventAutoHideAsync();
@@ -30,6 +36,99 @@ const queryClient = new QueryClient({
 
 function RootNavigator() {
   const { mode, theme } = useTheme();
+  const router = useRouter();
+  const segments = useSegments();
+
+  const {
+    isHydrated,
+    isAuthenticated,
+    biometricLockEnabled,
+    isBiometricUnlocked,
+    hydrateFromStorage,
+    setUserAndProfile,
+    clearSession,
+    markHydrated,
+    setBiometricUnlocked,
+  } = useAuthStore();
+
+  useEffect(() => {
+    let active = true;
+
+    async function bootstrapSession() {
+      try {
+        const { accessToken, refreshToken } = await hydrateFromStorage();
+        if (!accessToken && !refreshToken) {
+          if (active) markHydrated();
+          return;
+        }
+
+        const me = await authApi.getMe();
+        if (active) {
+          setUserAndProfile(me.user, me.profile);
+          markHydrated();
+        }
+      } catch {
+        if (active) {
+          await clearSession();
+        }
+      }
+    }
+
+    void bootstrapSession();
+    return () => {
+      active = false;
+    };
+  }, [clearSession, hydrateFromStorage, markHydrated, setUserAndProfile]);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+
+    const segmentList = segments as string[];
+    const inAuthGroup = segmentList[0] === '(auth)';
+    if (!isAuthenticated && !inAuthGroup) {
+      router.replace('/(auth)/welcome');
+    } else if (isAuthenticated && inAuthGroup && segmentList[1] !== 'onboarding') {
+      router.replace('/(app)');
+    }
+  }, [isAuthenticated, isHydrated, router, segments]);
+
+  const handleBiometricUnlock = async () => {
+    const result = await LocalAuthentication.authenticateAsync({
+      promptMessage: 'Unlock LifeOS',
+      fallbackLabel: 'Use passcode',
+    });
+    if (result.success) {
+      setBiometricUnlocked(true);
+    }
+  };
+
+  if (isHydrated && isAuthenticated && biometricLockEnabled && !isBiometricUnlocked) {
+    return (
+      <Screen scroll={false} contentStyle={styles.lockScreen}>
+        <Lock size={32} strokeWidth={1.75} color={theme.colors.brand.primaryForest} />
+        <EditorialText
+          variant="pageHeadingEditorial"
+          tone="primary"
+          style={{ marginTop: theme.spacing.md }}
+        >
+          LifeOS is locked.
+        </EditorialText>
+        <EditorialText
+          variant="body"
+          tone="secondary"
+          style={{ marginTop: theme.spacing.xs, textAlign: 'center' }}
+        >
+          Verify your identity to access your personal documents and responsibilities.
+        </EditorialText>
+        <Button
+          label="Unlock with Biometrics"
+          size="lg"
+          onPress={() => void handleBiometricUnlock()}
+          style={{ marginTop: theme.spacing.xl }}
+        />
+      </Screen>
+    );
+  }
 
   return (
     <>
@@ -76,3 +175,10 @@ export default function RootLayout() {
     </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  lockScreen: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
