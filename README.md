@@ -54,11 +54,10 @@ lifeos/
 
 ---
 
-## Design System — Warm Minimal × Editorial
+## Design System — Material 3 Expressive × Warm Minimal Editorial
 
-- **Canvas**: `#F7F8F5` (primary), `#F1F2EC` (secondary)
-- **Surfaces**: `#FFFFFF` (primary card), `#EEF1EA` (secondary surface)
-- **Brand**: `#253A32` (deep forest), `#526F60` (secondary forest), `#A5BDA8` (sage), `#E6EEE7` (soft sage)
+- **Tonal Palette**: Warm Minimal forest & sage hues mapped to Material 3 tonal roles (`#F7F8F5` surface, `#EEF1EA` surfaceContainer, `#253A32` primary, `#E6EEE7` primaryContainer, `#526F60` secondary, `#9C6A23` warm amber tertiary)
+- **Shapes & Motion**: Large squircle cards (`20–28px`), pill buttons & active tab indicators, Reanimated spring physics (`expressiveSpatial` / `expressiveEffects`)
 - **Typography**: `Manrope` for headings, `Inter` for body text, `DM Serif Display` selectively for editorial titles
 
 ---
@@ -109,9 +108,10 @@ npm run test
 
 ## Five-Day Build Status
 
-- **Day 1 (Completed)**: Monorepo setup, shared TypeScript packages, Warm Minimal × Editorial design tokens & mobile UI primitives, Expo Router foundation, Express API skeleton (`/api/v1/health`, OpenAPI spec), BullMQ worker skeleton, architecture & planning docs.
-- **Day 2 (Completed)**: PostgreSQL + Prisma 22-table schema and `0001_init` migration SQL, Argon2id + JWT access/refresh-token rotation (`auth` & `users` modules), mobile SecureStore + Axios refresh interceptor + editorial Welcome/Auth/Onboarding/Dashboard shell, unit & Supertest integration tests.
-- **Day 3 (Next)**: 5-tab navigation (`Home`, `Vault`, `Calendar`, `Assets`, `Profile`), Home dashboard, Document Vault, private S3 storage, and Android Document Scanner.
-- **Day 4–5 (Planned)**: Life Administration modules, BullMQ reminders, Life Intelligence OCR/AI extraction verification, and offline SQLite sync.
+- **Day 1 (Completed)**: Monorepo setup, shared TypeScript packages, design tokens & mobile UI primitives, Expo Router foundation, Express API skeleton, BullMQ worker skeleton, architecture & planning docs.
+- **Day 2 (Completed)**: PostgreSQL + Prisma 22-table schema and `0001_init` migration SQL, Argon2id + JWT access/refresh-token rotation, mobile SecureStore + Axios refresh interceptor + auth/onboarding flow.
+- **Day 3 (Completed)**: Material 3 Expressive UI upgrade across mobile, 5-tab navigation (`M3NavigationBar`), database-backed Home Dashboard, Document Vault + custom categories, private S3/signed-local storage with magic-byte verification & audit logs, and real Android Camera Document Scanner (multi-page capture, rotate/crop, on-device PDF generation).
+- **Day 4 (Next)**: Tasks, Calendar, Events, Reminders, Assets & Warranties, Subscriptions, and BullMQ reminder scheduling.
+- **Day 5 (Planned)**: Life Intelligence OCR/AI extraction verification, Expo SQLite offline sync, Universal Search, and Life AI Assistant.
 
 See [docs/DEVELOPMENT_LOG.md](docs/DEVELOPMENT_LOG.md) and [docs/IMPLEMENTATION_CHECKLIST.md](docs/IMPLEMENTATION_CHECKLIST.md) for detailed progress.

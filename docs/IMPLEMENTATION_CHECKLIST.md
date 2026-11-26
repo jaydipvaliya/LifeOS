@@ -29,12 +29,13 @@ Tasks are marked `[x]` only after implementation and verification.
 
 ## Day 3 — Home Dashboard & Document Vault
 
-- [ ] Implement 5-tab Expo Router navigation (`Home`, `Vault`, `Calendar`, `Assets`, `Profile`)
-- [ ] Build editorial Home dashboard backed by real database queries (loading, empty, error, populated states)
-- [ ] Implement Document Vault (categories, custom categories, metadata, filtering, search, archive/restore/delete)
-- [ ] Implement private S3-compatible upload/download presigned URLs with MIME/size validation and audit logs
-- [ ] Implement real Android Document Scanner (Expo Camera, crop/rotate, multi-page capture, PDF generation)
-- [ ] Add vault integration and mobile component tests
+- [x] Upgrade design tokens and UI primitives to Material 3 Expressive (`M3NavigationBar`, `ExpressiveFAB`, `FilterChip`, `Button`, `EditorialCard`, `StateViews`)
+- [x] Implement 5-tab Expo Router navigation (`Home`, `Vault`, `Calendar`, `Assets`, `Profile`)
+- [x] Build Material 3 Expressive Home dashboard backed by real database aggregation (`/api/v1/dashboard`, loading/empty/error/populated states)
+- [x] Implement Document Vault (11 system categories, custom categories, metadata, filtering, search, archive/restore/delete)
+- [x] Implement private S3-compatible & signed local storage upload/download URLs with MIME/magic-byte/size validation and audit logs
+- [x] Implement real Android Document Scanner (Expo Camera, multi-page capture, crop/rotate/optimize, on-device PDF generation, upload progress)
+- [x] Add vault & dashboard integration tests and mobile API/UI tests
 
 ## Day 4 — Life Administration Features
 

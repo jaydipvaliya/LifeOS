@@ -101,3 +101,53 @@
 
 1. Start Day 3 by inspecting `docs/DEVELOPMENT_LOG.md`, `docs/IMPLEMENTATION_CHECKLIST.md`, and `git status`.
 2. Configure `apps/api/.env` with PostgreSQL `DATABASE_URL` (with user-provided local credentials) to run `prisma migrate deploy` & `prisma:seed`, then implement the 5-tab navigation (`Home`, `Vault`, `Calendar`, `Assets`, `Profile`) and Document Vault + S3 private storage.
+
+## Day 3 — Material 3 Expressive UI, Home Dashboard, and Document Vault
+
+- **Date**: 2026-11-26
+- **Status**: Completed and verified
+
+### Completed Tasks
+
+1. Upgraded `@lifeos/design-tokens` (`colors.ts`, `typography.ts`, `spacing.ts`, `theme.ts`) to Material 3 Expressive tonal surface roles (`m3.primary`, `primaryContainer`, `secondaryContainer`, `tertiaryContainer`, `surfaceContainer*`), shape scales (`extraSmall`–`extraLarge`, `squircle`, `full`), and Reanimated spring motion presets (`expressiveSpatial`, `expressiveEffects`).
+2. Rebuilt mobile UI primitives (`Button`, `EditorialCard`, `TextField`, `FilterChip`, `ExpressiveFAB`, `M3NavigationBar`, `StateViews`) with Reanimated spring animations and updated `(auth)/*` screens (`welcome`, `login`, `register`, `onboarding`) to Material 3 Expressive styling.
+3. Implemented private object storage module (`apps/api/src/modules/storage/`):
+   - `S3StorageService` (`@aws-sdk/client-s3`, `@aws-sdk/s3-request-presigner`) for S3-compatible buckets.
+   - `LocalPrivateStorageService` with HMAC-SHA256 short-lived signed upload/download URLs (`PUT /api/v1/storage/upload`, `GET /api/v1/storage/download`), magic-byte file signature validation (`file-signature.ts`), 15MB cap, and `.storage/` excluded from Git.
+4. Implemented `categories` (`GET /api/v1/categories`, `POST /api/v1/categories`) and `documents` (`upload-init`, `upload-complete`, `list`, `getDetail`, `updateMetadata`, `archive`, `restore`, `delete`, `download-url`) modules with strict ownership enforcement, version tracking, and `AuditLog` tracking.
+5. Implemented `dashboard` aggregation endpoint (`GET /api/v1/dashboard`) querying real documents, tasks, events, assets, subscriptions, and weekly activity, and updated OpenAPI 3.1 docs.
+6. Added backend integration tests (`apps/api/tests/vault-dashboard.test.ts`) and mobile API tests (`apps/mobile/tests/vault-api.test.ts`).
+7. Implemented 5-tab Material 3 Expressive navigation (`Home`, `Vault`, `Calendar`, `Assets`, `Profile`) with animated `M3NavigationBar`, live Home Dashboard (`(tabs)/index.tsx`) with Quick Actions modal, Document Vault (`(tabs)/vault.tsx`), Document Detail (`documents/[id].tsx`) with signed preview/share/edit/archive/delete, and real Android Camera Document Scanner (`scanner.tsx` using `expo-camera`, `expo-image-manipulator`, `expo-print`, `expo-image-picker`, and upload progress).
+
+### Commits Created (Day 3)
+
+- `601275d` `feat(design-tokens): upgrade design system to Material 3 Expressive tonal roles, shapes, and motion`
+- `c32cf92` `feat(ui): rebuild mobile components with Material 3 Expressive primitives and Reanimated motion`
+- `fd5d54d` `feat(storage): add private S3-compatible and signed local storage services with file validation`
+- `078dc4f` `feat(vault): implement Document Vault, Categories, Versioning, and Audit APIs`
+- `9373343` `feat(dashboard): implement database-backed Home dashboard aggregation endpoint`
+- `f157da1` `test(vault): add integration tests for categories, documents, storage, and dashboard`
+- `5d7d977` `feat(mobile-nav): implement 5-tab Material 3 Expressive navigation and Home Dashboard`
+- `73515a9` `feat(mobile-vault): implement Document Vault, Detail, Upload, and Android Camera Scanner`
+- Plus Day 3 documentation commit (`docs(day3): update implementation checklist, API docs, README, and Day 3 log`)
+
+### Tests & Verification Executed (Day 3)
+
+- `npm run build`, `npm run typecheck`, `npm run lint` (0 errors, 0 warnings), `npm run format:check`: Passed
+- `npm run test` (all workspaces, run outside sandbox for Supertest loopback):
+  - `@lifeos/api`: 10/10 passed (`password-token.test.ts` 2, `health.test.ts` 3, `vault-dashboard.test.ts` 2, `auth.test.ts` 3)
+  - `@lifeos/mobile`: 7/7 passed (`design-tokens.test.ts` 4, `auth-store.test.ts` 1, `vault-api.test.ts` 2)
+  - `@lifeos/worker`: 1/1 passed
+  - `@lifeos/config`: 2/2 passed
+  - `@lifeos/validation`: 3/3 passed
+- Android Metro bundle export (`npx expo export --platform android --no-bytecode`): Bundled 3,935 modules (`5.2MB` JS bundle)
+
+### Known Issues
+
+- Local PostgreSQL Server 18 requires `apps/api/.env` `DATABASE_URL` credentials before running `prisma migrate deploy` and `prisma:seed` against the live DB; automated HTTP integration tests currently run against `InMemoryAuthAndUsersRepository` and `InMemoryVaultStore`.
+- `Calendar` and `Assets` tabs currently display Day 4 preview states until Tasks, Calendar, Assets, and Subscriptions modules are implemented in Day 4.
+
+### Exact Next Step (Day 4)
+
+1. Start Day 4 by inspecting `docs/DEVELOPMENT_LOG.md`, `docs/IMPLEMENTATION_CHECKLIST.md`, and `git status`.
+2. Implement Day 4 Life Administration backend modules and mobile screens (`tasks`, `events`/Calendar, `assets` & warranties/repairs, `subscriptions`, `notification_preferences`, and BullMQ reminder scheduling).

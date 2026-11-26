@@ -45,7 +45,7 @@ All endpoints are versioned under `/api/v1`.
 }
 ```
 
-## Available Endpoints (Day 2)
+## Available Endpoints (Day 3)
 
 - `GET /api/v1/health` — Returns service status, uptime, and database/dependency health checks.
 - `GET /api/v1/docs/openapi.json` — Returns the OpenAPI 3.1 JSON specification.
@@ -57,3 +57,7 @@ All endpoints are versioned under `/api/v1`.
 - `GET /api/v1/auth/sessions` & `DELETE /api/v1/auth/sessions/:deviceId` — Device session management (Bearer auth).
 - `DELETE /api/v1/auth/account` — Password-confirmed account soft-deletion (Bearer auth).
 - `GET /api/v1/users/me` & `PATCH /api/v1/users/me/profile` — Authenticated user summary and onboarding profile updates (Bearer auth).
+- `GET /api/v1/dashboard` — Database-aggregated Home dashboard overview (Bearer auth).
+- `GET /api/v1/categories` & `POST /api/v1/categories` — List system/custom categories and create custom categories (Bearer auth).
+- `GET /api/v1/documents`, `POST /api/v1/documents/upload-init`, `POST /api/v1/documents/:id/upload-complete`, `GET/PATCH/DELETE /api/v1/documents/:id`, `POST /api/v1/documents/:id/archive`, `POST /api/v1/documents/:id/restore`, `GET /api/v1/documents/:id/download-url` — Authorized Document Vault CRUD, versioning, and short-lived signed downloads (Bearer auth).
+- `PUT /api/v1/storage/upload` & `GET /api/v1/storage/download` — HMAC-signed private local binary upload/download endpoints (when `STORAGE_DRIVER=local`).
