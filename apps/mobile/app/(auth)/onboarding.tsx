@@ -154,6 +154,8 @@ export default function OnboardingScreen() {
       <View style={{ gap: theme.spacing.sm }}>
         <Button
           label="Save & Enter LifeOS"
+          variant="filled"
+          shape="pill"
           size="lg"
           fullWidth
           loading={saving}

@@ -63,12 +63,22 @@ export default function WelcomeScreen() {
           Documents, warranties, deadlines, and subscriptions unified in one editorial workspace.
         </EditorialText>
 
-        <EditorialCard variant="secondary" style={{ marginTop: theme.spacing.xxl }}>
+        <EditorialCard variant="tonal" style={{ marginTop: theme.spacing.xxl }}>
           <View style={styles.slideHeader}>
-            <EditorialText variant="editorialEyebrow" tone="secondaryForest" uppercase>
+            <EditorialText variant="editorialEyebrow" tone="forest" uppercase>
               {slide.eyebrow}
             </EditorialText>
-            <SlideIcon size={20} strokeWidth={1.75} color={theme.colors.brand.primaryForest} />
+            <View
+              style={[
+                styles.iconPill,
+                {
+                  backgroundColor: theme.colors.m3.surfaceContainerLowest,
+                  borderRadius: theme.shapes.medium,
+                },
+              ]}
+            >
+              <SlideIcon size={20} strokeWidth={1.75} color={theme.colors.m3.primary} />
+            </View>
           </View>
 
           <EditorialText
@@ -131,15 +141,18 @@ export default function WelcomeScreen() {
 
         <Button
           label="Create Account"
+          variant="filled"
           size="lg"
+          shape="pill"
           fullWidth
           rightIcon={<ArrowRight size={18} strokeWidth={2} color={theme.colors.text.inverse} />}
           onPress={() => router.push('/(auth)/register')}
         />
         <Button
           label="I already have an account"
-          variant="secondary"
+          variant="tonal"
           size="lg"
+          shape="pill"
           fullWidth
           onPress={() => router.push('/(auth)/login')}
         />
@@ -162,6 +175,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  iconPill: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   pagerRow: {
     flexDirection: 'row',

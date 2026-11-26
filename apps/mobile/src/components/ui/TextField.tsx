@@ -26,10 +26,13 @@ export function TextField({
   const [isFocused, setIsFocused] = useState(false);
 
   const borderColor = errorText
-    ? theme.colors.status.danger
+    ? theme.colors.m3.error
     : isFocused
-      ? theme.colors.brand.primaryForest
-      : theme.colors.border.subtle;
+      ? theme.colors.m3.primary
+      : theme.colors.m3.outlineVariant;
+
+  const borderWidth =
+    isFocused || errorText ? theme.borderWidths.medium : theme.borderWidths.hairline;
 
   return (
     <View style={styles.container}>
@@ -40,10 +43,12 @@ export function TextField({
         style={[
           styles.inputWrapper,
           {
-            backgroundColor: theme.colors.surface.primary,
+            backgroundColor: isFocused
+              ? theme.colors.m3.surfaceContainerLowest
+              : theme.colors.m3.surfaceContainerLow,
             borderColor,
-            borderWidth: theme.borderWidths.hairline,
-            borderRadius: theme.radii.md,
+            borderWidth,
+            borderRadius: theme.shapes.medium,
             paddingHorizontal: theme.spacing.md,
           },
         ]}
@@ -58,7 +63,7 @@ export function TextField({
             {
               fontFamily: theme.fonts.bodyRegular,
               fontSize: theme.typography.body.fontSize,
-              color: theme.colors.text.primary,
+              color: theme.colors.m3.onSurface,
             },
             style,
           ]}
@@ -95,7 +100,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   inputWrapper: {
-    minHeight: 48,
+    minHeight: 52,
     flexDirection: 'row',
     alignItems: 'center',
   },

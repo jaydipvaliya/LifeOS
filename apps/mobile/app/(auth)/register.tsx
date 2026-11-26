@@ -5,7 +5,14 @@ import { ArrowLeft, Check, Eye, EyeOff } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { Button, EditorialCard, EditorialText, Screen, TextField } from '../../src/components/ui';
+import {
+  Button,
+  EditorialCard,
+  EditorialText,
+  FilterChip,
+  Screen,
+  TextField,
+} from '../../src/components/ui';
 import { extractApiErrorMessage } from '../../src/services/api-client';
 import { authApi } from '../../src/services/auth-api';
 import { useAuthStore } from '../../src/stores/auth-store';
@@ -170,34 +177,14 @@ export default function RegisterScreen() {
               name="mode"
               render={({ field: { onChange, value } }) => (
                 <View style={styles.modeRow}>
-                  {MODES.map((option) => {
-                    const selected = value === option.value;
-                    return (
-                      <Pressable
-                        key={option.value}
-                        onPress={() => onChange(option.value)}
-                        accessibilityRole="radio"
-                        accessibilityState={{ selected }}
-                        style={[
-                          styles.modeChip,
-                          {
-                            borderRadius: theme.radii.md,
-                            borderWidth: theme.borderWidths.hairline,
-                            borderColor: selected
-                              ? theme.colors.brand.primaryForest
-                              : theme.colors.border.subtle,
-                            backgroundColor: selected
-                              ? theme.colors.brand.softSage
-                              : theme.colors.surface.primary,
-                          },
-                        ]}
-                      >
-                        <EditorialText variant="bodySmall" tone={selected ? 'forest' : 'secondary'}>
-                          {option.label}
-                        </EditorialText>
-                      </Pressable>
-                    );
-                  })}
+                  {MODES.map((option) => (
+                    <FilterChip
+                      key={option.value}
+                      label={option.label}
+                      selected={value === option.value}
+                      onPress={() => onChange(option.value)}
+                    />
+                  ))}
                 </View>
               )}
             />
@@ -284,13 +271,8 @@ const styles = StyleSheet.create({
   },
   modeRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
-  },
-  modeChip: {
-    flex: 1,
-    paddingVertical: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   consentRow: {
     flexDirection: 'row',

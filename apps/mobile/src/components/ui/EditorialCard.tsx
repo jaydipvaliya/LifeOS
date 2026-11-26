@@ -1,10 +1,16 @@
 import React from 'react';
 import { Pressable, View, type StyleProp, type ViewStyle } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { useTheme } from '../../theme';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+export type CardVariant =
+  'primary' | 'secondary' | 'sage' | 'elevated' | 'tonal' | 'outlined' | 'tertiary';
 
 interface EditorialCardProps {
   children: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'sage';
+  variant?: CardVariant;
   onPress?: () => void;
   style?: StyleProp<ViewStyle>;
   accessibilityLabel?: string;
@@ -18,33 +24,55 @@ export function EditorialCard({
   accessibilityLabel,
 }: EditorialCardProps) {
   const { theme } = useTheme();
+  const scale = useSharedValue(1);
 
-  const backgroundColor =
-    variant === 'sage'
-      ? theme.colors.brand.softSage
-      : variant === 'secondary'
-        ? theme.colors.surface.secondary
-        : theme.colors.surface.primary;
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
 
+  const backgroundColor = (() => {
+    switch (variant) {
+      case 'sage':
+      case 'tonal':
+        return theme.colors.m3.primaryContainer;
+      case 'secondary':
+        return theme.colors.m3.surfaceContainer;
+      case 'tertiary':
+        return theme.colors.m3.tertiaryContainer;
+      case 'elevated':
+      case 'primary':
+      case 'outlined':
+      default:
+        return theme.colors.m3.surfaceContainerLowest;
+    }
+  })();
+
+  const hasBorder = variant === 'outlined' || variant === 'primary';
   const cardStyle: ViewStyle = {
     backgroundColor,
-    borderColor: theme.colors.border.subtle,
-    borderWidth: theme.borderWidths.hairline,
-    borderRadius: theme.radii.card,
+    borderColor: theme.colors.m3.outlineVariant,
+    borderWidth: hasBorder ? theme.borderWidths.hairline : 0,
+    borderRadius: theme.shapes.large,
     padding: theme.spacing.lg,
-    ...theme.shadows.subtle,
+    ...(variant === 'elevated' ? theme.shadows.floating : theme.shadows.subtle),
   };
 
   if (onPress) {
     return (
-      <Pressable
+      <AnimatedPressable
         onPress={onPress}
+        onPressIn={() => {
+          scale.value = withSpring(0.985, theme.motion.expressiveEffects);
+        }}
+        onPressOut={() => {
+          scale.value = withSpring(1, theme.motion.expressiveSpatial);
+        }}
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel}
-        style={({ pressed }) => [cardStyle, { opacity: pressed ? 0.92 : 1 }, style]}
+        style={[cardStyle, animatedStyle, style]}
       >
         {children}
-      </Pressable>
+      </AnimatedPressable>
     );
   }
 

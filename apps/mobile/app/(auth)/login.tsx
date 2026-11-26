@@ -153,6 +153,8 @@ export default function LoginScreen() {
       <View style={{ gap: theme.spacing.sm }}>
         <Button
           label="Sign In"
+          variant="filled"
+          shape="pill"
           size="lg"
           fullWidth
           loading={isSubmitting}
