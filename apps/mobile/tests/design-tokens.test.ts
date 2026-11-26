@@ -2,33 +2,34 @@ import { darkTheme, lightTheme } from '@lifeos/design-tokens';
 import { describe, expect, it } from 'vitest';
 
 describe('LifeOS Design System Tokens', () => {
-  it('defines the required Warm Minimal x Editorial light palette', () => {
-    expect(lightTheme.colors.background.primary).toBe('#F7F8F5');
-    expect(lightTheme.colors.background.secondary).toBe('#F1F2EC');
+  it('defines a colorful Material 3 Expressive triadic palette and tonal containers', () => {
+    expect(lightTheme.colors.m3.primary).toBe('#4F46E5');
+    expect(lightTheme.colors.m3.primaryContainer).toBe('#E3E0FF');
+    expect(lightTheme.colors.m3.secondary).toBe('#0F9D8A');
+    expect(lightTheme.colors.m3.secondaryContainer).toBe('#CCF7EE');
+    expect(lightTheme.colors.m3.tertiary).toBe('#E85D3F');
+    expect(lightTheme.colors.m3.tertiaryContainer).toBe('#FFE2DA');
+    expect(lightTheme.colors.background.primary).toBe('#FAF8FF');
     expect(lightTheme.colors.surface.primary).toBe('#FFFFFF');
-    expect(lightTheme.colors.surface.secondary).toBe('#EEF1EA');
-    expect(lightTheme.colors.brand.primaryForest).toBe('#253A32');
-    expect(lightTheme.colors.brand.secondaryForest).toBe('#526F60');
-    expect(lightTheme.colors.brand.sage).toBe('#A5BDA8');
-    expect(lightTheme.colors.brand.softSage).toBe('#E6EEE7');
-    expect(lightTheme.colors.text.primary).toBe('#25332D');
-    expect(lightTheme.colors.text.secondary).toBe('#7C827D');
-    expect(lightTheme.colors.text.muted).toBe('#78857D');
-    expect(lightTheme.colors.border.subtle).toBe('#E6EAE5');
-    expect(lightTheme.colors.status.success).toBe('#39866B');
-    expect(lightTheme.colors.status.warning).toBe('#D69A48');
-    expect(lightTheme.colors.status.danger).toBe('#D66A64');
+  });
+
+  it('provides expressive multi-hue accent containers across light and dark themes', () => {
+    const accentKeys = ['violet', 'teal', 'coral', 'amber', 'cobalt', 'berry'] as const;
+    for (const key of accentKeys) {
+      expect(lightTheme.colors.expressive[key].base).toBeTruthy();
+      expect(lightTheme.colors.expressive[key].container).toBeTruthy();
+      expect(darkTheme.colors.expressive[key].base).toBeTruthy();
+      expect(darkTheme.colors.expressive[key].container).toBeTruthy();
+    }
   });
 
   it('provides a semantic dark theme scaffold with identical structure', () => {
     expect(darkTheme.mode).toBe('dark');
     expect(Object.keys(darkTheme.colors)).toEqual(Object.keys(lightTheme.colors));
+    expect(Object.keys(darkTheme.colors.m3)).toEqual(Object.keys(lightTheme.colors.m3));
   });
 
-  it('provides Material 3 Expressive tonal roles, shapes, and motion presets', () => {
-    expect(lightTheme.colors.m3.primary).toBe('#253A32');
-    expect(lightTheme.colors.m3.primaryContainer).toBe('#E6EEE7');
-    expect(lightTheme.colors.m3.surfaceContainer).toBe('#EEF1EA');
+  it('provides Material 3 Expressive shapes and spring motion presets', () => {
     expect(lightTheme.shapes.large).toBe(24);
     expect(lightTheme.shapes.extraLarge).toBe(28);
     expect(lightTheme.motion.expressiveSpatial.stiffness).toBe(220);

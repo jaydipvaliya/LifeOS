@@ -8,7 +8,7 @@ import { EditorialText } from './Typography';
 export function LoadingState({ message = 'Loading your workspace...' }: { message?: string }) {
   const { theme } = useTheme();
   return (
-    <EditorialCard variant="secondary" style={styles.centered}>
+    <EditorialCard variant="surface" style={styles.centered}>
       <ActivityIndicator size="small" color={theme.colors.m3.primary} />
       <EditorialText variant="bodySmall" tone="secondary" style={{ marginTop: theme.spacing.sm }}>
         {message}
@@ -32,8 +32,21 @@ export function EmptyState({
 }) {
   const { theme } = useTheme();
   return (
-    <EditorialCard variant="secondary" style={styles.centered}>
-      {icon ? <View style={{ marginBottom: theme.spacing.sm }}>{icon}</View> : null}
+    <EditorialCard variant="surface" style={styles.centered}>
+      {icon ? (
+        <View
+          style={[
+            styles.iconCircle,
+            {
+              backgroundColor: theme.colors.m3.surfaceContainerLowest,
+              borderRadius: theme.shapes.squircle,
+              marginBottom: theme.spacing.md,
+            },
+          ]}
+        >
+          {icon}
+        </View>
+      ) : null}
       <EditorialText variant="cardHeading" tone="primary" style={{ textAlign: 'center' }}>
         {title}
       </EditorialText>
@@ -48,6 +61,7 @@ export function EmptyState({
         <Button
           label={actionLabel}
           variant="tonal"
+          shape="pill"
           size="sm"
           onPress={onAction}
           style={{ marginTop: theme.spacing.md }}
@@ -74,6 +88,7 @@ export function ErrorState({ message, onRetry }: { message: string; onRetry?: ()
         <Button
           label="Try Again"
           variant="outlined"
+          shape="pill"
           size="sm"
           onPress={onRetry}
           style={{ marginTop: theme.spacing.sm }}
@@ -88,5 +103,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 28,
+  },
+  iconCircle: {
+    width: 54,
+    height: 54,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

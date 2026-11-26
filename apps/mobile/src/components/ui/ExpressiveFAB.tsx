@@ -2,15 +2,15 @@ import React from 'react';
 import { Pressable, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { useTheme } from '../../theme';
-import { EditorialText } from './Typography';
+import { EditorialText, type TextColorTone } from './Typography';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface ExpressiveFABProps {
-  icon: React.ReactNode;
+  icon: React.ReactNode | ((color: string) => React.ReactNode);
   label?: string;
   onPress: () => void;
-  tone?: 'primary' | 'container';
+  tone?: 'primary' | 'secondary' | 'tertiary' | 'container';
   accessibilityLabel: string;
   style?: StyleProp<ViewStyle>;
 }
@@ -30,13 +30,38 @@ export function ExpressiveFAB({
     transform: [{ scale: scale.value }],
   }));
 
-  const isPrimary = tone === 'primary';
+  const bgColor =
+    tone === 'secondary'
+      ? theme.colors.m3.secondary
+      : tone === 'tertiary'
+        ? theme.colors.m3.tertiary
+        : tone === 'container'
+          ? theme.colors.m3.primaryContainer
+          : theme.colors.m3.primary;
+
+  const fgColor =
+    tone === 'secondary'
+      ? theme.colors.m3.onSecondary
+      : tone === 'tertiary'
+        ? theme.colors.m3.onTertiary
+        : tone === 'container'
+          ? theme.colors.m3.onPrimaryContainer
+          : theme.colors.m3.onPrimary;
+
+  const textTone: TextColorTone =
+    tone === 'secondary'
+      ? 'onSecondary'
+      : tone === 'tertiary'
+        ? 'onTertiary'
+        : tone === 'container'
+          ? 'onPrimaryContainer'
+          : 'onPrimary';
 
   return (
     <AnimatedPressable
       onPress={onPress}
       onPressIn={() => {
-        scale.value = withSpring(0.93, theme.motion.expressiveEffects);
+        scale.value = withSpring(0.92, theme.motion.expressiveEffects);
       }}
       onPressOut={() => {
         scale.value = withSpring(1, theme.motion.expressiveSpatial);
@@ -46,20 +71,20 @@ export function ExpressiveFAB({
       style={[
         styles.fab,
         {
-          backgroundColor: isPrimary ? theme.colors.m3.primary : theme.colors.m3.primaryContainer,
+          backgroundColor: bgColor,
           borderRadius: theme.shapes.squircle,
           paddingHorizontal: label ? theme.spacing.lg : 0,
-          width: label ? undefined : 58,
-          height: 58,
+          width: label ? undefined : 56,
+          height: 56,
           ...theme.shadows.floating,
         },
         animatedStyle,
         style,
       ]}
     >
-      {icon}
+      {typeof icon === 'function' ? icon(fgColor) : icon}
       {label ? (
-        <EditorialText variant="labelLarge" tone={isPrimary ? 'inverse' : 'forest'}>
+        <EditorialText variant="labelLarge" tone={textTone}>
           {label}
         </EditorialText>
       ) : null}

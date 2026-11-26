@@ -14,22 +14,34 @@ import { useTheme } from '../../src/theme';
 
 const INTRO_SLIDES = [
   {
+    shortLabel: 'Vault',
     eyebrow: '01 · Vault',
     title: 'Every essential document, organized calmly.',
     body: 'Store invoices, academic certificates, IDs, and policies in private encrypted storage with instant search.',
     icon: FileText,
+    variant: 'violet' as const,
+    tone: 'violet' as const,
+    vibrantTone: 'violetVibrant' as const,
   },
   {
+    shortLabel: 'AI',
     eyebrow: '02 · Intelligence',
     title: 'From document to verified action.',
     body: 'LifeOS extracts key dates, warranty periods, and amounts for your confirmation—never guessing or acting silently.',
     icon: Sparkles,
+    variant: 'teal' as const,
+    tone: 'teal' as const,
+    vibrantTone: 'tealVibrant' as const,
   },
   {
+    shortLabel: 'Continuity',
     eyebrow: '03 · Continuity',
     title: 'Never miss a renewal or warranty.',
     body: 'Connect purchases to assets, track subscriptions, and receive quiet, timely reminders before deadlines arrive.',
     icon: CalendarCheck,
+    variant: 'coral' as const,
+    tone: 'coral' as const,
+    vibrantTone: 'coralVibrant' as const,
   },
 ] as const;
 
@@ -45,10 +57,20 @@ export default function WelcomeScreen() {
     <Screen contentStyle={styles.container}>
       <View>
         <View style={styles.topRow}>
-          <EditorialText variant="editorialEyebrow" tone="secondaryForest" uppercase>
-            LifeOS
-          </EditorialText>
-          <Badge label="Your life, organized." tone="sage" />
+          <View style={styles.brandMark}>
+            <View
+              style={[
+                styles.brandDot,
+                { backgroundColor: theme.colors.m3.primary, borderRadius: theme.shapes.small },
+              ]}
+            >
+              <Sparkles size={14} strokeWidth={2.2} color={theme.colors.m3.onPrimary} />
+            </View>
+            <EditorialText variant="labelLarge" tone="primary">
+              LifeOS
+            </EditorialText>
+          </View>
+          <Badge label="Your life, organized." tone="cobalt" />
         </View>
 
         <EditorialText
@@ -60,12 +82,49 @@ export default function WelcomeScreen() {
         </EditorialText>
 
         <EditorialText variant="bodyLarge" tone="secondary" style={{ marginTop: theme.spacing.sm }}>
-          Documents, warranties, deadlines, and subscriptions unified in one editorial workspace.
+          Documents, warranties, deadlines, and subscriptions unified in one expressive workspace.
         </EditorialText>
 
-        <EditorialCard variant="tonal" style={{ marginTop: theme.spacing.xxl }}>
+        {/* Expressive Pillar Pill Switcher */}
+        <View style={[styles.pillarTabs, { marginTop: theme.spacing.xl }]}>
+          {INTRO_SLIDES.map((item, index) => {
+            const active = index === activeSlide;
+            const accent = theme.colors.expressive[item.variant];
+            return (
+              <Pressable
+                key={item.eyebrow}
+                onPress={() => setActiveSlide(index)}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: active }}
+                style={[
+                  styles.pillarTab,
+                  {
+                    backgroundColor: active
+                      ? accent.container
+                      : theme.colors.m3.surfaceContainerLow,
+                    borderRadius: active ? theme.shapes.full : theme.shapes.medium,
+                  },
+                ]}
+              >
+                <EditorialText
+                  variant="label"
+                  tone={active ? item.tone : 'secondary'}
+                  numberOfLines={1}
+                >
+                  {item.shortLabel}
+                </EditorialText>
+              </Pressable>
+            );
+          })}
+        </View>
+
+        <EditorialCard
+          variant={slide.variant}
+          shape="extraLarge"
+          style={{ marginTop: theme.spacing.sm }}
+        >
           <View style={styles.slideHeader}>
-            <EditorialText variant="editorialEyebrow" tone="forest" uppercase>
+            <EditorialText variant="editorialEyebrow" tone={slide.vibrantTone} uppercase>
               {slide.eyebrow}
             </EditorialText>
             <View
@@ -77,13 +136,17 @@ export default function WelcomeScreen() {
                 },
               ]}
             >
-              <SlideIcon size={20} strokeWidth={1.75} color={theme.colors.m3.primary} />
+              <SlideIcon
+                size={22}
+                strokeWidth={2}
+                color={theme.colors.expressive[slide.variant].base}
+              />
             </View>
           </View>
 
           <EditorialText
             variant="sectionHeading"
-            tone="primary"
+            tone={slide.tone}
             style={{ marginTop: theme.spacing.sm }}
           >
             {slide.title}
@@ -107,11 +170,11 @@ export default function WelcomeScreen() {
                   style={[
                     styles.dot,
                     {
-                      width: activeSlide === index ? 22 : 8,
+                      width: activeSlide === index ? 26 : 8,
                       backgroundColor:
                         activeSlide === index
-                          ? theme.colors.brand.primaryForest
-                          : theme.colors.brand.sage,
+                          ? theme.colors.expressive[item.variant].base
+                          : theme.colors.m3.outlineVariant,
                     },
                   ]}
                 />
@@ -122,8 +185,19 @@ export default function WelcomeScreen() {
               onPress={() => setActiveSlide((prev) => (prev + 1) % INTRO_SLIDES.length)}
               accessibilityRole="button"
               hitSlop={8}
+              style={[
+                styles.nextPill,
+                {
+                  backgroundColor: theme.colors.m3.surfaceContainerLowest,
+                  borderRadius: theme.shapes.full,
+                },
+              ]}
             >
-              <EditorialText variant="label" tone="forest">
+              <EditorialText
+                variant="caption"
+                tone={slide.tone}
+                style={{ fontFamily: theme.fonts.bodySemiBold }}
+              >
                 Next pillar
               </EditorialText>
             </Pressable>
@@ -133,7 +207,7 @@ export default function WelcomeScreen() {
 
       <View style={[styles.footer, { gap: theme.spacing.sm }]}>
         <View style={styles.trustRow}>
-          <ShieldCheck size={16} strokeWidth={1.75} color={theme.colors.brand.secondaryForest} />
+          <ShieldCheck size={16} strokeWidth={1.9} color={theme.colors.m3.secondary} />
           <EditorialText variant="caption" tone="muted">
             Private storage · DPDP consent controls · Zero ad tracking
           </EditorialText>
@@ -145,7 +219,7 @@ export default function WelcomeScreen() {
           size="lg"
           shape="pill"
           fullWidth
-          rightIcon={<ArrowRight size={18} strokeWidth={2} color={theme.colors.text.inverse} />}
+          rightIcon={<ArrowRight size={18} strokeWidth={2.2} color={theme.colors.m3.onPrimary} />}
           onPress={() => router.push('/(auth)/register')}
         />
         <Button
@@ -164,12 +238,34 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   container: {
     justifyContent: 'space-between',
-    gap: 32,
+    gap: 28,
   },
   topRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  brandMark: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  brandDot: {
+    width: 30,
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pillarTabs: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  pillarTab: {
+    flex: 1,
+    height: 38,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 8,
   },
   slideHeader: {
     flexDirection: 'row',
@@ -177,8 +273,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   iconPill: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -193,8 +289,12 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   dot: {
-    height: 6,
+    height: 7,
     borderRadius: 4,
+  },
+  nextPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
   },
   footer: {
     width: '100%',

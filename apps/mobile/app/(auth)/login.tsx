@@ -1,11 +1,18 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, type LoginInput } from '@lifeos/validation';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Eye, EyeOff } from 'lucide-react-native';
+import { Eye, EyeOff } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
-import { Button, EditorialCard, EditorialText, Screen, TextField } from '../../src/components/ui';
+import {
+  Button,
+  EditorialCard,
+  EditorialText,
+  Screen,
+  ScreenTopBar,
+  TextField,
+} from '../../src/components/ui';
 import { extractApiErrorMessage } from '../../src/services/api-client';
 import { authApi } from '../../src/services/auth-api';
 import { useAuthStore } from '../../src/stores/auth-store';
@@ -50,24 +57,9 @@ export default function LoginScreen() {
   return (
     <Screen contentStyle={styles.container}>
       <View>
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          hitSlop={10}
-          style={styles.backRow}
-        >
-          <ArrowLeft size={18} strokeWidth={1.75} color={theme.colors.brand.primaryForest} />
-          <EditorialText variant="label" tone="forest">
-            Back
-          </EditorialText>
-        </Pressable>
+        <ScreenTopBar onBack={() => router.back()} badgeLabel="Sign In" badgeTone="violet" />
 
-        <EditorialText
-          variant="pageHeadingEditorial"
-          tone="primary"
-          style={{ marginTop: theme.spacing.lg }}
-        >
+        <EditorialText variant="pageHeadingEditorial" tone="primary">
           Welcome back.
         </EditorialText>
         <EditorialText variant="body" tone="secondary" style={{ marginTop: theme.spacing.xs }}>
@@ -76,10 +68,13 @@ export default function LoginScreen() {
 
         {serverError ? (
           <EditorialCard
+            shape="medium"
+            padding="sm"
             style={{
               marginTop: theme.spacing.lg,
-              backgroundColor: theme.colors.status.dangerSurface,
-              borderColor: theme.colors.status.danger,
+              backgroundColor: theme.colors.m3.errorContainer,
+              borderColor: theme.colors.m3.error,
+              borderWidth: theme.borderWidths.hairline,
             }}
           >
             <EditorialText variant="bodySmall" tone="danger">
@@ -128,9 +123,9 @@ export default function LoginScreen() {
                     hitSlop={8}
                   >
                     {showPassword ? (
-                      <EyeOff size={18} strokeWidth={1.75} color={theme.colors.text.muted} />
+                      <EyeOff size={18} strokeWidth={1.9} color={theme.colors.text.muted} />
                     ) : (
-                      <Eye size={18} strokeWidth={1.75} color={theme.colors.text.muted} />
+                      <Eye size={18} strokeWidth={1.9} color={theme.colors.text.muted} />
                     )}
                   </Pressable>
                 }
@@ -143,7 +138,7 @@ export default function LoginScreen() {
             accessibilityRole="button"
             style={styles.forgotLink}
           >
-            <EditorialText variant="label" tone="secondaryForest">
+            <EditorialText variant="label" tone="forest">
               Forgot password?
             </EditorialText>
           </Pressable>
@@ -162,7 +157,8 @@ export default function LoginScreen() {
         />
         <Button
           label="Create a new account"
-          variant="ghost"
+          variant="tonal"
+          shape="pill"
           fullWidth
           onPress={() => router.replace('/(auth)/register')}
         />
@@ -175,12 +171,6 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: 'space-between',
     gap: 24,
-  },
-  backRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    alignSelf: 'flex-start',
   },
   form: {
     width: '100%',

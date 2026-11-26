@@ -4,29 +4,38 @@ import { useRouter } from 'expo-router';
 import {
   Fingerprint,
   LogOut,
-  Moon,
+  Palette,
   RefreshCw,
   ShieldCheck,
   Smartphone,
-  Sun,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import {
   Badge,
   Button,
   Divider,
   EditorialCard,
   EditorialText,
+  ExpressiveSwitch,
   Screen,
   SectionHeader,
+  SegmentedControl,
 } from '../../../src/components/ui';
 import { authApi } from '../../../src/services/auth-api';
 import { useAuthStore } from '../../../src/stores/auth-store';
 import { useTheme } from '../../../src/theme';
 
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return `${parts[0]![0] ?? ''}${parts[1]![0] ?? ''}`.toUpperCase();
+  }
+  return (parts[0]?.slice(0, 2) || 'ME').toUpperCase();
+}
+
 export default function ProfileTabScreen() {
-  const { theme, mode, setMode } = useTheme();
+  const { theme, preference, setMode } = useTheme();
   const router = useRouter();
   const {
     user,
@@ -87,76 +96,99 @@ export default function ProfileTabScreen() {
     profile?.jobTitle;
 
   return (
-    <Screen>
+    <Screen includeBottomInset={false} bottomSpacing={32}>
       <View style={[styles.header, { marginBottom: theme.spacing.xl }]}>
         <View style={styles.topRow}>
-          <EditorialText variant="editorialEyebrow" tone="secondaryForest" uppercase>
+          <EditorialText variant="editorialEyebrow" tone="berryVibrant" uppercase>
             Account & Privacy
           </EditorialText>
-          <Badge label={displayMode} tone="sage" />
+          <Badge label={displayMode} tone="berry" />
         </View>
-        <EditorialText variant="pageHeadingEditorial" tone="primary" style={{ marginTop: 4 }}>
-          {displayName}
-        </EditorialText>
-        <EditorialText variant="bodySmall" tone="secondary">
-          {displayEmail}
-          {subLabel ? ` · ${subLabel}` : ''}
-        </EditorialText>
+
+        <View style={[styles.identityRow, { marginTop: theme.spacing.sm }]}>
+          <View
+            style={[
+              styles.avatarCircle,
+              {
+                backgroundColor: theme.colors.expressive.berry.container,
+                borderRadius: theme.shapes.squircle,
+              },
+            ]}
+          >
+            <EditorialText variant="titleLarge" tone="berryVibrant">
+              {getInitials(displayName)}
+            </EditorialText>
+          </View>
+          <View style={styles.flexText}>
+            <EditorialText variant="pageHeadingEditorial" tone="primary" numberOfLines={2}>
+              {displayName}
+            </EditorialText>
+            <EditorialText variant="bodySmall" tone="secondary" numberOfLines={2}>
+              {displayEmail}
+              {subLabel ? ` · ${subLabel}` : ''}
+            </EditorialText>
+          </View>
+        </View>
       </View>
 
-      <EditorialCard variant="tonal" style={{ marginBottom: theme.spacing.xl }}>
-        <View style={styles.rowBetween}>
-          <View style={styles.rowIcon}>
-            <ShieldCheck size={20} strokeWidth={1.75} color={theme.colors.m3.primary} />
-            <View style={{ flex: 1 }}>
-              <EditorialText variant="cardHeading" tone="primary">
-                Preferences
-              </EditorialText>
-              <EditorialText variant="caption" tone="secondaryForest">
-                Material 3 Expressive theme & biometric protection
-              </EditorialText>
-            </View>
+      <EditorialCard variant="violet" shape="extraLarge" style={{ marginBottom: theme.spacing.xl }}>
+        <View style={styles.rowIcon}>
+          <View
+            style={[
+              styles.iconTile,
+              {
+                backgroundColor: theme.colors.m3.surfaceContainerLowest,
+                borderRadius: theme.shapes.medium,
+              },
+            ]}
+          >
+            <ShieldCheck size={20} strokeWidth={1.9} color={theme.colors.expressive.violet.base} />
+          </View>
+          <View style={styles.flexText}>
+            <EditorialText variant="cardHeading" tone="violet">
+              Preferences
+            </EditorialText>
+            <EditorialText variant="caption" tone="secondary">
+              Appearance & security preferences
+            </EditorialText>
           </View>
         </View>
 
         <Divider style={{ marginVertical: theme.spacing.md }} />
 
-        <View style={{ gap: theme.spacing.sm }}>
-          <Pressable
-            onPress={() => setMode(mode === 'light' ? 'dark' : 'light')}
-            accessibilityRole="button"
-            style={styles.prefRow}
-          >
+        <View style={{ gap: theme.spacing.md }}>
+          <View style={{ gap: theme.spacing.xs }}>
             <View style={styles.rowIcon}>
-              {mode === 'light' ? (
-                <Sun size={18} color={theme.colors.m3.primary} />
-              ) : (
-                <Moon size={18} color={theme.colors.m3.primary} />
-              )}
+              <Palette size={17} color={theme.colors.expressive.amber.base} />
               <EditorialText variant="bodyMedium" tone="primary">
-                Appearance
+                Theme Mode
               </EditorialText>
             </View>
-            <Badge label={mode === 'light' ? 'Warm Light' : 'Forest Dark'} tone="sage" />
-          </Pressable>
+            <SegmentedControl
+              value={preference}
+              onChange={setMode}
+              options={[
+                { value: 'light', label: 'Light', accent: 'amber' },
+                { value: 'dark', label: 'Dark', accent: 'violet' },
+                { value: 'system', label: 'Auto', accent: 'cobalt' },
+              ]}
+            />
+          </View>
 
-          <Pressable
-            onPress={() => void handleToggleBiometric()}
-            accessibilityRole="switch"
-            accessibilityState={{ checked: biometricLockEnabled }}
-            style={styles.prefRow}
-          >
-            <View style={styles.rowIcon}>
-              <Fingerprint size={18} color={theme.colors.m3.primary} />
-              <EditorialText variant="bodyMedium" tone="primary">
+          <View style={styles.prefRow}>
+            <View style={[styles.rowIcon, styles.flexText]}>
+              <Fingerprint size={18} color={theme.colors.expressive.teal.base} />
+              <EditorialText variant="bodyMedium" tone="primary" numberOfLines={1}>
                 Biometric App Lock
               </EditorialText>
             </View>
-            <Badge
-              label={biometricLockEnabled ? 'Enabled' : 'Off'}
-              tone={biometricLockEnabled ? 'success' : 'neutral'}
+            <ExpressiveSwitch
+              value={biometricLockEnabled}
+              onValueChange={() => void handleToggleBiometric()}
+              accent="teal"
+              accessibilityLabel="Toggle biometric app lock"
             />
-          </Pressable>
+          </View>
         </View>
       </EditorialCard>
 
@@ -165,9 +197,10 @@ export default function ProfileTabScreen() {
         title="Active Sessions"
         actionLabel="Refresh"
         onActionPress={() => void sessionsQuery.refetch()}
+        eyebrowTone="cobaltVibrant"
       />
 
-      <EditorialCard variant="outlined" style={{ marginBottom: theme.spacing.xl }}>
+      <EditorialCard variant="surface" padding="sm" style={{ marginBottom: theme.spacing.xl }}>
         {sessionsQuery.isLoading ? (
           <EditorialText variant="bodySmall" tone="muted">
             Loading device sessions...
@@ -177,19 +210,29 @@ export default function ProfileTabScreen() {
             <View key={session.id}>
               {index > 0 ? <Divider style={{ marginVertical: theme.spacing.sm }} /> : null}
               <View style={styles.prefRow}>
-                <View style={[styles.rowIcon, { flex: 1 }]}>
-                  <Smartphone size={18} color={theme.colors.m3.secondary} />
-                  <View style={{ flex: 1 }}>
-                    <EditorialText variant="bodyMedium" tone="primary">
+                <View style={[styles.rowIcon, styles.flexText]}>
+                  <View
+                    style={[
+                      styles.sessionIcon,
+                      {
+                        backgroundColor: theme.colors.expressive.cobalt.container,
+                        borderRadius: theme.shapes.small,
+                      },
+                    ]}
+                  >
+                    <Smartphone size={17} color={theme.colors.expressive.cobalt.base} />
+                  </View>
+                  <View style={styles.flexText}>
+                    <EditorialText variant="bodyMedium" tone="primary" numberOfLines={1}>
                       {session.deviceName}
                     </EditorialText>
-                    <EditorialText variant="caption" tone="muted">
+                    <EditorialText variant="caption" tone="muted" numberOfLines={1}>
                       {session.platform.toUpperCase()} ·{' '}
                       {new Date(session.lastSeenAt).toLocaleDateString()}
                     </EditorialText>
                   </View>
                 </View>
-                <Badge label="Active" tone="success" />
+                <Badge label="Active" tone="teal" />
               </View>
             </View>
           ))
@@ -227,21 +270,48 @@ const styles = StyleSheet.create({
   header: {
     paddingTop: 4,
   },
+  identityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+  avatarCircle: {
+    width: 60,
+    height: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  flexText: {
+    flex: 1,
+    minWidth: 0,
+  },
+  iconTile: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  sessionIcon: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
   topRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-  },
-  rowBetween: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: 10,
   },
   prefRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 4,
+    gap: 12,
   },
   rowIcon: {
     flexDirection: 'row',

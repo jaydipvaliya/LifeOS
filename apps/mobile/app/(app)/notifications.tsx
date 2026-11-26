@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Bell, EyeOff } from 'lucide-react-native';
+import { Bell, EyeOff } from 'lucide-react-native';
 import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import {
   Badge,
   Divider,
@@ -10,8 +10,10 @@ import {
   EditorialText,
   EmptyState,
   ErrorState,
+  ExpressiveSwitch,
   LoadingState,
   Screen,
+  ScreenTopBar,
   SectionHeader,
 } from '../../src/components/ui';
 import { extractApiErrorMessage } from '../../src/services/api-client';
@@ -49,22 +51,12 @@ export default function NotificationsScreen() {
 
   return (
     <Screen>
-      <Pressable
-        onPress={() => router.back()}
-        accessibilityRole="button"
-        hitSlop={10}
-        style={styles.backRow}
-      >
-        <ArrowLeft size={18} color={theme.colors.m3.primary} />
-        <EditorialText variant="label" tone="forest">
-          Back
-        </EditorialText>
-      </Pressable>
+      <ScreenTopBar onBack={() => router.back()} badgeLabel="Alerts" badgeTone="coral" />
 
       <EditorialText
         variant="pageHeadingEditorial"
         tone="primary"
-        style={{ marginTop: theme.spacing.md, marginBottom: theme.spacing.lg }}
+        style={{ marginBottom: theme.spacing.lg }}
       >
         Notification Center
       </EditorialText>
@@ -73,65 +65,97 @@ export default function NotificationsScreen() {
         indexLabel="01 · Preferences"
         title="Privacy & Reminder Timing"
         subtitle="Control lock-screen privacy and lead days."
+        eyebrowTone="violetVibrant"
       />
 
       {preferencesQuery.isLoading ? (
         <LoadingState message="Loading notification preferences..." />
       ) : prefs ? (
-        <EditorialCard variant="tonal" style={{ marginBottom: theme.spacing.xl, gap: 12 }}>
-          <Pressable
-            onPress={() =>
-              updatePrefMutation.mutate({
-                privacyHideSensitiveContent: !prefs.privacyHideSensitiveContent,
-              })
-            }
-            style={styles.prefRow}
-          >
+        <EditorialCard
+          variant="violet"
+          shape="extraLarge"
+          style={{ marginBottom: theme.spacing.xl, gap: 12 }}
+        >
+          <View style={styles.prefRow}>
             <View style={styles.rowGap}>
-              <EyeOff size={18} color={theme.colors.m3.primary} />
-              <View style={{ flex: 1 }}>
-                <EditorialText variant="bodyMedium" tone="primary">
+              <View
+                style={[
+                  styles.iconTile,
+                  {
+                    backgroundColor: theme.colors.m3.surfaceContainerLowest,
+                    borderRadius: theme.shapes.medium,
+                  },
+                ]}
+              >
+                <EyeOff size={18} color={theme.colors.expressive.violet.base} />
+              </View>
+              <View style={styles.flexText}>
+                <EditorialText variant="bodyMedium" tone="violet">
                   Mask Sensitive Details
                 </EditorialText>
-                <EditorialText variant="caption" tone="secondaryForest">
+                <EditorialText variant="caption" tone="secondary">
                   Hide document titles & amounts in push notifications.
                 </EditorialText>
               </View>
             </View>
-            <Badge
-              label={prefs.privacyHideSensitiveContent ? 'Private' : 'Visible'}
-              tone={prefs.privacyHideSensitiveContent ? 'success' : 'warning'}
+            <ExpressiveSwitch
+              value={prefs.privacyHideSensitiveContent}
+              onValueChange={(next) =>
+                updatePrefMutation.mutate({ privacyHideSensitiveContent: next })
+              }
+              accent="violet"
+              accessibilityLabel="Toggle sensitive notification masking"
             />
-          </Pressable>
+          </View>
 
           <Divider />
 
-          <Pressable
-            onPress={() => updatePrefMutation.mutate({ pushEnabled: !prefs.pushEnabled })}
-            style={styles.prefRow}
-          >
-            <EditorialText variant="bodyMedium" tone="primary">
-              Push Notifications
-            </EditorialText>
-            <Badge
-              label={prefs.pushEnabled ? 'Enabled' : 'Paused'}
-              tone={prefs.pushEnabled ? 'success' : 'neutral'}
-            />
-          </Pressable>
-
           <View style={styles.prefRow}>
-            <EditorialText variant="caption" tone="secondaryForest">
-              Lead Days (Docs / Warranty / Subs)
+            <View style={styles.rowGap}>
+              <View
+                style={[
+                  styles.iconTile,
+                  {
+                    backgroundColor: theme.colors.m3.surfaceContainerLowest,
+                    borderRadius: theme.shapes.medium,
+                  },
+                ]}
+              >
+                <Bell size={18} color={theme.colors.expressive.teal.base} />
+              </View>
+              <View style={styles.flexText}>
+                <EditorialText variant="bodyMedium" tone="primary">
+                  Push Notifications
+                </EditorialText>
+                <EditorialText variant="caption" tone="secondary">
+                  Receive timely reminders on your device.
+                </EditorialText>
+              </View>
+            </View>
+            <ExpressiveSwitch
+              value={prefs.pushEnabled}
+              onValueChange={(next) => updatePrefMutation.mutate({ pushEnabled: next })}
+              accent="teal"
+              accessibilityLabel="Toggle push notifications"
+            />
+          </View>
+
+          <Divider />
+
+          <View style={styles.leadRow}>
+            <EditorialText variant="caption" tone="secondary">
+              Advance Notice Windows
             </EditorialText>
-            <EditorialText variant="label" tone="forest">
-              {prefs.documentExpiryDaysBefore}d / {prefs.warrantyExpiryDaysBefore}d /{' '}
-              {prefs.subscriptionRenewalDaysBefore}d
-            </EditorialText>
+            <View style={styles.leadBadges}>
+              <Badge label={`Docs ${prefs.documentExpiryDaysBefore}d`} tone="amber" />
+              <Badge label={`Warranty ${prefs.warrantyExpiryDaysBefore}d`} tone="teal" />
+              <Badge label={`Subs ${prefs.subscriptionRenewalDaysBefore}d`} tone="berry" />
+            </View>
           </View>
         </EditorialCard>
       ) : null}
 
-      <SectionHeader indexLabel="02 · History" title="Recent Alerts" />
+      <SectionHeader indexLabel="02 · History" title="Recent Alerts" eyebrowTone="coralVibrant" />
 
       {notificationsQuery.isLoading ? (
         <LoadingState message="Loading notifications..." />
@@ -142,7 +166,7 @@ export default function NotificationsScreen() {
         />
       ) : items.length === 0 ? (
         <EmptyState
-          icon={<Bell size={26} color={theme.colors.m3.primary} />}
+          icon={<Bell size={26} color={theme.colors.expressive.coral.base} />}
           title="All caught up"
           description="Scheduled reminders for document expirations, warranties, and renewals appear here."
         />
@@ -151,21 +175,22 @@ export default function NotificationsScreen() {
           {items.map((item) => (
             <EditorialCard
               key={item.id}
-              variant={item.readAt ? 'outlined' : 'secondary'}
+              variant={item.readAt ? 'surface' : 'coral'}
+              padding="sm"
               onPress={() => !item.readAt && markReadMutation.mutate(item.id)}
             >
               <View style={styles.prefRow}>
-                <View style={{ flex: 1 }}>
-                  <EditorialText variant="cardHeading" tone="primary">
+                <View style={styles.flexText}>
+                  <EditorialText variant="cardHeading" tone={item.readAt ? 'primary' : 'coral'}>
                     {item.title}
                   </EditorialText>
-                  <EditorialText variant="bodySmall" tone="secondary">
+                  <EditorialText variant="bodySmall" tone="secondary" style={{ marginTop: 2 }}>
                     {item.body}
                   </EditorialText>
                 </View>
                 <Badge
                   label={item.readAt ? 'Read' : 'New'}
-                  tone={item.readAt ? 'neutral' : 'sage'}
+                  tone={item.readAt ? 'neutral' : 'coral'}
                 />
               </View>
             </EditorialCard>
@@ -177,7 +202,16 @@ export default function NotificationsScreen() {
 }
 
 const styles = StyleSheet.create({
-  backRow: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start' },
+  flexText: { flex: 1, minWidth: 0 },
+  iconTile: {
+    width: 38,
+    height: 38,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
   prefRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
-  rowGap: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 },
+  rowGap: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 },
+  leadRow: { gap: 8 },
+  leadBadges: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
 });

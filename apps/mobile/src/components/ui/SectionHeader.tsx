@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useTheme } from '../../theme';
-import { EditorialText } from './Typography';
+import { EditorialText, type TextColorTone } from './Typography';
 
 interface SectionHeaderProps {
   indexLabel?: string;
@@ -9,6 +9,7 @@ interface SectionHeaderProps {
   subtitle?: string;
   actionLabel?: string;
   onActionPress?: () => void;
+  eyebrowTone?: TextColorTone;
 }
 
 export function SectionHeader({
@@ -17,6 +18,7 @@ export function SectionHeader({
   subtitle,
   actionLabel,
   onActionPress,
+  eyebrowTone = 'secondaryForest',
 }: SectionHeaderProps) {
   const { theme } = useTheme();
 
@@ -26,7 +28,7 @@ export function SectionHeader({
         {indexLabel ? (
           <EditorialText
             variant="editorialEyebrow"
-            tone="secondaryForest"
+            tone={eyebrowTone}
             uppercase
             style={{ marginBottom: theme.spacing.xxs }}
           >
@@ -43,8 +45,23 @@ export function SectionHeader({
         ) : null}
       </View>
       {actionLabel && onActionPress ? (
-        <Pressable onPress={onActionPress} accessibilityRole="button" hitSlop={8}>
-          <EditorialText variant="label" tone="forest">
+        <Pressable
+          onPress={onActionPress}
+          accessibilityRole="button"
+          hitSlop={8}
+          style={[
+            styles.actionPill,
+            {
+              backgroundColor: theme.colors.m3.primaryContainer,
+              borderRadius: theme.shapes.full,
+            },
+          ]}
+        >
+          <EditorialText
+            variant="caption"
+            tone="onPrimaryContainer"
+            style={{ fontFamily: theme.fonts.bodySemiBold }}
+          >
             {actionLabel}
           </EditorialText>
         </Pressable>
@@ -62,5 +79,11 @@ const styles = StyleSheet.create({
   },
   left: {
     flex: 1,
+    minWidth: 0,
+  },
+  actionPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    flexShrink: 0,
   },
 });

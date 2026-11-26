@@ -1,11 +1,18 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { forgotPasswordSchema, type ForgotPasswordInput } from '@lifeos/validation';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, CheckCircle2 } from 'lucide-react-native';
+import { CheckCircle2 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Pressable, StyleSheet, View } from 'react-native';
-import { Button, EditorialCard, EditorialText, Screen, TextField } from '../../src/components/ui';
+import { StyleSheet, View } from 'react-native';
+import {
+  Button,
+  EditorialCard,
+  EditorialText,
+  Screen,
+  ScreenTopBar,
+  TextField,
+} from '../../src/components/ui';
 import { extractApiErrorMessage } from '../../src/services/api-client';
 import { authApi } from '../../src/services/auth-api';
 import { useTheme } from '../../src/theme';
@@ -38,24 +45,9 @@ export default function ForgotPasswordScreen() {
   return (
     <Screen contentStyle={styles.container}>
       <View>
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          hitSlop={10}
-          style={styles.backRow}
-        >
-          <ArrowLeft size={18} strokeWidth={1.75} color={theme.colors.brand.primaryForest} />
-          <EditorialText variant="label" tone="forest">
-            Back
-          </EditorialText>
-        </Pressable>
+        <ScreenTopBar onBack={() => router.back()} badgeLabel="Recovery" badgeTone="coral" />
 
-        <EditorialText
-          variant="pageHeadingEditorial"
-          tone="primary"
-          style={{ marginTop: theme.spacing.lg }}
-        >
+        <EditorialText variant="pageHeadingEditorial" tone="primary">
           Reset your password.
         </EditorialText>
         <EditorialText variant="body" tone="secondary" style={{ marginTop: theme.spacing.xs }}>
@@ -64,10 +56,13 @@ export default function ForgotPasswordScreen() {
 
         {serverError ? (
           <EditorialCard
+            shape="medium"
+            padding="sm"
             style={{
               marginTop: theme.spacing.lg,
-              backgroundColor: theme.colors.status.dangerSurface,
-              borderColor: theme.colors.status.danger,
+              backgroundColor: theme.colors.m3.errorContainer,
+              borderColor: theme.colors.m3.error,
+              borderWidth: theme.borderWidths.hairline,
             }}
           >
             <EditorialText variant="bodySmall" tone="danger">
@@ -77,16 +72,16 @@ export default function ForgotPasswordScreen() {
         ) : null}
 
         {submittedMessage ? (
-          <EditorialCard variant="sage" style={{ marginTop: theme.spacing.xl }}>
+          <EditorialCard variant="teal" style={{ marginTop: theme.spacing.xl }}>
             <View style={styles.successHeader}>
-              <CheckCircle2 size={20} strokeWidth={1.75} color={theme.colors.status.success} />
-              <EditorialText variant="cardHeading" tone="primary">
+              <CheckCircle2 size={20} strokeWidth={1.9} color={theme.colors.expressive.teal.base} />
+              <EditorialText variant="cardHeading" tone="teal">
                 Request received
               </EditorialText>
             </View>
             <EditorialText
               variant="bodySmall"
-              tone="secondaryForest"
+              tone="secondary"
               style={{ marginTop: theme.spacing.xs }}
             >
               {submittedMessage}
@@ -118,6 +113,8 @@ export default function ForgotPasswordScreen() {
         {submittedMessage ? (
           <Button
             label="I have a reset token"
+            variant="filled"
+            shape="pill"
             size="lg"
             fullWidth
             onPress={() => router.push('/(auth)/reset-password')}
@@ -125,6 +122,8 @@ export default function ForgotPasswordScreen() {
         ) : (
           <Button
             label="Send Reset Instructions"
+            variant="filled"
+            shape="pill"
             size="lg"
             fullWidth
             loading={isSubmitting}
@@ -133,7 +132,8 @@ export default function ForgotPasswordScreen() {
         )}
         <Button
           label="Return to Sign In"
-          variant="ghost"
+          variant="tonal"
+          shape="pill"
           fullWidth
           onPress={() => router.replace('/(auth)/login')}
         />
@@ -146,12 +146,6 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: 'space-between',
     gap: 24,
-  },
-  backRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    alignSelf: 'flex-start',
   },
   successHeader: {
     flexDirection: 'row',

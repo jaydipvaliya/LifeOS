@@ -1,3 +1,18 @@
+export interface ExpressiveAccentPair {
+  base: string;
+  container: string;
+  onContainer: string;
+}
+
+export interface ExpressiveAccents {
+  violet: ExpressiveAccentPair;
+  teal: ExpressiveAccentPair;
+  coral: ExpressiveAccentPair;
+  amber: ExpressiveAccentPair;
+  cobalt: ExpressiveAccentPair;
+  berry: ExpressiveAccentPair;
+}
+
 export interface M3ColorScheme {
   primary: string;
   onPrimary: string;
@@ -66,147 +81,164 @@ export interface ColorPalette {
     dangerSurface: string;
   };
   m3: M3ColorScheme;
+  expressive: ExpressiveAccents;
 }
 
 /**
- * LifeOS Material 3 Expressive x Warm Minimal Light Palette.
- * Preserves the signature forest & sage identity with M3 tonal surface hierarchy.
+ * LifeOS Colorful Material 3 Expressive Light Palette.
+ * Triadic vibrant roles (Indigo-Violet, Teal, Coral) with expressive tonal surfaces.
  */
 export const lightColors: ColorPalette = {
   background: {
-    primary: '#F7F8F5',
-    secondary: '#F1F2EC',
+    primary: '#FAF8FF',
+    secondary: '#F3F0FA',
   },
   surface: {
     primary: '#FFFFFF',
-    secondary: '#EEF1EA',
+    secondary: '#ECE7F6',
     elevated: '#FFFFFF',
   },
   brand: {
-    primaryForest: '#253A32',
-    secondaryForest: '#526F60',
-    sage: '#A5BDA8',
-    softSage: '#E6EEE7',
+    primaryForest: '#4F46E5',
+    secondaryForest: '#0F9D8A',
+    sage: '#9B94F5',
+    softSage: '#E3E0FF',
   },
   text: {
-    primary: '#25332D',
-    secondary: '#7C827D',
-    muted: '#78857D',
-    inverse: '#F7F8F5',
+    primary: '#1B1926',
+    secondary: '#56526A',
+    muted: '#736E87',
+    inverse: '#FFFFFF',
   },
   border: {
-    subtle: '#E6EAE5',
-    strong: '#CDD5CE',
+    subtle: '#E6E1F2',
+    strong: '#CFC7E4',
   },
   status: {
-    success: '#39866B',
-    successSurface: '#E6F1EC',
-    warning: '#D69A48',
-    warningSurface: '#F9F1E3',
-    danger: '#D66A64',
-    dangerSurface: '#FBECEB',
+    success: '#0F9D8A',
+    successSurface: '#D2F7F0',
+    warning: '#D97706',
+    warningSurface: '#FEF1D2',
+    danger: '#DC3E55',
+    dangerSurface: '#FFE4E8',
   },
   m3: {
-    primary: '#253A32',
-    onPrimary: '#F7F8F5',
-    primaryContainer: '#E6EEE7',
-    onPrimaryContainer: '#1B2D26',
-    secondary: '#526F60',
+    primary: '#4F46E5',
+    onPrimary: '#FFFFFF',
+    primaryContainer: '#E3E0FF',
+    onPrimaryContainer: '#1B1564',
+    secondary: '#0F9D8A',
     onSecondary: '#FFFFFF',
-    secondaryContainer: '#DCE7DE',
-    onSecondaryContainer: '#1F332A',
-    tertiary: '#9C6A23',
+    secondaryContainer: '#CCF7EE',
+    onSecondaryContainer: '#043831',
+    tertiary: '#E85D3F',
     onTertiary: '#FFFFFF',
-    tertiaryContainer: '#F9F1E3',
-    onTertiaryContainer: '#4E3409',
-    surface: '#F7F8F5',
-    surfaceDim: '#E8EAE3',
+    tertiaryContainer: '#FFE2DA',
+    onTertiaryContainer: '#5C180A',
+    surface: '#FAF8FF',
+    surfaceDim: '#EAE5F5',
     surfaceBright: '#FFFFFF',
     surfaceContainerLowest: '#FFFFFF',
-    surfaceContainerLow: '#F1F2EC',
-    surfaceContainer: '#EEF1EA',
-    surfaceContainerHigh: '#E6EAE2',
-    surfaceContainerHighest: '#DDE3D9',
-    onSurface: '#25332D',
-    onSurfaceVariant: '#5E6C64',
-    outline: '#78857D',
-    outlineVariant: '#E6EAE5',
-    inverseSurface: '#25332D',
-    inverseOnSurface: '#F7F8F5',
-    error: '#D66A64',
+    surfaceContainerLow: '#F4F1FB',
+    surfaceContainer: '#ECE7F6',
+    surfaceContainerHigh: '#E4DDF1',
+    surfaceContainerHighest: '#DBD3EC',
+    onSurface: '#1B1926',
+    onSurfaceVariant: '#56526A',
+    outline: '#7E7894',
+    outlineVariant: '#E4DEF1',
+    inverseSurface: '#262335',
+    inverseOnSurface: '#F5F2FC',
+    error: '#DC3E55',
     onError: '#FFFFFF',
-    errorContainer: '#FBECEB',
-    onErrorContainer: '#641F1B',
+    errorContainer: '#FFE4E8',
+    onErrorContainer: '#670D1D',
+  },
+  expressive: {
+    violet: { base: '#6D28D9', container: '#EDE5FF', onContainer: '#2E0F66' },
+    teal: { base: '#0D9488', container: '#D2F7F2', onContainer: '#083A36' },
+    coral: { base: '#EA580C', container: '#FFE8DC', onContainer: '#5A2004' },
+    amber: { base: '#D97706', container: '#FEF1D2', onContainer: '#522B02' },
+    cobalt: { base: '#2563EB', container: '#DDEAFF', onContainer: '#0E2B6B' },
+    berry: { base: '#DB2777', container: '#FCE2EE', onContainer: '#5C0D31' },
   },
 };
 
 /**
- * Semantic Material 3 Expressive Dark Palette.
+ * Semantic Colorful Material 3 Expressive Dark Palette.
  */
 export const darkColors: ColorPalette = {
   background: {
-    primary: '#131A17',
-    secondary: '#1A231F',
+    primary: '#14121D',
+    secondary: '#1D1A29',
   },
   surface: {
-    primary: '#1F2A25',
-    secondary: '#26332D',
-    elevated: '#293731',
+    primary: '#231F31',
+    secondary: '#2B263D',
+    elevated: '#312B47',
   },
   brand: {
-    primaryForest: '#A5BDA8',
-    secondaryForest: '#7D9B8A',
-    sage: '#526F60',
-    softSage: '#24352E',
+    primaryForest: '#B9B4FF',
+    secondaryForest: '#6FE3D1',
+    sage: '#7A73D9',
+    softSage: '#312B72',
   },
   text: {
-    primary: '#EEF1EA',
-    secondary: '#B2BCB5',
-    muted: '#88968E',
-    inverse: '#131A17',
+    primary: '#F3F0FA',
+    secondary: '#C6C0D8',
+    muted: '#9891AE',
+    inverse: '#14121D',
   },
   border: {
-    subtle: '#2B3933',
-    strong: '#3B4D45',
+    subtle: '#352F4B',
+    strong: '#494266',
   },
   status: {
-    success: '#52A88A',
-    successSurface: '#1D332B',
-    warning: '#E0AA5E',
-    warningSurface: '#342A1C',
-    danger: '#E2847F',
-    dangerSurface: '#382221',
+    success: '#5CE1CC',
+    successSurface: '#123F38',
+    warning: '#FBBF49',
+    warningSurface: '#45310E',
+    danger: '#FF8697',
+    dangerSurface: '#4F1B24',
   },
   m3: {
-    primary: '#A5BDA8',
-    onPrimary: '#13221C',
-    primaryContainer: '#283F35',
-    onPrimaryContainer: '#D6E8D8',
-    secondary: '#8AA996',
-    onSecondary: '#16251E',
-    secondaryContainer: '#26372F',
-    onSecondaryContainer: '#D4E4D9',
-    tertiary: '#E0AA5E',
-    onTertiary: '#2F1F06',
-    tertiaryContainer: '#473315',
-    onTertiaryContainer: '#F9E6C8',
-    surface: '#131A17',
-    surfaceDim: '#0F1512',
-    surfaceBright: '#293731',
-    surfaceContainerLowest: '#0D1210',
-    surfaceContainerLow: '#1A231F',
-    surfaceContainer: '#1F2A25',
-    surfaceContainerHigh: '#26332D',
-    surfaceContainerHighest: '#2F3E37',
-    onSurface: '#EEF1EA',
-    onSurfaceVariant: '#B2BCB5',
-    outline: '#88968E',
-    outlineVariant: '#2B3933',
-    inverseSurface: '#EEF1EA',
-    inverseOnSurface: '#131A17',
-    error: '#E2847F',
-    onError: '#3A110F',
-    errorContainer: '#541E1B',
-    onErrorContainer: '#FBECEB',
+    primary: '#B9B4FF',
+    onPrimary: '#1A1466',
+    primaryContainer: '#35308C',
+    onPrimaryContainer: '#EAE9FF',
+    secondary: '#6FE3D1',
+    onSecondary: '#023830',
+    secondaryContainer: '#124D44',
+    onSecondaryContainer: '#D6FAF3',
+    tertiary: '#FFA691',
+    onTertiary: '#5C180A',
+    tertiaryContainer: '#6E2414',
+    onTertiaryContainer: '#FFE8E2',
+    surface: '#14121D',
+    surfaceDim: '#100E17',
+    surfaceBright: '#312B47',
+    surfaceContainerLowest: '#0D0B14',
+    surfaceContainerLow: '#1D1A29',
+    surfaceContainer: '#252136',
+    surfaceContainerHigh: '#2E2A42',
+    surfaceContainerHighest: '#37324F',
+    onSurface: '#F3F0FA',
+    onSurfaceVariant: '#C6C0D8',
+    outline: '#9891AE',
+    outlineVariant: '#352F4B',
+    inverseSurface: '#F3F0FA',
+    inverseOnSurface: '#14121D',
+    error: '#FF8697',
+    onError: '#540B17',
+    errorContainer: '#691523',
+    onErrorContainer: '#FFE4E8',
+  },
+  expressive: {
+    violet: { base: '#C4B5FD', container: '#3B2378', onContainer: '#EFEAFF' },
+    teal: { base: '#5EEAD4', container: '#114A43', onContainer: '#D5FCF5' },
+    coral: { base: '#FDBA74', container: '#63290B', onContainer: '#FFEBE0' },
+    amber: { base: '#FCD34D', container: '#573607', onContainer: '#FFF3D1' },
+    cobalt: { base: '#93C5FD', container: '#173775', onContainer: '#E1EDFF' },
+    berry: { base: '#F9A8D4', container: '#69193F', onContainer: '#FFE4F1' },
   },
 };

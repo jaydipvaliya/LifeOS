@@ -36,7 +36,11 @@ export function TextField({
 
   return (
     <View style={styles.container}>
-      <EditorialText variant="label" tone="primary" style={{ marginBottom: theme.spacing.xs }}>
+      <EditorialText
+        variant="label"
+        tone={errorText ? 'danger' : isFocused ? 'forest' : 'primary'}
+        style={{ marginBottom: 6 }}
+      >
         {label}
       </EditorialText>
       <View
@@ -58,6 +62,10 @@ export function TextField({
         ) : null}
         <TextInput
           placeholderTextColor={theme.colors.text.muted}
+          selectionColor={theme.colors.m3.primary}
+          cursorColor={theme.colors.m3.primary}
+          underlineColorAndroid="transparent"
+          importantForAutofill="no"
           style={[
             styles.input,
             {
@@ -100,12 +108,13 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   inputWrapper: {
-    minHeight: 52,
+    minHeight: 54,
     flexDirection: 'row',
     alignItems: 'center',
   },
   input: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: 13,
+    backgroundColor: 'transparent',
   },
 });

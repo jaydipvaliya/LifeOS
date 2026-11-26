@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  View,
-  type StyleProp,
-  type ViewStyle,
-} from 'react-native';
+import { ActivityIndicator, Pressable, View, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { useTheme } from '../../theme';
 import { EditorialText, type TextColorTone } from './Typography';
@@ -14,13 +7,24 @@ import { EditorialText, type TextColorTone } from './Typography';
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export type ButtonVariant =
-  'primary' | 'filled' | 'tonal' | 'secondary' | 'outlined' | 'ghost' | 'text' | 'destructive';
+  | 'primary'
+  | 'filled'
+  | 'tonal'
+  | 'tertiary'
+  | 'elevated'
+  | 'secondary'
+  | 'outlined'
+  | 'ghost'
+  | 'text'
+  | 'destructive';
 export type ButtonSize = 'sm' | 'md' | 'lg';
+export type ButtonAccent = 'primary' | 'violet' | 'teal' | 'coral' | 'amber' | 'cobalt' | 'berry';
 
 interface ButtonProps {
   label: string;
   onPress: () => void;
   variant?: ButtonVariant;
+  accent?: ButtonAccent;
   size?: ButtonSize;
   shape?: 'squircle' | 'pill';
   loading?: boolean;
@@ -36,8 +40,9 @@ export function Button({
   label,
   onPress,
   variant = 'primary',
+  accent,
   size = 'md',
-  shape = 'squircle',
+  shape = 'pill',
   loading = false,
   disabled = false,
   leftIcon,
@@ -54,20 +59,31 @@ export function Button({
     transform: [{ scale: scale.value }],
   }));
 
-  const height = size === 'lg' ? 54 : size === 'sm' ? 38 : 46;
+  const height = size === 'lg' ? 54 : size === 'sm' ? 38 : 48;
   const borderRadius =
     shape === 'pill' ? theme.shapes.full : size === 'lg' ? theme.shapes.medium : theme.shapes.small;
+
+  const accentPair = accent && accent !== 'primary' ? theme.colors.expressive[accent] : undefined;
 
   const getContainerColors = (): ViewStyle => {
     switch (variant) {
       case 'primary':
       case 'filled':
         return {
-          backgroundColor: theme.colors.m3.primary,
+          backgroundColor: accentPair ? accentPair.base : theme.colors.m3.primary,
         };
       case 'tonal':
         return {
-          backgroundColor: theme.colors.m3.secondaryContainer,
+          backgroundColor: accentPair ? accentPair.container : theme.colors.m3.secondaryContainer,
+        };
+      case 'tertiary':
+        return {
+          backgroundColor: theme.colors.m3.tertiaryContainer,
+        };
+      case 'elevated':
+        return {
+          backgroundColor: theme.colors.m3.surfaceContainerLow,
+          ...theme.shadows.subtle,
         };
       case 'secondary':
       case 'outlined':
@@ -84,20 +100,21 @@ export function Button({
       case 'destructive':
         return {
           backgroundColor: theme.colors.m3.errorContainer,
-          borderWidth: theme.borderWidths.hairline,
-          borderColor: theme.colors.m3.error,
         };
     }
   };
 
-  const textTone: TextColorTone =
-    variant === 'primary' || variant === 'filled'
-      ? 'inverse'
-      : variant === 'destructive'
-        ? 'danger'
-        : variant === 'tonal'
-          ? 'forest'
-          : 'primary';
+  const textTone: TextColorTone = (() => {
+    if (variant === 'primary' || variant === 'filled') return 'onPrimary';
+    if (variant === 'destructive') return 'danger';
+    if (variant === 'tonal') {
+      if (accent && accent !== 'primary') return accent;
+      return 'onSecondaryContainer';
+    }
+    if (variant === 'tertiary') return 'onTertiaryContainer';
+    if (variant === 'elevated' || variant === 'ghost' || variant === 'text') return 'forest';
+    return 'primary';
+  })();
 
   const spinnerColor =
     variant === 'primary' || variant === 'filled'
@@ -111,7 +128,7 @@ export function Button({
       onPress={onPress}
       onPressIn={() => {
         if (!isDisabled) {
-          scale.value = withSpring(0.97, theme.motion.expressiveEffects);
+          scale.value = withSpring(0.96, theme.motion.expressiveEffects);
         }
       }}
       onPressOut={() => {
@@ -125,13 +142,14 @@ export function Button({
         {
           height,
           borderRadius,
-          paddingHorizontal: size === 'sm' ? theme.spacing.md : theme.spacing.lg,
+          paddingHorizontal: size === 'sm' ? 14 : theme.spacing.lg,
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: theme.spacing.xs,
+          gap: size === 'sm' ? 6 : theme.spacing.xs,
           opacity: isDisabled ? 0.55 : 1,
           alignSelf: fullWidth ? 'stretch' : 'flex-start',
+          flexShrink: 0,
         },
         getContainerColors(),
         animatedStyle,
@@ -142,20 +160,18 @@ export function Button({
         <ActivityIndicator size="small" color={spinnerColor} />
       ) : (
         <>
-          {leftIcon ? <View style={styles.iconSlot}>{leftIcon}</View> : null}
-          <EditorialText variant={size === 'sm' ? 'label' : 'bodyMedium'} tone={textTone}>
+          {leftIcon ? <View style={{ flexShrink: 0 }}>{leftIcon}</View> : null}
+          <EditorialText
+            variant={size === 'sm' ? 'label' : 'labelLarge'}
+            tone={textTone}
+            numberOfLines={1}
+            style={{ flexShrink: 1 }}
+          >
             {label}
           </EditorialText>
-          {rightIcon ? <View style={styles.iconSlot}>{rightIcon}</View> : null}
+          {rightIcon ? <View style={{ flexShrink: 0 }}>{rightIcon}</View> : null}
         </>
       )}
     </AnimatedPressable>
   );
 }
-
-const styles = StyleSheet.create({
-  iconSlot: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

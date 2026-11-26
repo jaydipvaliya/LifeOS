@@ -18,7 +18,7 @@ import { Lock } from 'lucide-react-native';
 import React, { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { Button, EditorialText, Screen } from '../src/components/ui';
+import { Button, EditorialCard, EditorialText, Screen } from '../src/components/ui';
 import { authApi } from '../src/services/auth-api';
 import { useAuthStore } from '../src/stores/auth-store';
 import { ThemeProvider, useTheme } from '../src/theme';
@@ -105,11 +105,13 @@ function RootNavigator() {
   if (isHydrated && isAuthenticated && biometricLockEnabled && !isBiometricUnlocked) {
     return (
       <Screen scroll={false} contentStyle={styles.lockScreen}>
-        <Lock size={32} strokeWidth={1.75} color={theme.colors.brand.primaryForest} />
+        <EditorialCard variant="violet" shape="extraLarge" padding="lg" style={styles.lockIconCard}>
+          <Lock size={34} strokeWidth={1.9} color={theme.colors.expressive.violet.base} />
+        </EditorialCard>
         <EditorialText
           variant="pageHeadingEditorial"
           tone="primary"
-          style={{ marginTop: theme.spacing.md }}
+          style={{ marginTop: theme.spacing.lg }}
         >
           LifeOS is locked.
         </EditorialText>
@@ -122,9 +124,11 @@ function RootNavigator() {
         </EditorialText>
         <Button
           label="Unlock with Biometrics"
+          variant="filled"
+          shape="pill"
           size="lg"
           onPress={() => void handleBiometricUnlock()}
-          style={{ marginTop: theme.spacing.xl }}
+          style={{ marginTop: theme.spacing.xl, alignSelf: 'center' }}
         />
       </Screen>
     );
@@ -180,5 +184,13 @@ const styles = StyleSheet.create({
   lockScreen: {
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  lockIconCard: {
+    width: 84,
+    height: 84,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 0,
   },
 });

@@ -2,17 +2,20 @@ import { darkTheme, lightTheme, type LifeOSTheme, type ThemeMode } from '@lifeos
 import React, { createContext, useContext, useMemo, useState } from 'react';
 import { useColorScheme } from 'react-native';
 
+export type ThemePreference = ThemeMode | 'system';
+
 interface ThemeContextValue {
   theme: LifeOSTheme;
   mode: ThemeMode;
-  setMode: (mode: ThemeMode | 'system') => void;
+  preference: ThemePreference;
+  setMode: (mode: ThemePreference) => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const systemScheme = useColorScheme();
-  const [preference, setPreference] = useState<ThemeMode | 'system'>('light');
+  const [preference, setPreference] = useState<ThemePreference>('light');
 
   const resolvedMode: ThemeMode = useMemo(() => {
     if (preference === 'system') {
@@ -25,9 +28,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     () => ({
       theme: resolvedMode === 'dark' ? darkTheme : lightTheme,
       mode: resolvedMode,
+      preference,
       setMode: setPreference,
     }),
-    [resolvedMode],
+    [preference, resolvedMode],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

@@ -6,7 +6,6 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Print from 'expo-print';
 import { useRouter } from 'expo-router';
 import {
-  ArrowLeft,
   Camera,
   Check,
   Crop,
@@ -19,13 +18,13 @@ import {
 import React, { useRef, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import {
-  Badge,
   Button,
   EditorialCard,
   EditorialText,
   ErrorState,
   FilterChip,
   Screen,
+  ScreenTopBar,
   TextField,
 } from '../../src/components/ui';
 import { extractApiErrorMessage } from '../../src/services/api-client';
@@ -38,6 +37,8 @@ interface ScannedPage {
   width: number;
   height: number;
 }
+
+const CAT_ACCENTS = ['teal', 'violet', 'cobalt', 'coral', 'amber', 'berry'] as const;
 
 export default function DocumentScannerScreen() {
   const { theme } = useTheme();
@@ -258,25 +259,14 @@ export default function DocumentScannerScreen() {
     const activePage = pages[selectedIndex] ?? pages[0]!;
     return (
       <Screen>
-        <View style={styles.reviewHeader}>
-          <Pressable
-            onPress={() => setReviewMode(false)}
-            accessibilityRole="button"
-            style={styles.backRow}
-          >
-            <ArrowLeft size={18} color={theme.colors.m3.primary} />
-            <EditorialText variant="label" tone="forest">
-              Camera
-            </EditorialText>
-          </Pressable>
-          <Badge label={`${pages.length} page${pages.length > 1 ? 's' : ''}`} tone="sage" />
-        </View>
+        <ScreenTopBar
+          onBack={() => setReviewMode(false)}
+          backLabel="Camera"
+          badgeLabel={`${pages.length} page${pages.length > 1 ? 's' : ''}`}
+          badgeTone="teal"
+        />
 
-        <EditorialText
-          variant="pageHeadingEditorial"
-          tone="primary"
-          style={{ marginTop: theme.spacing.md }}
-        >
+        <EditorialText variant="pageHeadingEditorial" tone="primary">
           Review & Prepare
         </EditorialText>
 
@@ -286,33 +276,45 @@ export default function DocumentScannerScreen() {
           </View>
         ) : null}
 
-        <EditorialCard variant="secondary" style={{ marginTop: theme.spacing.md, padding: 12 }}>
+        <EditorialCard variant="surface" padding="sm" style={{ marginTop: theme.spacing.md }}>
           <Image
             source={{ uri: activePage.uri }}
             resizeMode="contain"
-            style={[styles.previewImage, { borderRadius: theme.shapes.medium }]}
+            style={[
+              styles.previewImage,
+              {
+                borderRadius: theme.shapes.medium,
+                backgroundColor: theme.colors.m3.inverseSurface,
+              },
+            ]}
           />
           <View style={[styles.editToolbar, { marginTop: theme.spacing.sm }]}>
             <Button
               label="Rotate"
               variant="outlined"
               size="sm"
+              shape="pill"
               leftIcon={<RotateCw size={15} color={theme.colors.m3.primary} />}
               onPress={() => void handleRotatePage()}
+              style={styles.toolBtn}
             />
             <Button
-              label="Trim Margins"
+              label="Trim"
               variant="outlined"
               size="sm"
+              shape="pill"
               leftIcon={<Crop size={15} color={theme.colors.m3.primary} />}
               onPress={() => void handleCropCenterPage()}
+              style={styles.toolBtn}
             />
             <Button
               label="Retake"
               variant="destructive"
               size="sm"
+              shape="pill"
               leftIcon={<Trash2 size={15} color={theme.colors.m3.error} />}
               onPress={handleRemovePage}
+              style={styles.toolBtn}
             />
           </View>
         </EditorialCard>
@@ -321,7 +323,8 @@ export default function DocumentScannerScreen() {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ gap: 8, marginTop: theme.spacing.md }}
+          style={{ flexGrow: 0, flexShrink: 0, marginTop: theme.spacing.md }}
+          contentContainerStyle={{ gap: 8, alignItems: 'center' }}
         >
           {pages.map((p, idx) => (
             <Pressable
@@ -365,12 +368,14 @@ export default function DocumentScannerScreen() {
             <View style={styles.chipWrap}>
               <FilterChip
                 label="PDF Document"
+                accent="violet"
                 selected={exportAsPdf || pages.length > 1}
                 onPress={() => setExportAsPdf(true)}
               />
               {pages.length === 1 ? (
                 <FilterChip
                   label="Optimized JPEG"
+                  accent="teal"
                   selected={!exportAsPdf}
                   onPress={() => setExportAsPdf(false)}
                 />
@@ -383,10 +388,11 @@ export default function DocumentScannerScreen() {
               Category
             </EditorialText>
             <View style={styles.chipWrap}>
-              {categories.map((cat) => (
+              {categories.map((cat, idx) => (
                 <FilterChip
                   key={cat.id}
                   label={cat.name}
+                  accent={CAT_ACCENTS[idx % CAT_ACCENTS.length]}
                   selected={activeCategoryId === cat.id}
                   onPress={() => setCategoryId(cat.id)}
                 />
@@ -395,8 +401,8 @@ export default function DocumentScannerScreen() {
           </View>
 
           {uploading ? (
-            <EditorialCard variant="tonal">
-              <EditorialText variant="label" tone="forest">
+            <EditorialCard variant="teal" padding="sm">
+              <EditorialText variant="label" tone="teal">
                 {statusLabel ?? 'Uploading...'} ({Math.round(uploadProgress * 100)}%)
               </EditorialText>
             </EditorialCard>
@@ -419,57 +425,60 @@ export default function DocumentScannerScreen() {
 
   return (
     <Screen scroll={false} contentStyle={styles.cameraContainer}>
-      <View style={styles.cameraTopBar}>
-        <Pressable onPress={() => router.back()} accessibilityRole="button" style={styles.backRow}>
-          <ArrowLeft size={20} color={theme.colors.m3.primary} />
-          <EditorialText variant="labelLarge" tone="forest">
-            Close
-          </EditorialText>
-        </Pressable>
-
-        <View style={styles.cameraTopRight}>
-          {pages.length > 0 ? (
-            <Button
-              label={`Review (${pages.length})`}
-              variant="tonal"
-              size="sm"
-              shape="pill"
-              onPress={() => setReviewMode(true)}
-            />
-          ) : null}
-          <Pressable
-            onPress={() => setFlashEnabled((prev) => !prev)}
-            accessibilityRole="button"
-            accessibilityLabel="Toggle flash"
-            style={[
-              styles.flashBtn,
-              {
-                backgroundColor: theme.colors.m3.surfaceContainer,
-                borderRadius: theme.shapes.medium,
-              },
-            ]}
-          >
-            {flashEnabled ? (
-              <Zap size={18} color={theme.colors.m3.primary} />
-            ) : (
-              <ZapOff size={18} color={theme.colors.text.muted} />
-            )}
-          </Pressable>
-        </View>
-      </View>
+      <ScreenTopBar
+        onBack={() => router.back()}
+        backLabel="Close"
+        rightSlot={
+          <View style={styles.cameraTopRight}>
+            {pages.length > 0 ? (
+              <Button
+                label={`Review (${pages.length})`}
+                variant="tonal"
+                size="sm"
+                shape="pill"
+                onPress={() => setReviewMode(true)}
+              />
+            ) : null}
+            <Pressable
+              onPress={() => setFlashEnabled((prev) => !prev)}
+              accessibilityRole="button"
+              accessibilityLabel="Toggle flash"
+              style={[
+                styles.flashBtn,
+                {
+                  backgroundColor: flashEnabled
+                    ? theme.colors.expressive.amber.container
+                    : theme.colors.m3.surfaceContainer,
+                  borderRadius: theme.shapes.full,
+                },
+              ]}
+            >
+              {flashEnabled ? (
+                <Zap size={18} color={theme.colors.expressive.amber.base} />
+              ) : (
+                <ZapOff size={18} color={theme.colors.text.muted} />
+              )}
+            </Pressable>
+          </View>
+        }
+      />
 
       {!permission ? (
-        <EditorialCard variant="secondary" style={{ marginTop: theme.spacing.xl }}>
+        <EditorialCard variant="surface" style={{ marginTop: theme.spacing.xl }}>
           <EditorialText variant="body" tone="secondary">
             Checking camera permissions...
           </EditorialText>
         </EditorialCard>
       ) : !permission.granted ? (
-        <EditorialCard variant="tonal" style={{ marginTop: theme.spacing.xl, gap: 12 }}>
-          <EditorialText variant="headlineMedium" tone="primary">
+        <EditorialCard
+          variant="violet"
+          shape="extraLarge"
+          style={{ marginTop: theme.spacing.xl, gap: 12 }}
+        >
+          <EditorialText variant="headlineMedium" tone="violet">
             Camera access needed
           </EditorialText>
-          <EditorialText variant="bodySmall" tone="secondaryForest">
+          <EditorialText variant="bodySmall" tone="secondary">
             Allow camera access to scan receipts, certificates, and IDs directly on your Android
             device—or pick an existing image from your gallery.
           </EditorialText>
@@ -482,10 +491,10 @@ export default function DocumentScannerScreen() {
           />
           <Button
             label="Choose from Gallery"
-            variant="outlined"
+            variant="tonal"
             shape="pill"
             fullWidth
-            leftIcon={<ImageIcon size={16} color={theme.colors.m3.primary} />}
+            leftIcon={<ImageIcon size={16} color={theme.colors.m3.onSecondaryContainer} />}
             onPress={() => void handlePickFromGallery()}
           />
         </EditorialCard>
@@ -498,6 +507,7 @@ export default function DocumentScannerScreen() {
                 borderRadius: theme.shapes.extraLarge,
                 borderColor: theme.colors.m3.outlineVariant,
                 borderWidth: 1,
+                backgroundColor: theme.colors.m3.inverseSurface,
               },
             ]}
           >
@@ -557,14 +567,7 @@ export default function DocumentScannerScreen() {
 const styles = StyleSheet.create({
   cameraContainer: {
     flex: 1,
-    paddingBottom: 20,
     justifyContent: 'space-between',
-  },
-  cameraTopBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
   },
   cameraTopRight: {
     flexDirection: 'row',
@@ -577,15 +580,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  backRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
   cameraViewport: {
     flex: 1,
     overflow: 'hidden',
-    backgroundColor: '#131A17',
   },
   shutterBar: {
     flexDirection: 'row',
@@ -608,20 +605,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  reviewHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
   previewImage: {
     width: '100%',
     height: 280,
-    backgroundColor: '#131A17',
   },
   editToolbar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: 8,
+  },
+  toolBtn: {
+    flex: 1,
   },
   thumbWrap: {
     width: 58,

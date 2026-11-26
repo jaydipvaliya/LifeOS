@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowLeft, FileText, Link2, Plus, ShieldCheck, Wrench } from 'lucide-react-native';
+import { FileText, Link2, Plus, ShieldCheck, Wrench } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Modal, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import {
   Badge,
   Button,
@@ -10,9 +10,11 @@ import {
   EditorialCard,
   EditorialText,
   ErrorState,
+  ExpressiveSheetModal,
   FilterChip,
   LoadingState,
   Screen,
+  ScreenTopBar,
   SectionHeader,
   TextField,
 } from '../../../src/components/ui';
@@ -83,36 +85,30 @@ export default function AssetDetailScreen() {
 
   return (
     <Screen>
-      <Pressable
-        onPress={() => router.back()}
-        accessibilityRole="button"
-        hitSlop={10}
-        style={styles.backRow}
-      >
-        <ArrowLeft size={18} color={theme.colors.m3.primary} />
-        <EditorialText variant="label" tone="forest">
-          Back
-        </EditorialText>
-      </Pressable>
+      <ScreenTopBar
+        onBack={() => router.back()}
+        badgeLabel={asset ? asset.category : undefined}
+        badgeTone="cobalt"
+      />
 
       {detailQuery.isLoading ? (
-        <View style={{ marginTop: theme.spacing.lg }}>
+        <View style={{ marginTop: theme.spacing.md }}>
           <LoadingState message="Loading asset record..." />
         </View>
       ) : detailQuery.isError ? (
-        <View style={{ marginTop: theme.spacing.lg }}>
+        <View style={{ marginTop: theme.spacing.md }}>
           <ErrorState
             message={extractApiErrorMessage(detailQuery.error)}
             onRetry={() => void detailQuery.refetch()}
           />
         </View>
       ) : asset ? (
-        <View style={{ marginTop: theme.spacing.lg, gap: theme.spacing.lg }}>
+        <View style={{ gap: theme.spacing.lg }}>
           <View>
             <View style={styles.badgeRow}>
-              <Badge label={asset.category} tone="sage" />
+              <Badge label={asset.category} tone="cobalt" />
               {asset.warrantyExpirationDate ? (
-                <Badge label={`Warranty until ${asset.warrantyExpirationDate}`} tone="success" />
+                <Badge label={`Warranty until ${asset.warrantyExpirationDate}`} tone="teal" />
               ) : null}
             </View>
             <EditorialText
@@ -128,17 +124,17 @@ export default function AssetDetailScreen() {
             </EditorialText>
           </View>
 
-          <EditorialCard variant="tonal">
+          <EditorialCard variant="cobalt" shape="extraLarge">
             <View style={styles.rowGap}>
-              <ShieldCheck size={18} color={theme.colors.m3.primary} />
-              <EditorialText variant="cardHeading" tone="primary">
+              <ShieldCheck size={18} color={theme.colors.expressive.cobalt.base} />
+              <EditorialText variant="cardHeading" tone="cobalt">
                 Purchase & Warranty Summary
               </EditorialText>
             </View>
             <Divider style={{ marginVertical: theme.spacing.sm }} />
-            <View style={{ gap: 6 }}>
+            <View style={{ gap: 8 }}>
               <View style={styles.metaLine}>
-                <EditorialText variant="caption" tone="secondaryForest">
+                <EditorialText variant="caption" tone="cobalt">
                   Purchase Price
                 </EditorialText>
                 <EditorialText variant="bodySmall" tone="primary">
@@ -148,7 +144,7 @@ export default function AssetDetailScreen() {
                 </EditorialText>
               </View>
               <View style={styles.metaLine}>
-                <EditorialText variant="caption" tone="secondaryForest">
+                <EditorialText variant="caption" tone="cobalt">
                   Warranty Expires
                 </EditorialText>
                 <EditorialText variant="bodySmall" tone="primary">
@@ -163,8 +159,9 @@ export default function AssetDetailScreen() {
             title="Linked Invoices & Documents"
             actionLabel="Link Document"
             onActionPress={() => setLinkModalOpen(true)}
+            eyebrowTone="tealVibrant"
           />
-          <EditorialCard variant="outlined" style={{ gap: theme.spacing.sm }}>
+          <EditorialCard variant="surface" padding="sm" style={{ gap: theme.spacing.sm }}>
             {asset.linkedDocuments.length === 0 ? (
               <EditorialText variant="bodySmall" tone="muted">
                 No documents linked yet. Attach the purchase invoice from your Vault.
@@ -176,13 +173,18 @@ export default function AssetDetailScreen() {
                   onPress={() => router.push(`/(app)/documents/${doc.documentId}`)}
                   style={styles.metaLine}
                 >
-                  <View style={styles.rowGap}>
-                    <FileText size={16} color={theme.colors.m3.primary} />
-                    <EditorialText variant="bodyMedium" tone="primary">
+                  <View style={[styles.rowGap, styles.flexText]}>
+                    <FileText size={16} color={theme.colors.expressive.teal.base} />
+                    <EditorialText
+                      variant="bodyMedium"
+                      tone="primary"
+                      numberOfLines={1}
+                      style={{ flexShrink: 1 }}
+                    >
                       {doc.title}
                     </EditorialText>
                   </View>
-                  <Badge label={doc.relationType} tone="sage" />
+                  <Badge label={doc.relationType} tone="teal" />
                 </Pressable>
               ))
             )}
@@ -193,8 +195,9 @@ export default function AssetDetailScreen() {
             title="Repair History"
             actionLabel="Add Repair"
             onActionPress={() => setRepairModalOpen(true)}
+            eyebrowTone="amberVibrant"
           />
-          <EditorialCard variant="outlined" style={{ gap: theme.spacing.sm }}>
+          <EditorialCard variant="surface" padding="sm" style={{ gap: theme.spacing.sm }}>
             {asset.repairs.length === 0 ? (
               <EditorialText variant="bodySmall" tone="muted">
                 No repairs recorded for this asset.
@@ -203,8 +206,8 @@ export default function AssetDetailScreen() {
               asset.repairs.map((r) => (
                 <View key={r.id} style={styles.repairItem}>
                   <View style={styles.rowGap}>
-                    <Wrench size={15} color={theme.colors.m3.secondary} />
-                    <EditorialText variant="bodyMedium" tone="primary">
+                    <Wrench size={15} color={theme.colors.expressive.amber.base} />
+                    <EditorialText variant="bodyMedium" tone="primary" style={styles.flexText}>
                       {r.issueSummary}
                     </EditorialText>
                   </View>
@@ -219,122 +222,83 @@ export default function AssetDetailScreen() {
         </View>
       ) : null}
 
-      {/* Add Repair Modal */}
-      <Modal
-        visible={repairModalOpen}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setRepairModalOpen(false)}
-      >
-        <Pressable style={styles.backdrop} onPress={() => setRepairModalOpen(false)}>
-          <Pressable
-            style={[
-              styles.sheet,
-              {
-                backgroundColor: theme.colors.m3.surfaceContainerLowest,
-                borderTopLeftRadius: theme.shapes.extraLarge,
-                borderTopRightRadius: theme.shapes.extraLarge,
-                padding: theme.spacing.xl,
-              },
-            ]}
-          >
-            <EditorialText variant="headlineMedium" tone="primary">
-              Record Repair
-            </EditorialText>
-            <View style={{ marginTop: 14, gap: 12 }}>
-              <TextField
-                label="Issue / Service Summary"
-                placeholder="Battery replacement"
-                value={issueSummary}
-                onChangeText={setIssueSummary}
-              />
-              <TextField
-                label="Service Provider"
-                placeholder="Authorized Service Center"
-                value={providerName}
-                onChangeText={setProviderName}
-              />
-              <TextField
-                label="Repair Date (YYYY-MM-DD)"
-                value={repairDate}
-                onChangeText={setRepairDate}
-              />
-              <TextField
-                label="Cost (INR, optional)"
-                keyboardType="numeric"
-                value={repairCost}
-                onChangeText={setRepairCost}
-              />
-              <Button
-                label="Save Repair"
-                variant="filled"
-                shape="pill"
-                fullWidth
-                leftIcon={<Plus size={16} color={theme.colors.m3.onPrimary} />}
-                loading={addRepairMutation.isPending}
-                onPress={() => {
-                  if (issueSummary.trim()) addRepairMutation.mutate();
-                }}
-              />
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
+      <ExpressiveSheetModal visible={repairModalOpen} onClose={() => setRepairModalOpen(false)}>
+        <EditorialText variant="headlineMedium" tone="primary">
+          Record Repair
+        </EditorialText>
+        <View style={{ marginTop: 14, gap: 12 }}>
+          <TextField
+            label="Issue / Service Summary"
+            placeholder="Battery replacement"
+            value={issueSummary}
+            onChangeText={setIssueSummary}
+          />
+          <TextField
+            label="Service Provider"
+            placeholder="Authorized Service Center"
+            value={providerName}
+            onChangeText={setProviderName}
+          />
+          <TextField
+            label="Repair Date (YYYY-MM-DD)"
+            value={repairDate}
+            onChangeText={setRepairDate}
+          />
+          <TextField
+            label="Cost (INR, optional)"
+            keyboardType="numeric"
+            value={repairCost}
+            onChangeText={setRepairCost}
+          />
+          <Button
+            label="Save Repair"
+            variant="filled"
+            shape="pill"
+            fullWidth
+            leftIcon={<Plus size={16} color={theme.colors.m3.onPrimary} />}
+            loading={addRepairMutation.isPending}
+            onPress={() => {
+              if (issueSummary.trim()) addRepairMutation.mutate();
+            }}
+          />
+        </View>
+      </ExpressiveSheetModal>
 
-      {/* Link Vault Document Modal */}
-      <Modal
-        visible={linkModalOpen}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setLinkModalOpen(false)}
-      >
-        <Pressable style={styles.backdrop} onPress={() => setLinkModalOpen(false)}>
-          <Pressable
-            style={[
-              styles.sheet,
-              {
-                backgroundColor: theme.colors.m3.surfaceContainerLowest,
-                borderTopLeftRadius: theme.shapes.extraLarge,
-                borderTopRightRadius: theme.shapes.extraLarge,
-                padding: theme.spacing.xl,
-              },
-            ]}
-          >
-            <View style={styles.rowGap}>
-              <Link2 size={18} color={theme.colors.m3.primary} />
-              <EditorialText variant="headlineMedium" tone="primary">
-                Link Vault Document
-              </EditorialText>
+      <ExpressiveSheetModal visible={linkModalOpen} onClose={() => setLinkModalOpen(false)}>
+        <View style={styles.rowGap}>
+          <Link2 size={18} color={theme.colors.m3.primary} />
+          <EditorialText variant="headlineMedium" tone="primary">
+            Link Vault Document
+          </EditorialText>
+        </View>
+        <View style={{ marginTop: 14, gap: 8 }}>
+          {(docsQuery.data?.documents ?? []).length === 0 ? (
+            <EditorialText variant="bodySmall" tone="muted">
+              Upload an invoice to your Vault first.
+            </EditorialText>
+          ) : (
+            <View style={styles.chipsWrap}>
+              {(docsQuery.data?.documents ?? []).map((doc) => (
+                <FilterChip
+                  key={doc.id}
+                  label={doc.title}
+                  accent="teal"
+                  selected={false}
+                  showCheck={false}
+                  onPress={() => linkDocMutation.mutate(doc.id)}
+                />
+              ))}
             </View>
-            <View style={{ marginTop: 14, gap: 8 }}>
-              {(docsQuery.data?.documents ?? []).length === 0 ? (
-                <EditorialText variant="bodySmall" tone="muted">
-                  Upload an invoice to your Vault first.
-                </EditorialText>
-              ) : (
-                <View style={styles.chipsWrap}>
-                  {(docsQuery.data?.documents ?? []).map((doc) => (
-                    <FilterChip
-                      key={doc.id}
-                      label={doc.title}
-                      selected={false}
-                      showCheck={false}
-                      onPress={() => linkDocMutation.mutate(doc.id)}
-                    />
-                  ))}
-                </View>
-              )}
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
+          )}
+        </View>
+      </ExpressiveSheetModal>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  backRow: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start' },
   badgeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  flexText: { flex: 1, minWidth: 0 },
   rowGap: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   metaLine: {
     flexDirection: 'row',
@@ -343,7 +307,5 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   repairItem: { gap: 4 },
-  backdrop: { flex: 1, backgroundColor: 'rgba(19, 26, 23, 0.38)', justifyContent: 'flex-end' },
-  sheet: { width: '100%' },
   chipsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
 });

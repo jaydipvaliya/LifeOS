@@ -45,6 +45,7 @@ export interface M3TabBarProps {
 }
 
 interface NavTabItemProps {
+  routeName: string;
   label: string;
   focused: boolean;
   icon: (color: string, focused: boolean) => React.ReactNode;
@@ -52,7 +53,7 @@ interface NavTabItemProps {
   onLongPress: () => void;
 }
 
-function NavTabItem({ label, focused, icon, onPress, onLongPress }: NavTabItemProps) {
+function NavTabItem({ routeName, label, focused, icon, onPress, onLongPress }: NavTabItemProps) {
   const { theme } = useTheme();
   const pillProgress = useSharedValue(focused ? 1 : 0);
 
@@ -65,7 +66,23 @@ function NavTabItem({ label, focused, icon, onPress, onLongPress }: NavTabItemPr
     transform: [{ scaleX: 0.72 + pillProgress.value * 0.28 }],
   }));
 
-  const activeIconColor = theme.colors.m3.onSecondaryContainer;
+  const accent = (() => {
+    switch (routeName) {
+      case 'vault':
+        return theme.colors.expressive.teal;
+      case 'calendar':
+        return theme.colors.expressive.coral;
+      case 'assets':
+        return theme.colors.expressive.cobalt;
+      case 'profile':
+        return theme.colors.expressive.berry;
+      case 'index':
+      default:
+        return theme.colors.expressive.violet;
+    }
+  })();
+
+  const activeIconColor = accent.onContainer;
   const inactiveIconColor = theme.colors.m3.onSurfaceVariant;
 
   return (
@@ -82,7 +99,7 @@ function NavTabItem({ label, focused, icon, onPress, onLongPress }: NavTabItemPr
           style={[
             styles.activePill,
             {
-              backgroundColor: theme.colors.m3.secondaryContainer,
+              backgroundColor: accent.container,
               borderRadius: theme.shapes.full,
             },
             pillAnimatedStyle,
@@ -94,11 +111,12 @@ function NavTabItem({ label, focused, icon, onPress, onLongPress }: NavTabItemPr
       </View>
       <EditorialText
         variant="caption"
-        tone={focused ? 'forest' : 'muted'}
         style={{
+          color: focused ? accent.base : theme.colors.m3.onSurfaceVariant,
           fontFamily: focused ? theme.fonts.bodySemiBold : theme.fonts.bodyMedium,
           marginTop: 4,
         }}
+        numberOfLines={1}
       >
         {label}
       </EditorialText>
@@ -121,7 +139,7 @@ export function M3NavigationBar({
       style={[
         styles.bar,
         {
-          backgroundColor: theme.colors.m3.surfaceContainer,
+          backgroundColor: theme.colors.m3.surfaceContainerLow,
           borderTopColor: theme.colors.m3.outlineVariant,
           borderTopWidth: theme.borderWidths.hairline,
           paddingBottom: Math.max(insets.bottom, 10),
@@ -168,6 +186,7 @@ export function M3NavigationBar({
         return (
           <NavTabItem
             key={route.key}
+            routeName={route.name}
             label={label}
             focused={focused}
             onPress={onPress}
@@ -196,7 +215,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   pillWrapper: {
-    width: 64,
+    width: 58,
     height: 32,
     alignItems: 'center',
     justifyContent: 'center',

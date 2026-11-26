@@ -8,27 +8,53 @@ import {
   FolderPlus,
   Image as ImageIcon,
   Plus,
-  Search,
+  RotateCcw,
+  SlidersHorizontal,
   Upload,
 } from 'lucide-react-native';
-import React, { useState } from 'react';
-import { Modal, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import {
   Badge,
   Button,
+  Divider,
   EditorialCard,
   EditorialText,
   EmptyState,
   ErrorState,
   ExpressiveFAB,
+  ExpressiveSheetModal,
   FilterChip,
   LoadingState,
   Screen,
+  SearchBar,
+  SegmentedControl,
   TextField,
 } from '../../../src/components/ui';
 import { extractApiErrorMessage } from '../../../src/services/api-client';
 import { vaultApi } from '../../../src/services/vault-api';
 import { useTheme } from '../../../src/theme';
+
+const CATEGORY_ACCENTS = ['teal', 'violet', 'cobalt', 'coral', 'amber', 'berry'] as const;
+type VaultScope = 'active' | 'expiring' | 'archived';
+
+function formatVaultStatus(status: string, isArchived: boolean): string {
+  if (isArchived) return 'Archived';
+  switch (status) {
+    case 'completed':
+      return 'Indexed';
+    case 'uploaded':
+      return 'Saved';
+    case 'pending_extraction':
+      return 'Queued';
+    case 'processing':
+      return 'Analyzing';
+    case 'failed':
+      return 'Failed';
+    default:
+      return status.replace(/_/g, ' ');
+  }
+}
 
 export default function DocumentVaultScreen() {
   const { theme } = useTheme();
@@ -37,8 +63,9 @@ export default function DocumentVaultScreen() {
 
   const [searchText, setSearchText] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>(undefined);
-  const [showArchived, setShowArchived] = useState(false);
+  const [scope, setScope] = useState<VaultScope>('active');
 
+  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const [uploadSheetOpen, setUploadSheetOpen] = useState(false);
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -50,13 +77,17 @@ export default function DocumentVaultScreen() {
     queryFn: () => vaultApi.listCategories(),
   });
 
+  const showArchived = scope === 'archived';
+  const expiringWithinDays = scope === 'expiring' ? 30 : undefined;
+
   const documentsQuery = useQuery({
-    queryKey: ['documents', { searchText, selectedCategoryId, showArchived }],
+    queryKey: ['documents', { searchText, selectedCategoryId, scope }],
     queryFn: () =>
       vaultApi.listDocuments({
         search: searchText.trim() || undefined,
         categoryId: selectedCategoryId,
         archived: showArchived,
+        expiringWithinDays,
         limit: 50,
       }),
   });
@@ -71,10 +102,33 @@ export default function DocumentVaultScreen() {
     },
   });
 
+  const categories = categoriesQuery.data ?? [];
+
+  // Put selected and populated categories first so users immediately see relevant chips
+  const sortedCategories = useMemo(() => {
+    return [...categories].sort((a, b) => {
+      if (a.id === selectedCategoryId) return -1;
+      if (b.id === selectedCategoryId) return 1;
+      const countA = a.documentCount ?? 0;
+      const countB = b.documentCount ?? 0;
+      if (countA > 0 && countB === 0) return -1;
+      if (countB > 0 && countA === 0) return 1;
+      return countB - countA;
+    });
+  }, [categories, selectedCategoryId]);
+
+  const selectedCategory = categories.find((c) => c.id === selectedCategoryId);
+  const hasActiveFilters = Boolean(selectedCategoryId || scope !== 'active' || searchText.trim());
+  const filterBadgeCount = (selectedCategoryId ? 1 : 0) + (scope !== 'active' ? 1 : 0);
+
+  const clearAllFilters = () => {
+    setSearchText('');
+    setSelectedCategoryId(undefined);
+    setScope('active');
+  };
+
   const defaultCategoryId =
-    selectedCategoryId ??
-    categoriesQuery.data?.find((c) => c.slug === 'other')?.id ??
-    categoriesQuery.data?.[0]?.id;
+    selectedCategoryId ?? categories.find((c) => c.slug === 'other')?.id ?? categories[0]?.id;
 
   const uploadPickedAsset = async (asset: {
     uri: string;
@@ -149,104 +203,237 @@ export default function DocumentVaultScreen() {
     });
   };
 
-  const categories = categoriesQuery.data ?? [];
   const documents = documentsQuery.data?.documents ?? [];
 
   return (
     <View style={styles.root}>
-      <Screen scroll={false}>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={documentsQuery.isRefetching}
-              onRefresh={() => void documentsQuery.refetch()}
-              tintColor={theme.colors.m3.primary}
-            />
-          }
-        >
-          <View style={styles.headerRow}>
-            <View style={{ flex: 1 }}>
-              <EditorialText variant="editorialEyebrow" tone="secondaryForest" uppercase>
-                Private Storage
-              </EditorialText>
-              <EditorialText variant="pageHeadingEditorial" tone="primary" style={{ marginTop: 4 }}>
-                Document Vault
-              </EditorialText>
-            </View>
-            <Button
-              label={showArchived ? 'Archived' : 'Active'}
-              variant={showArchived ? 'tonal' : 'outlined'}
-              size="sm"
-              shape="pill"
-              onPress={() => setShowArchived((prev) => !prev)}
-            />
+      <Screen
+        includeBottomInset={false}
+        bottomSpacing={104}
+        refreshControl={
+          <RefreshControl
+            refreshing={documentsQuery.isRefetching}
+            onRefresh={() => void documentsQuery.refetch()}
+            tintColor={theme.colors.m3.secondary}
+          />
+        }
+      >
+        <View style={styles.headerRow}>
+          <View style={styles.flexText}>
+            <EditorialText variant="editorialEyebrow" tone="tealVibrant" uppercase>
+              Private Storage
+            </EditorialText>
+            <EditorialText variant="pageHeadingEditorial" tone="primary" style={{ marginTop: 4 }}>
+              Document Vault
+            </EditorialText>
           </View>
-
-          <View style={{ marginTop: theme.spacing.md }}>
-            <TextField
-              label="Search Vault"
-              placeholder="Search titles, filenames, or tags..."
-              value={searchText}
-              onChangeText={setSearchText}
-              leftAdornment={<Search size={18} color={theme.colors.text.muted} />}
-            />
-          </View>
-
-          {/* M3 Expressive Filter Chips */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={[styles.chipsRow, { marginTop: theme.spacing.md }]}
+          <Pressable
+            onPress={() => setCategoryModalOpen(true)}
+            accessibilityRole="button"
+            accessibilityLabel="Create custom category"
+            style={[
+              styles.newCatPill,
+              {
+                backgroundColor: theme.colors.expressive.teal.container,
+                borderRadius: theme.shapes.full,
+              },
+            ]}
           >
-            <FilterChip
-              label="All"
-              selected={!selectedCategoryId}
-              onPress={() => setSelectedCategoryId(undefined)}
+            <FolderPlus
+              size={15}
+              strokeWidth={2.1}
+              color={theme.colors.expressive.teal.onContainer}
             />
-            {categories.map((cat) => (
+            <EditorialText
+              variant="caption"
+              tone="teal"
+              style={{ fontFamily: theme.fonts.bodySemiBold }}
+            >
+              Category
+            </EditorialText>
+          </Pressable>
+        </View>
+
+        {/* M3 Search + Filter Bar */}
+        <View style={[styles.searchFilterRow, { marginTop: theme.spacing.md }]}>
+          <SearchBar
+            value={searchText}
+            onChangeText={setSearchText}
+            placeholder="Search titles, filenames, tags..."
+            accentColor={theme.colors.expressive.teal.base}
+            accessibilityLabel="Search Vault"
+            style={styles.searchBarFlex}
+          />
+          <Pressable
+            onPress={() => setFilterSheetOpen(true)}
+            accessibilityRole="button"
+            accessibilityLabel="Open vault filters"
+            style={[
+              styles.filterBtn,
+              {
+                backgroundColor:
+                  filterBadgeCount > 0
+                    ? theme.colors.expressive.teal.container
+                    : theme.colors.m3.surfaceContainerHigh,
+                borderRadius: theme.shapes.full,
+              },
+            ]}
+          >
+            <SlidersHorizontal
+              size={19}
+              strokeWidth={2}
+              color={
+                filterBadgeCount > 0
+                  ? theme.colors.expressive.teal.onContainer
+                  : theme.colors.m3.onSurfaceVariant
+              }
+            />
+            {filterBadgeCount > 0 ? (
+              <View
+                style={[
+                  styles.filterCountDot,
+                  {
+                    backgroundColor: theme.colors.expressive.teal.base,
+                    borderRadius: theme.shapes.full,
+                  },
+                ]}
+              >
+                <EditorialText
+                  variant="caption"
+                  tone="onSecondary"
+                  style={{ fontSize: 10, lineHeight: 12, fontFamily: theme.fonts.bodySemiBold }}
+                >
+                  {filterBadgeCount}
+                </EditorialText>
+              </View>
+            ) : null}
+          </Pressable>
+        </View>
+
+        {/* Connected M3 Segmented View Scope */}
+        <View style={{ marginTop: theme.spacing.sm }}>
+          <SegmentedControl
+            value={scope}
+            onChange={setScope}
+            options={[
+              { value: 'active', label: 'Active', accent: 'teal' },
+              { value: 'expiring', label: 'Expiring 30d', accent: 'amber' },
+              { value: 'archived', label: 'Archived', accent: 'violet' },
+            ]}
+          />
+        </View>
+
+        {/* Full-bleed Edge-to-Edge Category Chip Strip */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={[
+            styles.horizontalStrip,
+            { marginHorizontal: -theme.spacing.lg, marginTop: theme.spacing.sm },
+          ]}
+          contentContainerStyle={[styles.chipsRow, { paddingHorizontal: theme.spacing.lg }]}
+        >
+          <FilterChip
+            label="All"
+            accent="teal"
+            selected={!selectedCategoryId}
+            onPress={() => setSelectedCategoryId(undefined)}
+          />
+          {sortedCategories.map((cat, idx) => {
+            const countLabel =
+              cat.documentCount && cat.documentCount > 0
+                ? `${cat.name} (${cat.documentCount})`
+                : cat.name;
+            return (
               <FilterChip
                 key={cat.id}
-                label={cat.documentCount ? `${cat.name} (${cat.documentCount})` : cat.name}
+                label={countLabel}
+                accent={CATEGORY_ACCENTS[idx % CATEGORY_ACCENTS.length]}
                 selected={selectedCategoryId === cat.id}
                 onPress={() =>
                   setSelectedCategoryId((prev) => (prev === cat.id ? undefined : cat.id))
                 }
               />
-            ))}
-            <FilterChip
-              label="+ Category"
-              selected={false}
-              showCheck={false}
-              onPress={() => setCategoryModalOpen(true)}
-            />
-          </ScrollView>
+            );
+          })}
+        </ScrollView>
 
-          <View style={{ marginTop: theme.spacing.lg, gap: theme.spacing.sm }}>
-            {documentsQuery.isLoading ? (
-              <LoadingState message="Opening your encrypted vault..." />
-            ) : documentsQuery.isError ? (
-              <ErrorState
-                message={extractApiErrorMessage(documentsQuery.error)}
-                onRetry={() => void documentsQuery.refetch()}
-              />
-            ) : documents.length === 0 ? (
-              <EmptyState
-                icon={<FileText size={28} strokeWidth={1.6} color={theme.colors.m3.primary} />}
-                title={showArchived ? 'No archived documents' : 'No documents found'}
-                description={
-                  searchText
-                    ? 'Try clearing your search or switching categories.'
-                    : 'Scan with your camera or upload a PDF or image to file it safely.'
-                }
-                actionLabel="Scan or Upload"
-                onAction={() => setUploadSheetOpen(true)}
-              />
-            ) : (
-              documents.map((doc) => (
+        {/* Active Filter Context Bar */}
+        {hasActiveFilters ? (
+          <View
+            style={[
+              styles.activeFilterBar,
+              {
+                backgroundColor: theme.colors.m3.surfaceContainerLow,
+                borderRadius: theme.shapes.medium,
+                marginTop: theme.spacing.sm,
+              },
+            ]}
+          >
+            <EditorialText
+              variant="caption"
+              tone="secondary"
+              numberOfLines={1}
+              style={styles.flexText}
+            >
+              {documents.length} result{documents.length === 1 ? '' : 's'}
+              {selectedCategory ? ` · ${selectedCategory.name}` : ''}
+              {scope === 'expiring' ? ' · Expiring within 30d' : ''}
+              {scope === 'archived' ? ' · Archived' : ''}
+            </EditorialText>
+            <Pressable
+              onPress={clearAllFilters}
+              accessibilityRole="button"
+              hitSlop={8}
+              style={styles.resetPill}
+            >
+              <RotateCcw size={12} color={theme.colors.expressive.teal.base} />
+              <EditorialText
+                variant="caption"
+                tone="tealVibrant"
+                style={{ fontFamily: theme.fonts.bodySemiBold }}
+              >
+                Reset
+              </EditorialText>
+            </Pressable>
+          </View>
+        ) : null}
+
+        <View style={{ marginTop: theme.spacing.md, gap: theme.spacing.xs }}>
+          {documentsQuery.isLoading ? (
+            <LoadingState message="Opening your encrypted vault..." />
+          ) : documentsQuery.isError ? (
+            <ErrorState
+              message={extractApiErrorMessage(documentsQuery.error)}
+              onRetry={() => void documentsQuery.refetch()}
+            />
+          ) : documents.length === 0 ? (
+            <EmptyState
+              icon={<FileText size={28} strokeWidth={1.7} color={theme.colors.m3.secondary} />}
+              title={
+                hasActiveFilters
+                  ? 'No matching documents'
+                  : scope === 'archived'
+                    ? 'No archived documents'
+                    : 'Your Vault is empty'
+              }
+              description={
+                hasActiveFilters
+                  ? 'No files match the active search or category filter.'
+                  : 'Scan with your camera or upload a PDF or image to file it safely.'
+              }
+              actionLabel={hasActiveFilters ? 'Reset Filters' : 'Scan or Upload'}
+              onAction={hasActiveFilters ? clearAllFilters : () => setUploadSheetOpen(true)}
+            />
+          ) : (
+            documents.map((doc, idx) => {
+              const accentKey = CATEGORY_ACCENTS[idx % CATEGORY_ACCENTS.length]!;
+              const accent = theme.colors.expressive[accentKey];
+              return (
                 <EditorialCard
                   key={doc.id}
-                  variant="outlined"
+                  variant="surface"
+                  padding="sm"
                   onPress={() => router.push(`/(app)/documents/${doc.id}`)}
                 >
                   <View style={styles.docCardRow}>
@@ -254,14 +441,14 @@ export default function DocumentVaultScreen() {
                       style={[
                         styles.docIcon,
                         {
-                          backgroundColor: theme.colors.m3.primaryContainer,
+                          backgroundColor: accent.container,
                           borderRadius: theme.shapes.medium,
                         },
                       ]}
                     >
-                      <FileText size={20} strokeWidth={1.75} color={theme.colors.m3.primary} />
+                      <FileText size={20} strokeWidth={1.9} color={accent.base} />
                     </View>
-                    <View style={{ flex: 1 }}>
+                    <View style={styles.flexText}>
                       <EditorialText variant="cardHeading" tone="primary" numberOfLines={1}>
                         {doc.title}
                       </EditorialText>
@@ -270,169 +457,232 @@ export default function DocumentVaultScreen() {
                         {Math.max(1, Math.round(doc.fileSizeBytes / 1024))} KB
                       </EditorialText>
                       {doc.expiryDate ? (
-                        <EditorialText variant="caption" tone="warning" style={{ marginTop: 2 }}>
+                        <EditorialText
+                          variant="caption"
+                          tone="amberVibrant"
+                          style={{ marginTop: 2 }}
+                        >
                           Expires {doc.expiryDate}
                         </EditorialText>
                       ) : null}
                     </View>
                     <Badge
-                      label={doc.isArchived ? 'Archived' : doc.processingStatus.replace('_', ' ')}
-                      tone={doc.isArchived ? 'neutral' : 'sage'}
+                      label={formatVaultStatus(doc.processingStatus, doc.isArchived)}
+                      tone={doc.isArchived ? 'neutral' : accentKey}
                     />
                   </View>
                 </EditorialCard>
-              ))
-            )}
-          </View>
-
-          <View style={{ height: 96 }} />
-        </ScrollView>
+              );
+            })
+          )}
+        </View>
       </Screen>
 
       <ExpressiveFAB
-        icon={<Plus size={24} strokeWidth={2.2} color={theme.colors.m3.onPrimary} />}
+        icon={(color) => <Plus size={24} strokeWidth={2.2} color={color} />}
         label="Add"
+        tone="secondary"
         accessibilityLabel="Add document to vault"
         onPress={() => setUploadSheetOpen(true)}
         style={styles.fabPosition}
       />
 
-      {/* Upload / Scan Action Sheet */}
-      <Modal
-        visible={uploadSheetOpen}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setUploadSheetOpen(false)}
-      >
-        <Pressable style={styles.backdrop} onPress={() => setUploadSheetOpen(false)}>
-          <Pressable
-            style={[
-              styles.sheet,
-              {
-                backgroundColor: theme.colors.m3.surfaceContainerLowest,
-                borderTopLeftRadius: theme.shapes.extraLarge,
-                borderTopRightRadius: theme.shapes.extraLarge,
-                padding: theme.spacing.xl,
-              },
-            ]}
-          >
-            <EditorialText variant="editorialEyebrow" tone="secondaryForest" uppercase>
-              Add to Vault
+      {/* Full M3 Filter & Categories Sheet */}
+      <ExpressiveSheetModal visible={filterSheetOpen} onClose={() => setFilterSheetOpen(false)}>
+        <View style={styles.sheetHeaderRow}>
+          <View>
+            <EditorialText variant="editorialEyebrow" tone="tealVibrant" uppercase>
+              Vault Filters
             </EditorialText>
-            <EditorialText
-              variant="headlineMedium"
-              tone="primary"
-              style={{ marginTop: 4, marginBottom: theme.spacing.md }}
-            >
-              Capture or Upload
+            <EditorialText variant="headlineMedium" tone="primary" style={{ marginTop: 2 }}>
+              Filter & Categories
             </EditorialText>
+          </View>
+          {hasActiveFilters ? (
+            <Button
+              label="Reset"
+              variant="tonal"
+              accent="coral"
+              size="sm"
+              shape="pill"
+              onPress={clearAllFilters}
+            />
+          ) : null}
+        </View>
 
-            {uploadError ? (
-              <EditorialCard
-                style={{
-                  marginBottom: theme.spacing.md,
-                  backgroundColor: theme.colors.m3.errorContainer,
-                }}
-              >
-                <EditorialText variant="bodySmall" tone="danger">
-                  {uploadError}
-                </EditorialText>
-              </EditorialCard>
-            ) : null}
+        <View style={{ marginTop: theme.spacing.md, gap: theme.spacing.md }}>
+          <View>
+            <EditorialText variant="label" tone="primary" style={{ marginBottom: 8 }}>
+              Document Status
+            </EditorialText>
+            <SegmentedControl
+              value={scope}
+              onChange={setScope}
+              options={[
+                { value: 'active', label: 'Active', accent: 'teal' },
+                { value: 'expiring', label: 'Expiring 30d', accent: 'amber' },
+                { value: 'archived', label: 'Archived', accent: 'violet' },
+              ]}
+            />
+          </View>
 
-            {uploadProgress !== null ? (
-              <EditorialCard variant="tonal" style={{ marginBottom: theme.spacing.md }}>
-                <EditorialText variant="label" tone="forest">
-                  Uploading securely... {Math.round(uploadProgress * 100)}%
-                </EditorialText>
-              </EditorialCard>
-            ) : null}
+          <Divider />
 
-            <View style={{ gap: theme.spacing.sm }}>
-              <Button
-                label="Scan Multi-Page Document (Camera)"
-                variant="filled"
-                shape="pill"
-                fullWidth
-                leftIcon={<Camera size={18} color={theme.colors.m3.onPrimary} />}
-                onPress={() => {
-                  setUploadSheetOpen(false);
-                  router.push('/(app)/scanner');
-                }}
-              />
-              <Button
-                label="Upload PDF or File"
-                variant="tonal"
-                shape="pill"
-                fullWidth
-                leftIcon={<Upload size={18} color={theme.colors.m3.onSecondaryContainer} />}
-                onPress={() => void handlePickPdf()}
-              />
-              <Button
-                label="Choose Image from Gallery"
-                variant="outlined"
-                shape="pill"
-                fullWidth
-                leftIcon={<ImageIcon size={18} color={theme.colors.m3.primary} />}
-                onPress={() => void handlePickImage()}
-              />
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
-
-      {/* Custom Category Modal */}
-      <Modal
-        visible={categoryModalOpen}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setCategoryModalOpen(false)}
-      >
-        <Pressable style={styles.backdrop} onPress={() => setCategoryModalOpen(false)}>
-          <Pressable
-            style={[
-              styles.sheet,
-              {
-                backgroundColor: theme.colors.m3.surfaceContainerLowest,
-                borderTopLeftRadius: theme.shapes.extraLarge,
-                borderTopRightRadius: theme.shapes.extraLarge,
-                padding: theme.spacing.xl,
-              },
-            ]}
-          >
-            <View style={styles.catModalTitle}>
-              <FolderPlus size={20} color={theme.colors.m3.primary} />
-              <EditorialText variant="headlineMedium" tone="primary">
-                New Category
+          <View>
+            <View style={styles.catHeaderRow}>
+              <EditorialText variant="label" tone="primary">
+                Categories ({categories.length})
               </EditorialText>
-            </View>
-
-            <View style={{ marginTop: theme.spacing.md }}>
-              <TextField
-                label="Category Name"
-                placeholder="e.g. University Housing"
-                value={newCategoryName}
-                onChangeText={setNewCategoryName}
-              />
-            </View>
-
-            <View style={{ marginTop: theme.spacing.lg, gap: theme.spacing.sm }}>
-              <Button
-                label="Create Category"
-                variant="filled"
-                shape="pill"
-                fullWidth
-                loading={createCategoryMutation.isPending}
+              <Pressable
                 onPress={() => {
-                  if (newCategoryName.trim().length >= 2) {
-                    createCategoryMutation.mutate(newCategoryName.trim());
-                  }
+                  setFilterSheetOpen(false);
+                  setCategoryModalOpen(true);
                 }}
-              />
+                hitSlop={8}
+              >
+                <EditorialText
+                  variant="caption"
+                  tone="tealVibrant"
+                  style={{ fontFamily: theme.fonts.bodySemiBold }}
+                >
+                  + New Category
+                </EditorialText>
+              </Pressable>
             </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
+            <View style={styles.sheetChipsWrap}>
+              <FilterChip
+                label="All Categories"
+                accent="teal"
+                selected={!selectedCategoryId}
+                onPress={() => setSelectedCategoryId(undefined)}
+              />
+              {categories.map((cat, idx) => (
+                <FilterChip
+                  key={cat.id}
+                  label={
+                    cat.documentCount && cat.documentCount > 0
+                      ? `${cat.name} (${cat.documentCount})`
+                      : cat.name
+                  }
+                  accent={CATEGORY_ACCENTS[idx % CATEGORY_ACCENTS.length]}
+                  selected={selectedCategoryId === cat.id}
+                  onPress={() =>
+                    setSelectedCategoryId((prev) => (prev === cat.id ? undefined : cat.id))
+                  }
+                />
+              ))}
+            </View>
+          </View>
+
+          <Button
+            label={`Show ${documents.length} Document${documents.length === 1 ? '' : 's'}`}
+            variant="filled"
+            accent="teal"
+            shape="pill"
+            fullWidth
+            onPress={() => setFilterSheetOpen(false)}
+          />
+        </View>
+      </ExpressiveSheetModal>
+
+      <ExpressiveSheetModal visible={uploadSheetOpen} onClose={() => setUploadSheetOpen(false)}>
+        <EditorialText variant="editorialEyebrow" tone="tealVibrant" uppercase>
+          Add to Vault
+        </EditorialText>
+        <EditorialText
+          variant="headlineMedium"
+          tone="primary"
+          style={{ marginTop: 4, marginBottom: theme.spacing.md }}
+        >
+          Capture or Upload
+        </EditorialText>
+
+        {uploadError ? (
+          <EditorialCard
+            shape="medium"
+            padding="sm"
+            style={{
+              marginBottom: theme.spacing.md,
+              backgroundColor: theme.colors.m3.errorContainer,
+            }}
+          >
+            <EditorialText variant="bodySmall" tone="danger">
+              {uploadError}
+            </EditorialText>
+          </EditorialCard>
+        ) : null}
+
+        {uploadProgress !== null ? (
+          <EditorialCard variant="teal" padding="sm" style={{ marginBottom: theme.spacing.md }}>
+            <EditorialText variant="label" tone="teal">
+              Uploading securely... {Math.round(uploadProgress * 100)}%
+            </EditorialText>
+          </EditorialCard>
+        ) : null}
+
+        <View style={{ gap: theme.spacing.sm }}>
+          <Button
+            label="Scan Multi-Page Document (Camera)"
+            variant="filled"
+            shape="pill"
+            fullWidth
+            leftIcon={<Camera size={18} color={theme.colors.m3.onPrimary} />}
+            onPress={() => {
+              setUploadSheetOpen(false);
+              router.push('/(app)/scanner');
+            }}
+          />
+          <Button
+            label="Upload PDF or File"
+            variant="tonal"
+            shape="pill"
+            fullWidth
+            leftIcon={<Upload size={18} color={theme.colors.m3.onSecondaryContainer} />}
+            onPress={() => void handlePickPdf()}
+          />
+          <Button
+            label="Choose Image from Gallery"
+            variant="tertiary"
+            shape="pill"
+            fullWidth
+            leftIcon={<ImageIcon size={18} color={theme.colors.m3.onTertiaryContainer} />}
+            onPress={() => void handlePickImage()}
+          />
+        </View>
+      </ExpressiveSheetModal>
+
+      <ExpressiveSheetModal visible={categoryModalOpen} onClose={() => setCategoryModalOpen(false)}>
+        <View style={styles.catModalTitle}>
+          <FolderPlus size={20} color={theme.colors.m3.primary} />
+          <EditorialText variant="headlineMedium" tone="primary">
+            New Category
+          </EditorialText>
+        </View>
+
+        <View style={{ marginTop: theme.spacing.md }}>
+          <TextField
+            label="Category Name"
+            placeholder="e.g. University Housing"
+            value={newCategoryName}
+            onChangeText={setNewCategoryName}
+          />
+        </View>
+
+        <View style={{ marginTop: theme.spacing.lg, gap: theme.spacing.sm }}>
+          <Button
+            label="Create Category"
+            variant="filled"
+            shape="pill"
+            fullWidth
+            loading={createCategoryMutation.isPending}
+            onPress={() => {
+              if (newCategoryName.trim().length >= 2) {
+                createCategoryMutation.mutate(newCategoryName.trim());
+              }
+            }}
+          />
+        </View>
+      </ExpressiveSheetModal>
     </View>
   );
 }
@@ -443,13 +693,69 @@ const styles = StyleSheet.create({
   },
   headerRow: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
+    alignItems: 'center',
     justifyContent: 'space-between',
     gap: 12,
   },
-  chipsRow: {
+  flexText: {
+    flex: 1,
+    minWidth: 0,
+  },
+  newCatPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    flexShrink: 0,
+  },
+  searchFilterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
-    paddingVertical: 2,
+  },
+  searchBarFlex: {
+    flex: 1,
+    minWidth: 0,
+  },
+  filterBtn: {
+    width: 52,
+    height: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  filterCountDot: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    minWidth: 16,
+    height: 16,
+    paddingHorizontal: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  horizontalStrip: {
+    flexGrow: 0,
+    flexShrink: 0,
+  },
+  chipsRow: {
+    alignItems: 'center',
+    gap: 8,
+  },
+  activeFilterBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    gap: 10,
+  },
+  resetPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    flexShrink: 0,
   },
   docCardRow: {
     flexDirection: 'row',
@@ -461,23 +767,33 @@ const styles = StyleSheet.create({
     height: 44,
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
   },
   fabPosition: {
     position: 'absolute',
     right: 20,
-    bottom: 20,
+    bottom: 16,
   },
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(19, 26, 23, 0.38)',
-    justifyContent: 'flex-end',
+  sheetHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
   },
-  sheet: {
-    width: '100%',
+  catHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  sheetChipsWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
   },
   catModalTitle: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
   },
 });

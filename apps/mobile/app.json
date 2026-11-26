@@ -7,9 +7,9 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
-    "backgroundColor": "#F7F8F5",
+    "backgroundColor": "#FAF8FF",
     "splash": {
-      "backgroundColor": "#F7F8F5",
+      "backgroundColor": "#FAF8FF",
       "resizeMode": "contain"
     },
     "ios": {
@@ -19,7 +19,7 @@
     "android": {
       "package": "com.lifeos.app",
       "adaptiveIcon": {
-        "backgroundColor": "#F7F8F5",
+        "backgroundColor": "#FAF8FF",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -53,7 +53,8 @@
         {
           "photosPermission": "LifeOS accesses your selected photos to upload documents to your private Vault."
         }
-      ]
+      ],
+      "expo-sqlite"
     ]
   }
 }

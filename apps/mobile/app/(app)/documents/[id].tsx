@@ -5,17 +5,17 @@ import * as Sharing from 'expo-sharing';
 import {
   Archive,
   ArchiveRestore,
-  ArrowLeft,
   Clock,
   Edit3,
   ExternalLink,
   FileText,
   History,
   Share2,
+  Sparkles,
   Trash2,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Alert, Linking, Modal, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Linking, Platform, StyleSheet, View } from 'react-native';
 import {
   Badge,
   Button,
@@ -23,9 +23,11 @@ import {
   EditorialCard,
   EditorialText,
   ErrorState,
+  ExpressiveSheetModal,
   FilterChip,
   LoadingState,
   Screen,
+  ScreenTopBar,
   SectionHeader,
   TextField,
 } from '../../../src/components/ui';
@@ -171,38 +173,31 @@ export default function DocumentDetailScreen() {
 
   return (
     <Screen>
-      <Pressable
-        onPress={() => router.back()}
-        accessibilityRole="button"
-        accessibilityLabel="Back to vault"
-        hitSlop={10}
-        style={styles.backRow}
-      >
-        <ArrowLeft size={18} strokeWidth={1.75} color={theme.colors.m3.primary} />
-        <EditorialText variant="label" tone="forest">
-          Back
-        </EditorialText>
-      </Pressable>
+      <ScreenTopBar
+        onBack={() => router.back()}
+        badgeLabel={doc ? `v${doc.version}` : undefined}
+        badgeTone="teal"
+      />
 
       {detailQuery.isLoading ? (
-        <View style={{ marginTop: theme.spacing.lg }}>
+        <View style={{ marginTop: theme.spacing.md }}>
           <LoadingState message="Loading document record..." />
         </View>
       ) : detailQuery.isError ? (
-        <View style={{ marginTop: theme.spacing.lg }}>
+        <View style={{ marginTop: theme.spacing.md }}>
           <ErrorState
             message={extractApiErrorMessage(detailQuery.error)}
             onRetry={() => void detailQuery.refetch()}
           />
         </View>
       ) : doc ? (
-        <View style={{ marginTop: theme.spacing.lg, gap: theme.spacing.lg }}>
+        <View style={{ gap: theme.spacing.lg }}>
           {/* Title & Category Header */}
           <View>
             <View style={styles.badgeRow}>
-              <Badge label={doc.category.name} tone="sage" />
+              <Badge label={doc.category.name} tone="teal" />
               {doc.isArchived ? <Badge label="Archived" tone="neutral" /> : null}
-              {doc.expiryDate ? <Badge label={`Expires ${doc.expiryDate}`} tone="warning" /> : null}
+              {doc.expiryDate ? <Badge label={`Expires ${doc.expiryDate}`} tone="amber" /> : null}
             </View>
             <EditorialText
               variant="pageHeadingEditorial"
@@ -227,7 +222,7 @@ export default function DocumentDetailScreen() {
               loading={downloading}
               leftIcon={<ExternalLink size={16} color={theme.colors.m3.onPrimary} />}
               onPress={() => void handleOpenOrShare('preview')}
-              style={{ flex: 1 }}
+              style={styles.previewActionBtn}
             />
             <Button
               label="Share"
@@ -239,73 +234,115 @@ export default function DocumentDetailScreen() {
             />
             <Button
               label="Edit"
-              variant="outlined"
+              variant="tertiary"
               shape="pill"
-              leftIcon={<Edit3 size={16} color={theme.colors.m3.primary} />}
+              leftIcon={<Edit3 size={16} color={theme.colors.m3.onTertiaryContainer} />}
               onPress={openEditModal}
             />
           </View>
 
           {/* Metadata Card */}
-          <EditorialCard variant="secondary">
+          <EditorialCard variant="violet" shape="extraLarge">
             <View style={styles.metaTitleRow}>
-              <FileText size={18} color={theme.colors.m3.primary} />
-              <EditorialText variant="cardHeading" tone="primary">
+              <FileText size={18} color={theme.colors.expressive.violet.base} />
+              <EditorialText variant="cardHeading" tone="violet">
                 File Metadata
               </EditorialText>
             </View>
             <Divider style={{ marginVertical: theme.spacing.sm }} />
             <View style={{ gap: 8 }}>
               <View style={styles.metaLine}>
-                <EditorialText variant="caption" tone="muted">
+                <EditorialText variant="caption" tone="violet" style={styles.metaLabel}>
                   Original File
                 </EditorialText>
-                <EditorialText variant="bodySmall" tone="primary" numberOfLines={1}>
+                <EditorialText
+                  variant="bodySmall"
+                  tone="primary"
+                  numberOfLines={1}
+                  style={styles.metaValue}
+                >
                   {doc.originalFilename}
                 </EditorialText>
               </View>
               <View style={styles.metaLine}>
-                <EditorialText variant="caption" tone="muted">
+                <EditorialText variant="caption" tone="violet" style={styles.metaLabel}>
                   File Type
                 </EditorialText>
-                <EditorialText variant="bodySmall" tone="primary">
+                <EditorialText
+                  variant="bodySmall"
+                  tone="primary"
+                  numberOfLines={1}
+                  style={styles.metaValue}
+                >
                   {doc.mimeType}
                 </EditorialText>
               </View>
               <View style={styles.metaLine}>
-                <EditorialText variant="caption" tone="muted">
+                <EditorialText variant="caption" tone="violet" style={styles.metaLabel}>
                   File Size
                 </EditorialText>
-                <EditorialText variant="bodySmall" tone="primary">
+                <EditorialText variant="bodySmall" tone="primary" style={styles.metaValue}>
                   {Math.max(1, Math.round(doc.fileSizeBytes / 1024))} KB
                 </EditorialText>
               </View>
               {doc.tags.length > 0 ? (
                 <View style={styles.tagsWrap}>
                   {doc.tags.map((tag) => (
-                    <Badge key={tag} label={`#${tag}`} tone="neutral" />
+                    <Badge key={tag} label={`#${tag}`} tone="cobalt" />
                   ))}
                 </View>
               ) : null}
             </View>
           </EditorialCard>
 
-          {/* Life Intelligence / Linked Items */}
+          {/* Life Intelligence / AI Extraction & Linked Items */}
           <SectionHeader
-            indexLabel="01 · Connections"
-            title="Extracted & Linked Records"
-            subtitle="Events, tasks, and assets linked to this document."
+            indexLabel="01 · Intelligence"
+            title="AI Extraction & Connections"
+            subtitle="Inspect OCR extraction, verify fields, or ask LifeOS AI."
+            eyebrowTone="violetVibrant"
           />
-          <EditorialCard variant="outlined">
+          <EditorialCard variant="violet" shape="extraLarge" style={{ gap: theme.spacing.sm }}>
+            <View style={styles.metaTitleRow}>
+              <Sparkles size={18} color={theme.colors.expressive.violet.base} />
+              <EditorialText variant="cardHeading" tone="violet">
+                {doc.processingStatus === 'verified'
+                  ? 'Verified Extraction Complete'
+                  : doc.processingStatus === 'needs_review'
+                    ? 'Ready for Verification'
+                    : 'Analyze with LifeOS AI'}
+              </EditorialText>
+            </View>
             <EditorialText variant="bodySmall" tone="secondary">
               {doc.extractedSummary
-                ? 'Verified extraction metadata attached.'
-                : 'Document stored securely. Automatic AI classification & extraction arrives in Day 5.'}
+                ? 'Extracted fields are attached. Open review to edit fields or link warranties and reminders.'
+                : 'Extract key dates, amounts, and product warranties—nothing is saved without your explicit confirmation.'}
             </EditorialText>
-            <EditorialText variant="caption" tone="muted" style={{ marginTop: 6 }}>
+            <EditorialText variant="caption" tone="muted">
               Linked Events: {doc.relatedEvents.length} · Linked Tasks: {doc.relatedTasks.length} ·
               Linked Assets: {doc.relatedAssets.length}
             </EditorialText>
+            <View style={styles.actionRow}>
+              <Button
+                label={
+                  doc.processingStatus === 'verified' ? 'Review Extraction' : 'Analyze & Review'
+                }
+                variant="filled"
+                accent="violet"
+                size="sm"
+                shape="pill"
+                leftIcon={<Sparkles size={15} color={theme.colors.m3.onPrimary} />}
+                onPress={() => router.push(`/(app)/extraction/${doc.id}`)}
+              />
+              <Button
+                label="Ask AI"
+                variant="tonal"
+                accent="teal"
+                size="sm"
+                shape="pill"
+                onPress={() => router.push(`/(app)/assistant?documentId=${doc.id}` as never)}
+              />
+            </View>
           </EditorialCard>
 
           {/* Version & Access History */}
@@ -313,8 +350,9 @@ export default function DocumentDetailScreen() {
             indexLabel="02 · Security"
             title="Versions & Access History"
             subtitle="Every upload and signed download URL request is audited."
+            eyebrowTone="cobaltVibrant"
           />
-          <EditorialCard variant="outlined" style={{ gap: theme.spacing.sm }}>
+          <EditorialCard variant="surface" style={{ gap: theme.spacing.sm }}>
             <View style={styles.metaTitleRow}>
               <History size={16} color={theme.colors.m3.primary} />
               <EditorialText variant="labelLarge" tone="primary">
@@ -382,83 +420,58 @@ export default function DocumentDetailScreen() {
         </View>
       ) : null}
 
-      {/* Edit Metadata Modal */}
-      <Modal
-        visible={editModalOpen}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setEditModalOpen(false)}
-      >
-        <Pressable style={styles.backdrop} onPress={() => setEditModalOpen(false)}>
-          <Pressable
-            style={[
-              styles.sheet,
-              {
-                backgroundColor: theme.colors.m3.surfaceContainerLowest,
-                borderTopLeftRadius: theme.shapes.extraLarge,
-                borderTopRightRadius: theme.shapes.extraLarge,
-                padding: theme.spacing.xl,
-              },
-            ]}
-          >
-            <EditorialText variant="headlineMedium" tone="primary">
-              Edit Document Details
+      <ExpressiveSheetModal visible={editModalOpen} onClose={() => setEditModalOpen(false)}>
+        <EditorialText variant="headlineMedium" tone="primary">
+          Edit Document Details
+        </EditorialText>
+
+        <View style={{ marginTop: theme.spacing.md, gap: theme.spacing.md }}>
+          <TextField label="Title" value={editTitle} onChangeText={setEditTitle} />
+          <TextField
+            label="Expiry Date (YYYY-MM-DD, optional)"
+            placeholder="2028-05-31"
+            value={editExpiryDate}
+            onChangeText={setEditExpiryDate}
+          />
+          <TextField
+            label="Tags (comma-separated)"
+            placeholder="laptop, apple, warranty"
+            value={editTags}
+            onChangeText={setEditTags}
+          />
+
+          <View>
+            <EditorialText variant="label" tone="primary" style={{ marginBottom: 6 }}>
+              Category
             </EditorialText>
-
-            <View style={{ marginTop: theme.spacing.md, gap: theme.spacing.md }}>
-              <TextField label="Title" value={editTitle} onChangeText={setEditTitle} />
-              <TextField
-                label="Expiry Date (YYYY-MM-DD, optional)"
-                placeholder="2028-05-31"
-                value={editExpiryDate}
-                onChangeText={setEditExpiryDate}
-              />
-              <TextField
-                label="Tags (comma-separated)"
-                placeholder="laptop, apple, warranty"
-                value={editTags}
-                onChangeText={setEditTags}
-              />
-
-              <View>
-                <EditorialText variant="label" tone="primary" style={{ marginBottom: 6 }}>
-                  Category
-                </EditorialText>
-                <View style={styles.catChips}>
-                  {(categoriesQuery.data ?? []).map((cat) => (
-                    <FilterChip
-                      key={cat.id}
-                      label={cat.name}
-                      selected={editCategoryId === cat.id}
-                      onPress={() => setEditCategoryId(cat.id)}
-                    />
-                  ))}
-                </View>
-              </View>
-
-              <Button
-                label="Save Changes"
-                variant="filled"
-                shape="pill"
-                fullWidth
-                loading={updateMutation.isPending}
-                onPress={() => updateMutation.mutate()}
-              />
+            <View style={styles.catChips}>
+              {(categoriesQuery.data ?? []).map((cat) => (
+                <FilterChip
+                  key={cat.id}
+                  label={cat.name}
+                  accent="teal"
+                  selected={editCategoryId === cat.id}
+                  onPress={() => setEditCategoryId(cat.id)}
+                />
+              ))}
             </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
+          </View>
+
+          <Button
+            label="Save Changes"
+            variant="filled"
+            shape="pill"
+            fullWidth
+            loading={updateMutation.isPending}
+            onPress={() => updateMutation.mutate()}
+          />
+        </View>
+      </ExpressiveSheetModal>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  backRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    alignSelf: 'flex-start',
-  },
   badgeRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -466,8 +479,13 @@ const styles = StyleSheet.create({
   },
   actionRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     gap: 8,
+  },
+  previewActionBtn: {
+    flexGrow: 1,
+    minWidth: 150,
   },
   metaTitleRow: {
     flexDirection: 'row',
@@ -480,19 +498,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 12,
   },
+  metaLabel: {
+    flexShrink: 0,
+  },
+  metaValue: {
+    flex: 1,
+    minWidth: 0,
+    textAlign: 'right',
+  },
   tagsWrap: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 6,
     marginTop: 4,
-  },
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(19, 26, 23, 0.38)',
-    justifyContent: 'flex-end',
-  },
-  sheet: {
-    width: '100%',
   },
   catChips: {
     flexDirection: 'row',

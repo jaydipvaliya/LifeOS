@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { registerSchema, type RegisterInput } from '@lifeos/validation';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Check, Eye, EyeOff } from 'lucide-react-native';
+import { Check, Eye, EyeOff } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -11,6 +11,7 @@ import {
   EditorialText,
   FilterChip,
   Screen,
+  ScreenTopBar,
   TextField,
 } from '../../src/components/ui';
 import { extractApiErrorMessage } from '../../src/services/api-client';
@@ -18,10 +19,14 @@ import { authApi } from '../../src/services/auth-api';
 import { useAuthStore } from '../../src/stores/auth-store';
 import { useTheme } from '../../src/theme';
 
-const MODES: Array<{ value: 'student' | 'professional' | 'transitioning'; label: string }> = [
-  { value: 'student', label: 'Student' },
-  { value: 'professional', label: 'Professional' },
-  { value: 'transitioning', label: 'Transitioning' },
+const MODES: Array<{
+  value: 'student' | 'professional' | 'transitioning';
+  label: string;
+  accent: 'violet' | 'teal' | 'coral';
+}> = [
+  { value: 'student', label: 'Student', accent: 'violet' },
+  { value: 'professional', label: 'Professional', accent: 'teal' },
+  { value: 'transitioning', label: 'Transitioning', accent: 'coral' },
 ];
 
 export default function RegisterScreen() {
@@ -60,24 +65,13 @@ export default function RegisterScreen() {
   return (
     <Screen contentStyle={styles.container}>
       <View>
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          hitSlop={10}
-          style={styles.backRow}
-        >
-          <ArrowLeft size={18} strokeWidth={1.75} color={theme.colors.brand.primaryForest} />
-          <EditorialText variant="label" tone="forest">
-            Back
-          </EditorialText>
-        </Pressable>
+        <ScreenTopBar
+          onBack={() => router.back()}
+          badgeLabel="Create Account"
+          badgeTone="primary"
+        />
 
-        <EditorialText
-          variant="pageHeadingEditorial"
-          tone="primary"
-          style={{ marginTop: theme.spacing.lg }}
-        >
+        <EditorialText variant="pageHeadingEditorial" tone="primary">
           Create your LifeOS.
         </EditorialText>
         <EditorialText variant="body" tone="secondary" style={{ marginTop: theme.spacing.xs }}>
@@ -86,10 +80,13 @@ export default function RegisterScreen() {
 
         {serverError ? (
           <EditorialCard
+            shape="medium"
+            padding="sm"
             style={{
-              marginTop: theme.spacing.lg,
-              backgroundColor: theme.colors.status.dangerSurface,
-              borderColor: theme.colors.status.danger,
+              marginTop: theme.spacing.md,
+              backgroundColor: theme.colors.m3.errorContainer,
+              borderColor: theme.colors.m3.error,
+              borderWidth: theme.borderWidths.hairline,
             }}
           >
             <EditorialText variant="bodySmall" tone="danger">
@@ -98,7 +95,7 @@ export default function RegisterScreen() {
           </EditorialCard>
         ) : null}
 
-        <View style={[styles.form, { marginTop: theme.spacing.xl, gap: theme.spacing.md }]}>
+        <View style={[styles.form, { marginTop: theme.spacing.lg, gap: theme.spacing.md }]}>
           <Controller
             control={control}
             name="fullName"
@@ -154,9 +151,9 @@ export default function RegisterScreen() {
                     hitSlop={8}
                   >
                     {showPassword ? (
-                      <EyeOff size={18} strokeWidth={1.75} color={theme.colors.text.muted} />
+                      <EyeOff size={18} strokeWidth={1.9} color={theme.colors.text.muted} />
                     ) : (
-                      <Eye size={18} strokeWidth={1.75} color={theme.colors.text.muted} />
+                      <Eye size={18} strokeWidth={1.9} color={theme.colors.text.muted} />
                     )}
                   </Pressable>
                 }
@@ -181,6 +178,7 @@ export default function RegisterScreen() {
                     <FilterChip
                       key={option.value}
                       label={option.label}
+                      accent={option.accent}
                       selected={value === option.value}
                       onPress={() => onChange(option.value)}
                     />
@@ -199,7 +197,16 @@ export default function RegisterScreen() {
                   onPress={() => onChange(!value)}
                   accessibilityRole="checkbox"
                   accessibilityState={{ checked: Boolean(value) }}
-                  style={styles.consentRow}
+                  style={[
+                    styles.consentCard,
+                    {
+                      backgroundColor: value
+                        ? theme.colors.m3.primaryContainer
+                        : theme.colors.m3.surfaceContainerLow,
+                      borderRadius: theme.shapes.medium,
+                      padding: theme.spacing.md,
+                    },
+                  ]}
                 >
                   <View
                     style={[
@@ -207,17 +214,15 @@ export default function RegisterScreen() {
                       {
                         borderRadius: 6,
                         borderWidth: theme.borderWidths.medium,
-                        borderColor: value
-                          ? theme.colors.brand.primaryForest
-                          : theme.colors.border.strong,
+                        borderColor: value ? theme.colors.m3.primary : theme.colors.m3.outline,
                         backgroundColor: value
-                          ? theme.colors.brand.primaryForest
-                          : theme.colors.surface.primary,
+                          ? theme.colors.m3.primary
+                          : theme.colors.m3.surfaceContainerLowest,
                       },
                     ]}
                   >
                     {value ? (
-                      <Check size={14} strokeWidth={2.5} color={theme.colors.text.inverse} />
+                      <Check size={14} strokeWidth={2.6} color={theme.colors.m3.onPrimary} />
                     ) : null}
                   </View>
                   <EditorialText variant="caption" tone="secondary" style={styles.consentText}>
@@ -236,17 +241,20 @@ export default function RegisterScreen() {
         </View>
       </View>
 
-      <View style={{ gap: theme.spacing.sm }}>
+      <View style={{ gap: theme.spacing.sm, marginTop: theme.spacing.md }}>
         <Button
           label="Create Account"
+          variant="filled"
           size="lg"
+          shape="pill"
           fullWidth
           loading={isSubmitting}
           onPress={handleSubmit(onSubmit)}
         />
         <Button
           label="Already have an account? Sign in"
-          variant="ghost"
+          variant="tonal"
+          shape="pill"
           fullWidth
           onPress={() => router.replace('/(auth)/login')}
         />
@@ -258,13 +266,7 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     justifyContent: 'space-between',
-    gap: 24,
-  },
-  backRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    alignSelf: 'flex-start',
+    gap: 20,
   },
   form: {
     width: '100%',
@@ -274,18 +276,18 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 8,
   },
-  consentRow: {
+  consentCard: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 10,
-    marginTop: 4,
+    gap: 12,
   },
   checkbox: {
-    width: 20,
-    height: 20,
+    width: 22,
+    height: 22,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 2,
+    marginTop: 1,
+    flexShrink: 0,
   },
   consentText: {
     flex: 1,

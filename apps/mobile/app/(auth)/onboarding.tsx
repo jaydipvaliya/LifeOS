@@ -2,12 +2,13 @@ import * as LocalAuthentication from 'expo-local-authentication';
 import { useRouter } from 'expo-router';
 import { Fingerprint } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import {
   Badge,
   Button,
   EditorialCard,
   EditorialText,
+  ExpressiveSwitch,
   Screen,
   TextField,
 } from '../../src/components/ui';
@@ -69,10 +70,10 @@ export default function OnboardingScreen() {
     <Screen contentStyle={styles.container}>
       <View>
         <View style={styles.topRow}>
-          <EditorialText variant="editorialEyebrow" tone="secondaryForest" uppercase>
+          <EditorialText variant="editorialEyebrow" tone="cobaltVibrant" uppercase>
             Optional Personalization
           </EditorialText>
-          <Badge label="Step 1 of 1" tone="sage" />
+          <Badge label="Step 1 of 1" tone="cobalt" />
         </View>
 
         <EditorialText
@@ -89,10 +90,13 @@ export default function OnboardingScreen() {
 
         {errorMessage ? (
           <EditorialCard
+            shape="medium"
+            padding="sm"
             style={{
               marginTop: theme.spacing.lg,
-              backgroundColor: theme.colors.status.dangerSurface,
-              borderColor: theme.colors.status.danger,
+              backgroundColor: theme.colors.m3.errorContainer,
+              borderColor: theme.colors.m3.error,
+              borderWidth: theme.borderWidths.hairline,
             }}
           >
             <EditorialText variant="bodySmall" tone="danger">
@@ -120,21 +124,26 @@ export default function OnboardingScreen() {
             />
           ) : null}
 
-          <EditorialCard variant="secondary">
-            <Pressable
-              onPress={handleToggleBiometrics}
-              accessibilityRole="switch"
-              accessibilityState={{ checked: enableBiometrics }}
-              style={styles.biometricRow}
-            >
+          <EditorialCard variant="teal" shape="extraLarge">
+            <View style={styles.biometricRow}>
               <View style={styles.biometricLeft}>
-                <Fingerprint
-                  size={20}
-                  strokeWidth={1.75}
-                  color={theme.colors.brand.primaryForest}
-                />
-                <View style={{ flex: 1 }}>
-                  <EditorialText variant="cardHeading" tone="primary">
+                <View
+                  style={[
+                    styles.iconTile,
+                    {
+                      backgroundColor: theme.colors.m3.surfaceContainerLowest,
+                      borderRadius: theme.shapes.medium,
+                    },
+                  ]}
+                >
+                  <Fingerprint
+                    size={22}
+                    strokeWidth={1.9}
+                    color={theme.colors.expressive.teal.base}
+                  />
+                </View>
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <EditorialText variant="cardHeading" tone="teal">
                     Biometric App Lock
                   </EditorialText>
                   <EditorialText variant="caption" tone="secondary">
@@ -142,11 +151,13 @@ export default function OnboardingScreen() {
                   </EditorialText>
                 </View>
               </View>
-              <Badge
-                label={enableBiometrics ? 'Enabled' : 'Off'}
-                tone={enableBiometrics ? 'success' : 'neutral'}
+              <ExpressiveSwitch
+                value={enableBiometrics}
+                onValueChange={() => void handleToggleBiometrics()}
+                accent="teal"
+                accessibilityLabel="Toggle biometric app lock"
               />
-            </Pressable>
+            </View>
           </EditorialCard>
         </View>
       </View>
@@ -163,7 +174,8 @@ export default function OnboardingScreen() {
         />
         <Button
           label="Skip for now"
-          variant="ghost"
+          variant="tonal"
+          shape="pill"
           fullWidth
           disabled={saving}
           onPress={() => handleComplete(true)}
@@ -183,6 +195,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  iconTile: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
   biometricRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -194,5 +213,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+    minWidth: 0,
   },
 });
