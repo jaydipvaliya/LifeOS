@@ -1,0 +1,611 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserMode {
+  student
+  professional
+  transitioning
+}
+
+enum DevicePlatform {
+  android
+  ios
+  web
+}
+
+enum DocumentProcessingStatus {
+  pending_upload
+  uploaded
+  ocr_processing
+  ai_extracting
+  needs_review
+  verified
+  failed
+}
+
+enum ExtractionStatus {
+  pending
+  completed
+  verified
+  failed
+}
+
+enum TaskPriority {
+  low
+  medium
+  high
+  urgent
+}
+
+enum TaskStatus {
+  pending
+  in_progress
+  completed
+  snoozed
+  cancelled
+}
+
+enum EventCategory {
+  document_expiry
+  warranty_expiry
+  subscription_renewal
+  payment_due
+  academic_deadline
+  appointment
+  custom
+}
+
+enum ReminderChannel {
+  push
+  email
+  in_app
+}
+
+enum ReminderStatus {
+  scheduled
+  sent
+  snoozed
+  cancelled
+  failed
+}
+
+enum SubscriptionFrequency {
+  weekly
+  monthly
+  quarterly
+  annual
+  custom
+}
+
+enum SubscriptionStatus {
+  active
+  paused
+  cancelled
+}
+
+enum AssetCategory {
+  laptop
+  smartphone
+  tablet
+  headphones
+  electronics
+  furniture
+  appliances
+  other
+}
+
+enum SyncOperationType {
+  create
+  update
+  delete
+}
+
+enum SyncStatus {
+  pending
+  syncing
+  synced
+  conflict
+  failed
+}
+
+enum AiMessageRole {
+  user
+  assistant
+  system
+}
+
+model User {
+  id                       String    @id @default(uuid()) @db.Uuid
+  email                    String    @unique @db.VarChar(254)
+  passwordHash             String    @map("password_hash")
+  fullName                 String    @map("full_name") @db.VarChar(120)
+  mode                     UserMode  @default(student)
+  emailVerified            Boolean   @default(false) @map("email_verified")
+  emailVerifiedAt          DateTime? @map("email_verified_at") @db.Timestamptz(6)
+  privacyConsentAcceptedAt DateTime  @map("privacy_consent_accepted_at") @db.Timestamptz(6)
+  privacyConsentVersion    String    @default("2026-11-v1") @map("privacy_consent_version") @db.VarChar(32)
+  passwordResetTokenHash   String?   @map("password_reset_token_hash")
+  passwordResetExpiresAt   DateTime? @map("password_reset_expires_at") @db.Timestamptz(6)
+  deletedAt                DateTime? @map("deleted_at") @db.Timestamptz(6)
+  createdAt                DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  profile                UserProfile?
+  notificationPreference NotificationPreference?
+  devices                Device[]
+  refreshTokens          RefreshToken[]
+  categories             Category[]
+  documents              Document[]
+  assets                 Asset[]
+  assetRepairs           AssetRepair[]
+  events                 Event[]
+  reminders              Reminder[]
+  tasks                  Task[]
+  subscriptions          Subscription[]
+  transactions           Transaction[]
+  notifications          Notification[]
+  auditLogs              AuditLog[]
+  aiConversations        AiConversation[]
+  aiMessages             AiMessage[]
+  syncOperations         SyncOperation[]
+
+  @@index([deletedAt])
+  @@map("users")
+}
+
+model UserProfile {
+  id                    String    @id @default(uuid()) @db.Uuid
+  userId                String    @unique @map("user_id") @db.Uuid
+  timezone              String    @default("Asia/Kolkata") @db.VarChar(64)
+  locale                String    @default("en-IN") @db.VarChar(16)
+  themePreference       String    @default("light") @map("theme_preference") @db.VarChar(16)
+  institutionName       String?   @map("institution_name") @db.VarChar(160)
+  graduationYear        Int?      @map("graduation_year")
+  jobTitle              String?   @map("job_title") @db.VarChar(120)
+  companyName           String?   @map("company_name") @db.VarChar(160)
+  onboardingCompletedAt DateTime? @map("onboarding_completed_at") @db.Timestamptz(6)
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+model Device {
+  id               String         @id @default(uuid()) @db.Uuid
+  userId           String         @map("user_id") @db.Uuid
+  deviceName       String         @map("device_name") @db.VarChar(120)
+  platform         DevicePlatform @default(android)
+  pushToken        String?        @map("push_token") @db.VarChar(255)
+  biometricEnabled Boolean        @default(false) @map("biometric_enabled")
+  lastSeenAt       DateTime       @default(now()) @map("last_seen_at") @db.Timestamptz(6)
+  revokedAt        DateTime?      @map("revoked_at") @db.Timestamptz(6)
+  createdAt        DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokens RefreshToken[]
+
+  @@index([userId, revokedAt])
+  @@map("devices")
+}
+
+model RefreshToken {
+  id                String    @id @default(uuid()) @db.Uuid
+  userId            String    @map("user_id") @db.Uuid
+  deviceId          String?   @map("device_id") @db.Uuid
+  familyId          String    @map("family_id") @db.Uuid
+  tokenHash         String    @unique @map("token_hash")
+  expiresAt         DateTime  @map("expires_at") @db.Timestamptz(6)
+  revokedAt         DateTime? @map("revoked_at") @db.Timestamptz(6)
+  replacedByTokenId String?   @map("replaced_by_token_id") @db.Uuid
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  device Device? @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+
+  @@index([userId, familyId])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+model Category {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String?  @map("user_id") @db.Uuid
+  slug      String   @db.VarChar(60)
+  name      String   @db.VarChar(80)
+  isSystem  Boolean  @default(false) @map("is_system")
+  iconName  String?  @map("icon_name") @db.VarChar(48)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user      User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documents Document[]
+
+  @@unique([userId, slug])
+  @@index([isSystem])
+  @@map("categories")
+}
+
+model Document {
+  id               String                   @id @default(uuid()) @db.Uuid
+  userId           String                   @map("user_id") @db.Uuid
+  categoryId       String                   @map("category_id") @db.Uuid
+  title            String                   @db.VarChar(180)
+  originalFilename String                   @map("original_filename") @db.VarChar(255)
+  mimeType         String                   @map("mime_type") @db.VarChar(100)
+  fileSizeBytes    Int                      @map("file_size_bytes")
+  storageKey       String                   @unique @map("storage_key")
+  checksumSha256   String?                  @map("checksum_sha256") @db.VarChar(64)
+  expiryDate       DateTime?                @map("expiry_date") @db.Date
+  processingStatus DocumentProcessingStatus @default(pending_upload) @map("processing_status")
+  tags             String[]                 @default([])
+  isArchived       Boolean                  @default(false) @map("is_archived")
+  archivedAt       DateTime?                @map("archived_at") @db.Timestamptz(6)
+  deletedAt        DateTime?                @map("deleted_at") @db.Timestamptz(6)
+  version          Int                      @default(1)
+  createdAt        DateTime                 @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime                 @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category       Category          @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  versions       DocumentVersion[]
+  extractedData  ExtractedData[]
+  assetDocuments AssetDocument[]
+  events         Event[]
+  reminders      Reminder[]
+  tasks          Task[]
+  transactions   Transaction[]
+
+  @@index([userId, isArchived, deletedAt])
+  @@index([userId, expiryDate])
+  @@map("documents")
+}
+
+model DocumentVersion {
+  id             String   @id @default(uuid()) @db.Uuid
+  documentId     String   @map("document_id") @db.Uuid
+  versionNumber  Int      @map("version_number")
+  storageKey     String   @map("storage_key")
+  mimeType       String   @map("mime_type") @db.VarChar(100)
+  fileSizeBytes  Int      @map("file_size_bytes")
+  checksumSha256 String?  @map("checksum_sha256") @db.VarChar(64)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, versionNumber])
+  @@map("document_versions")
+}
+
+model ExtractedData {
+  id                   String           @id @default(uuid()) @db.Uuid
+  documentId           String           @map("document_id") @db.Uuid
+  documentType         String           @map("document_type") @db.VarChar(64)
+  providerName         String?          @map("provider_name") @db.VarChar(64)
+  modelName            String?          @map("model_name") @db.VarChar(80)
+  rawText              String?          @map("raw_text")
+  structuredPayload    Json             @map("structured_payload") @db.JsonB
+  confidenceScore      Decimal?         @map("confidence_score") @db.Decimal(4, 3)
+  processingDurationMs Int?             @map("processing_duration_ms")
+  tokenUsage           Int?             @map("token_usage")
+  estimatedCostUsd     Decimal?         @map("estimated_cost_usd") @db.Decimal(10, 6)
+  status               ExtractionStatus @default(pending)
+  verifiedAt           DateTime?        @map("verified_at") @db.Timestamptz(6)
+  errorMessage         String?          @map("error_message")
+  createdAt            DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId, status])
+  @@map("extracted_data")
+}
+
+model Asset {
+  id                     String        @id @default(uuid()) @db.Uuid
+  userId                 String        @map("user_id") @db.Uuid
+  name                   String        @db.VarChar(160)
+  category               AssetCategory @default(electronics)
+  brand                  String?       @db.VarChar(100)
+  model                  String?       @db.VarChar(120)
+  serialNumber           String?       @map("serial_number") @db.VarChar(120)
+  purchaseDate           DateTime?     @map("purchase_date") @db.Date
+  purchasePrice          Decimal?      @map("purchase_price") @db.Decimal(12, 2)
+  currency               String        @default("INR") @db.VarChar(3)
+  warrantyStartDate      DateTime?     @map("warranty_start_date") @db.Date
+  warrantyExpirationDate DateTime?     @map("warranty_expiration_date") @db.Date
+  serviceInfo            String?       @map("service_info")
+  notes                  String?
+  version                Int           @default(1)
+  createdAt              DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt              DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assetDocuments AssetDocument[]
+  repairs        AssetRepair[]
+  events         Event[]
+  transactions   Transaction[]
+
+  @@index([userId, warrantyExpirationDate])
+  @@map("assets")
+}
+
+model AssetDocument {
+  id           String   @id @default(uuid()) @db.Uuid
+  assetId      String   @map("asset_id") @db.Uuid
+  documentId   String   @map("document_id") @db.Uuid
+  relationType String   @default("invoice") @map("relation_type") @db.VarChar(48)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  asset    Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([assetId, documentId])
+  @@map("asset_documents")
+}
+
+model AssetRepair {
+  id           String   @id @default(uuid()) @db.Uuid
+  assetId      String   @map("asset_id") @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  repairDate   DateTime @map("repair_date") @db.Date
+  providerName String?  @map("provider_name") @db.VarChar(120)
+  issueSummary String   @map("issue_summary")
+  cost         Decimal? @db.Decimal(12, 2)
+  currency     String   @default("INR") @db.VarChar(3)
+  notes        String?
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([assetId, repairDate])
+  @@map("asset_repairs")
+}
+
+model Event {
+  id                   String        @id @default(uuid()) @db.Uuid
+  userId               String        @map("user_id") @db.Uuid
+  title                String        @db.VarChar(180)
+  description          String?
+  category             EventCategory @default(custom)
+  startAt              DateTime      @map("start_at") @db.Timestamptz(6)
+  endAt                DateTime?     @map("end_at") @db.Timestamptz(6)
+  allDay               Boolean       @default(false) @map("all_day")
+  timezone             String        @default("Asia/Kolkata") @db.VarChar(64)
+  isRecurring          Boolean       @default(false) @map("is_recurring")
+  recurrenceRule       String?       @map("recurrence_rule") @db.VarChar(160)
+  sourceDocumentId     String?       @map("source_document_id") @db.Uuid
+  sourceAssetId        String?       @map("source_asset_id") @db.Uuid
+  sourceSubscriptionId String?       @map("source_subscription_id") @db.Uuid
+  completedAt          DateTime?     @map("completed_at") @db.Timestamptz(6)
+  version              Int           @default(1)
+  createdAt            DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sourceDocument     Document?     @relation(fields: [sourceDocumentId], references: [id], onDelete: SetNull)
+  sourceAsset        Asset?        @relation(fields: [sourceAssetId], references: [id], onDelete: SetNull)
+  sourceSubscription Subscription? @relation(fields: [sourceSubscriptionId], references: [id], onDelete: SetNull)
+  reminders          Reminder[]
+  linkedTasks        Task[]
+
+  @@index([userId, startAt])
+  @@map("events")
+}
+
+model Task {
+  id               String       @id @default(uuid()) @db.Uuid
+  userId           String       @map("user_id") @db.Uuid
+  title            String       @db.VarChar(180)
+  notes            String?
+  priority         TaskPriority @default(medium)
+  status           TaskStatus   @default(pending)
+  category         String?      @db.VarChar(60)
+  dueAt            DateTime?    @map("due_at") @db.Timestamptz(6)
+  snoozedUntil     DateTime?    @map("snoozed_until") @db.Timestamptz(6)
+  completedAt      DateTime?    @map("completed_at") @db.Timestamptz(6)
+  isRecurring      Boolean      @default(false) @map("is_recurring")
+  recurrenceRule   String?      @map("recurrence_rule") @db.VarChar(160)
+  sourceDocumentId String?      @map("source_document_id") @db.Uuid
+  linkedEventId    String?      @map("linked_event_id") @db.Uuid
+  version          Int          @default(1)
+  createdAt        DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sourceDocument Document?  @relation(fields: [sourceDocumentId], references: [id], onDelete: SetNull)
+  linkedEvent    Event?     @relation(fields: [linkedEventId], references: [id], onDelete: SetNull)
+  reminders      Reminder[]
+
+  @@index([userId, status, dueAt])
+  @@map("tasks")
+}
+
+model Reminder {
+  id           String          @id @default(uuid()) @db.Uuid
+  userId       String          @map("user_id") @db.Uuid
+  eventId      String?         @map("event_id") @db.Uuid
+  taskId       String?         @map("task_id") @db.Uuid
+  documentId   String?         @map("document_id") @db.Uuid
+  title        String          @db.VarChar(180)
+  remindAt     DateTime        @map("remind_at") @db.Timestamptz(6)
+  channel      ReminderChannel @default(push)
+  status       ReminderStatus  @default(scheduled)
+  sentAt       DateTime?       @map("sent_at") @db.Timestamptz(6)
+  snoozedUntil DateTime?       @map("snoozed_until") @db.Timestamptz(6)
+  jobId        String?         @map("job_id") @db.VarChar(120)
+  createdAt    DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event         Event?         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  task          Task?          @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  document      Document?      @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  notifications Notification[]
+
+  @@index([userId, remindAt, status])
+  @@map("reminders")
+}
+
+model Subscription {
+  id                 String                @id @default(uuid()) @db.Uuid
+  userId             String                @map("user_id") @db.Uuid
+  name               String                @db.VarChar(160)
+  provider           String                @db.VarChar(120)
+  amount             Decimal               @db.Decimal(12, 2)
+  currency           String                @default("INR") @db.VarChar(3)
+  frequency          SubscriptionFrequency @default(monthly)
+  startDate          DateTime              @map("start_date") @db.Date
+  nextRenewalDate    DateTime              @map("next_renewal_date") @db.Date
+  paymentMethodLabel String?               @map("payment_method_label") @db.VarChar(80)
+  cancellationInfo   String?               @map("cancellation_info")
+  status             SubscriptionStatus    @default(active)
+  cancelledAt        DateTime?             @map("cancelled_at") @db.Timestamptz(6)
+  version            Int                   @default(1)
+  createdAt          DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime              @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events       Event[]
+  transactions Transaction[]
+
+  @@index([userId, status, nextRenewalDate])
+  @@map("subscriptions")
+}
+
+model Transaction {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  subscriptionId String?  @map("subscription_id") @db.Uuid
+  assetId        String?  @map("asset_id") @db.Uuid
+  documentId     String?  @map("document_id") @db.Uuid
+  amount         Decimal  @db.Decimal(12, 2)
+  currency       String   @default("INR") @db.VarChar(3)
+  occurredOn     DateTime @map("occurred_on") @db.Date
+  description    String   @db.VarChar(255)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  asset        Asset?        @relation(fields: [assetId], references: [id], onDelete: SetNull)
+  document     Document?     @relation(fields: [documentId], references: [id], onDelete: SetNull)
+
+  @@index([userId, occurredOn])
+  @@map("transactions")
+}
+
+model Notification {
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  reminderId   String?   @map("reminder_id") @db.Uuid
+  type         String    @db.VarChar(48)
+  title        String    @db.VarChar(160)
+  body         String
+  readAt       DateTime? @map("read_at") @db.Timestamptz(6)
+  snoozedUntil DateTime? @map("snoozed_until") @db.Timestamptz(6)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reminder Reminder? @relation(fields: [reminderId], references: [id], onDelete: SetNull)
+
+  @@index([userId, readAt, createdAt])
+  @@map("notifications")
+}
+
+model NotificationPreference {
+  id                            String   @id @default(uuid()) @db.Uuid
+  userId                        String   @unique @map("user_id") @db.Uuid
+  pushEnabled                   Boolean  @default(true) @map("push_enabled")
+  emailEnabled                  Boolean  @default(true) @map("email_enabled")
+  documentExpiryDaysBefore      Int      @default(30) @map("document_expiry_days_before")
+  warrantyExpiryDaysBefore      Int      @default(14) @map("warranty_expiry_days_before")
+  subscriptionRenewalDaysBefore Int      @default(3) @map("subscription_renewal_days_before")
+  quietHoursStart               String?  @map("quiet_hours_start") @db.VarChar(5)
+  quietHoursEnd                 String?  @map("quiet_hours_end") @db.VarChar(5)
+  privacyHideSensitiveContent   Boolean  @default(true) @map("privacy_hide_sensitive_content")
+  createdAt                     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
+}
+
+model AuditLog {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String?  @map("user_id") @db.Uuid
+  action       String   @db.VarChar(80)
+  resourceType String   @map("resource_type") @db.VarChar(60)
+  resourceId   String?  @map("resource_id") @db.VarChar(80)
+  ipAddress    String?  @map("ip_address") @db.VarChar(64)
+  userAgent    String?  @map("user_agent") @db.VarChar(255)
+  metadata     Json?    @db.JsonB
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([action, resourceType])
+  @@map("audit_logs")
+}
+
+model AiConversation {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  title     String   @default("New Conversation") @db.VarChar(180)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages AiMessage[]
+
+  @@index([userId, updatedAt])
+  @@map("ai_conversations")
+}
+
+model AiMessage {
+  id             String        @id @default(uuid()) @db.Uuid
+  conversationId String        @map("conversation_id") @db.Uuid
+  userId         String        @map("user_id") @db.Uuid
+  role           AiMessageRole
+  content        String
+  citations      Json?         @db.JsonB
+  tokenUsage     Int?          @map("token_usage")
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  conversation AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@map("ai_messages")
+}
+
+model SyncOperation {
+  id            String            @id @default(uuid()) @db.Uuid
+  userId        String            @map("user_id") @db.Uuid
+  deviceId      String?           @map("device_id") @db.Uuid
+  entityType    String            @map("entity_type") @db.VarChar(60)
+  entityId      String            @map("entity_id") @db.Uuid
+  operationType SyncOperationType @map("operation_type")
+  clientVersion Int               @map("client_version")
+  payload       Json              @db.JsonB
+  status        SyncStatus        @default(pending)
+  errorMessage  String?           @map("error_message")
+  processedAt   DateTime?         @map("processed_at") @db.Timestamptz(6)
+  createdAt     DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status, createdAt])
+  @@map("sync_operations")
+}

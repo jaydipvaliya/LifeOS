@@ -1,6 +1,7 @@
 import { createApp } from './app';
 import { env } from './config/env';
 import { logger } from './config/logger';
+import { disconnectPrisma } from './config/prisma';
 
 const app = createApp();
 
@@ -10,13 +11,19 @@ const server = app.listen(env.PORT, env.HOST, () => {
 
 function shutdown(signal: string): void {
   logger.info({ signal }, 'Received shutdown signal, closing API server');
-  server.close((err) => {
+  server.close(async (err) => {
     if (err) {
       logger.error({ err }, 'Error while shutting down HTTP server');
       process.exit(1);
     }
-    logger.info('HTTP server closed cleanly');
-    process.exit(0);
+    try {
+      await disconnectPrisma();
+      logger.info('HTTP server and Prisma client closed cleanly');
+      process.exit(0);
+    } catch (prismaErr) {
+      logger.error({ err: prismaErr }, 'Error disconnecting Prisma client');
+      process.exit(1);
+    }
   });
 }
 

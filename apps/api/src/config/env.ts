@@ -1,16 +1,48 @@
 import 'dotenv/config';
 import { z } from 'zod';
 
-const envSchema = z.object({
-  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  PORT: z.coerce.number().int().min(1).max(65535).default(4000),
-  HOST: z.string().default('0.0.0.0'),
-  CORS_ORIGIN: z.string().default('http://localhost:8081'),
-  LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
-  DATABASE_URL: z.string().optional(),
-  REDIS_URL: z.string().optional(),
-  S3_BUCKET: z.string().optional(),
-});
+const envSchema = z
+  .object({
+    NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+    PORT: z.coerce.number().int().min(1).max(65535).default(4000),
+    HOST: z.string().default('0.0.0.0'),
+    CORS_ORIGIN: z.string().default('http://localhost:8081'),
+    LOG_LEVEL: z
+      .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])
+      .default('info'),
+    DATABASE_URL: z.string().optional(),
+    REDIS_URL: z.string().optional(),
+    S3_BUCKET: z.string().optional(),
+    JWT_ACCESS_SECRET: z.string().default('lifeos-dev-only-access-secret-change-in-prod-32c'),
+    JWT_REFRESH_SECRET: z.string().default('lifeos-dev-only-refresh-secret-change-in-prod-32c'),
+    JWT_ACCESS_EXPIRES_IN: z.string().default('15m'),
+    JWT_REFRESH_EXPIRES_DAYS: z.coerce.number().int().min(1).max(90).default(30),
+  })
+  .superRefine((data, ctx) => {
+    if (data.NODE_ENV === 'production') {
+      if (data.JWT_ACCESS_SECRET.includes('dev-only') || data.JWT_ACCESS_SECRET.length < 32) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['JWT_ACCESS_SECRET'],
+          message: 'Production JWT_ACCESS_SECRET must be a strong 32+ character secret',
+        });
+      }
+      if (data.JWT_REFRESH_SECRET.includes('dev-only') || data.JWT_REFRESH_SECRET.length < 32) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['JWT_REFRESH_SECRET'],
+          message: 'Production JWT_REFRESH_SECRET must be a strong 32+ character secret',
+        });
+      }
+      if (!data.DATABASE_URL) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['DATABASE_URL'],
+          message: 'DATABASE_URL is required in production',
+        });
+      }
+    }
+  });
 
 const parsed = envSchema.safeParse(process.env);
 
