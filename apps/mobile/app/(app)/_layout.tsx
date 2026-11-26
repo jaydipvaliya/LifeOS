@@ -9,8 +9,23 @@ export default function AuthenticatedAppLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: theme.colors.background.primary },
+        contentStyle: { backgroundColor: theme.colors.m3.surface },
       }}
-    />
+    >
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="scanner"
+        options={{
+          presentation: 'modal',
+          animation: 'slide_from_bottom',
+        }}
+      />
+      <Stack.Screen
+        name="documents/[id]"
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+    </Stack>
   );
 }

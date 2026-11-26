@@ -26,7 +26,15 @@ export interface M3TabBarProps {
       };
     }
   >;
-  navigation: {
+  emitter?: {
+    emit: (options: {
+      type: 'tabPress' | 'tabLongPress';
+      target: string;
+      canPreventDefault?: boolean;
+    }) => unknown;
+  };
+  navigateToTab?: (routeKey: string) => void;
+  navigation?: {
     emit: (event: {
       type: 'tabPress' | 'tabLongPress';
       target?: string;
@@ -98,7 +106,13 @@ function NavTabItem({ label, focused, icon, onPress, onLongPress }: NavTabItemPr
   );
 }
 
-export function M3NavigationBar({ state, descriptors, navigation }: M3TabBarProps) {
+export function M3NavigationBar({
+  state,
+  descriptors,
+  emitter,
+  navigateToTab,
+  navigation,
+}: M3TabBarProps) {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
 
@@ -127,21 +141,28 @@ export function M3NavigationBar({ state, descriptors, navigation }: M3TabBarProp
         const focused = state.index === index;
 
         const onPress = () => {
-          const event = navigation.emit({
-            type: 'tabPress',
-            target: route.key,
-            canPreventDefault: true,
-          });
-          if (!focused && !event.defaultPrevented) {
-            navigation.navigate(route.name, route.params);
+          const event = emitter
+            ? emitter.emit({ type: 'tabPress', target: route.key, canPreventDefault: true })
+            : navigation?.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
+
+          const prevented = Boolean(
+            (event as { defaultPrevented?: boolean } | undefined)?.defaultPrevented,
+          );
+          if (!focused && !prevented) {
+            if (navigateToTab) {
+              navigateToTab(route.key);
+            } else {
+              navigation?.navigate(route.name, route.params);
+            }
           }
         };
 
         const onLongPress = () => {
-          navigation.emit({
-            type: 'tabLongPress',
-            target: route.key,
-          });
+          if (emitter) {
+            emitter.emit({ type: 'tabLongPress', target: route.key });
+          } else {
+            navigation?.emit({ type: 'tabLongPress', target: route.key });
+          }
         };
 
         return (
