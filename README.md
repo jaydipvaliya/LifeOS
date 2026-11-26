@@ -111,7 +111,7 @@ npm run test
 - **Day 1 (Completed)**: Monorepo setup, shared TypeScript packages, design tokens & mobile UI primitives, Expo Router foundation, Express API skeleton, BullMQ worker skeleton, architecture & planning docs.
 - **Day 2 (Completed)**: PostgreSQL + Prisma 22-table schema and `0001_init` migration SQL, Argon2id + JWT access/refresh-token rotation, mobile SecureStore + Axios refresh interceptor + auth/onboarding flow.
 - **Day 3 (Completed)**: Material 3 Expressive UI upgrade across mobile, 5-tab navigation (`M3NavigationBar`), database-backed Home Dashboard, Document Vault + custom categories, private S3/signed-local storage with magic-byte verification & audit logs, and real Android Camera Document Scanner (multi-page capture, rotate/crop, on-device PDF generation).
-- **Day 4 (Next)**: Tasks, Calendar, Events, Reminders, Assets & Warranties, Subscriptions, and BullMQ reminder scheduling.
-- **Day 5 (Planned)**: Life Intelligence OCR/AI extraction verification, Expo SQLite offline sync, Universal Search, and Life AI Assistant.
+- **Day 4 (Completed)**: Tasks, Life Calendar (Month/Week/Agenda), BullMQ-queued Reminders, Assets & Warranty Repairs (with linked Vault invoices), Subscriptions with monthly/annual spend summaries, and Notification Center & privacy-masking preferences.
+- **Day 5 (Next)**: Life Intelligence OCR/AI extraction verification, Expo SQLite offline sync, Universal Search, and Life AI Assistant.
 
 See [docs/DEVELOPMENT_LOG.md](docs/DEVELOPMENT_LOG.md) and [docs/IMPLEMENTATION_CHECKLIST.md](docs/IMPLEMENTATION_CHECKLIST.md) for detailed progress.

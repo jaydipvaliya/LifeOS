@@ -61,3 +61,9 @@ All endpoints are versioned under `/api/v1`.
 - `GET /api/v1/categories` & `POST /api/v1/categories` — List system/custom categories and create custom categories (Bearer auth).
 - `GET /api/v1/documents`, `POST /api/v1/documents/upload-init`, `POST /api/v1/documents/:id/upload-complete`, `GET/PATCH/DELETE /api/v1/documents/:id`, `POST /api/v1/documents/:id/archive`, `POST /api/v1/documents/:id/restore`, `GET /api/v1/documents/:id/download-url` — Authorized Document Vault CRUD, versioning, and short-lived signed downloads (Bearer auth).
 - `PUT /api/v1/storage/upload` & `GET /api/v1/storage/download` — HMAC-signed private local binary upload/download endpoints (when `STORAGE_DRIVER=local`).
+- `GET/POST /api/v1/tasks`, `PATCH/DELETE /api/v1/tasks/:id`, `POST /api/v1/tasks/:id/complete`, `POST /api/v1/tasks/:id/snooze` — Task management with document/event links (Bearer auth).
+- `GET/POST /api/v1/events`, `PATCH/DELETE /api/v1/events/:id`, `POST /api/v1/events/:id/complete` — Timezone-aware Life Calendar events (Bearer auth).
+- `GET/POST /api/v1/reminders`, `POST /api/v1/reminders/:id/snooze`, `DELETE /api/v1/reminders/:id` — BullMQ-scheduled reminders (Bearer auth).
+- `GET/POST /api/v1/assets`, `GET/PATCH/DELETE /api/v1/assets/:id`, `POST /api/v1/assets/:id/documents`, `POST /api/v1/assets/:id/repairs` — Asset, warranty, invoice link, and repair history endpoints (Bearer auth).
+- `GET/POST /api/v1/subscriptions`, `PATCH/DELETE /api/v1/subscriptions/:id`, `POST /api/v1/subscriptions/:id/cancel` — Subscription tracking & monthly/annual spend summary (Bearer auth).
+- `GET /api/v1/notifications`, `POST /api/v1/notifications/:id/read`, `POST /api/v1/notifications/:id/snooze`, `GET/PATCH /api/v1/notifications/preferences` — Notification history & privacy-aware timing preferences (Bearer auth).

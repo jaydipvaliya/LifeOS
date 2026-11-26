@@ -39,12 +39,12 @@ Tasks are marked `[x]` only after implementation and verification.
 
 ## Day 4 — Life Administration Features
 
-- [ ] Implement Task Management (priorities, due dates, recurring, snooze, linked docs/events)
-- [ ] Implement Life Calendar (monthly, weekly, agenda, time zones, recurring events)
-- [ ] Implement Asset & Warranty Manager (repair history, linked invoices)
-- [ ] Implement Subscription Manager (billing cycles, monthly/annual spend summaries, renewal reminders)
-- [ ] Implement server-side BullMQ reminder scheduling & notification preferences
-- [ ] Implement Home dashboard database aggregation & integration tests
+- [x] Implement Task Management (priorities, due dates, recurring, snooze, linked docs/events)
+- [x] Implement Life Calendar (monthly, weekly, agenda, time zones, recurring events)
+- [x] Implement Asset & Warranty Manager (repair history, linked invoices)
+- [x] Implement Subscription Manager (billing cycles, monthly/annual spend summaries, renewal reminders)
+- [x] Implement server-side BullMQ reminder scheduling & notification preferences
+- [x] Implement Home dashboard database aggregation & integration tests
 
 ## Day 5 — Life Intelligence, Offline-First & Quality Preparation
 
