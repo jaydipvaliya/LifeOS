@@ -260,5 +260,97 @@ export const openApiSpec = {
         },
       },
     },
+    '/tasks': {
+      get: {
+        summary: 'List tasks with filtering and sorting',
+        tags: ['Tasks'],
+        security: [{ bearerAuth: [] }],
+        responses: { '200': { description: 'Tasks list' } },
+      },
+      post: {
+        summary: 'Create task',
+        tags: ['Tasks'],
+        security: [{ bearerAuth: [] }],
+        responses: { '201': { description: 'Task created' } },
+      },
+    },
+    '/events': {
+      get: {
+        summary: 'List calendar events',
+        tags: ['Events'],
+        security: [{ bearerAuth: [] }],
+        responses: { '200': { description: 'Events list' } },
+      },
+      post: {
+        summary: 'Create calendar event',
+        tags: ['Events'],
+        security: [{ bearerAuth: [] }],
+        responses: { '201': { description: 'Event created' } },
+      },
+    },
+    '/reminders': {
+      get: {
+        summary: 'List scheduled reminders',
+        tags: ['Reminders'],
+        security: [{ bearerAuth: [] }],
+        responses: { '200': { description: 'Reminders list' } },
+      },
+      post: {
+        summary: 'Create and queue reminder',
+        tags: ['Reminders'],
+        security: [{ bearerAuth: [] }],
+        responses: { '201': { description: 'Reminder queued' } },
+      },
+    },
+    '/assets': {
+      get: {
+        summary: 'List assets and warranty dates',
+        tags: ['Assets'],
+        security: [{ bearerAuth: [] }],
+        responses: { '200': { description: 'Assets list' } },
+      },
+      post: {
+        summary: 'Create asset and link documents',
+        tags: ['Assets'],
+        security: [{ bearerAuth: [] }],
+        responses: { '201': { description: 'Asset created' } },
+      },
+    },
+    '/subscriptions': {
+      get: {
+        summary: 'List subscriptions with monthly/annual spend summary',
+        tags: ['Subscriptions'],
+        security: [{ bearerAuth: [] }],
+        responses: { '200': { description: 'Subscriptions and spend summary' } },
+      },
+      post: {
+        summary: 'Create subscription',
+        tags: ['Subscriptions'],
+        security: [{ bearerAuth: [] }],
+        responses: { '201': { description: 'Subscription created' } },
+      },
+    },
+    '/notifications': {
+      get: {
+        summary: 'List notification history',
+        tags: ['Notifications'],
+        security: [{ bearerAuth: [] }],
+        responses: { '200': { description: 'Notifications list' } },
+      },
+    },
+    '/notifications/preferences': {
+      get: {
+        summary: 'Get notification preferences',
+        tags: ['Notifications'],
+        security: [{ bearerAuth: [] }],
+        responses: { '200': { description: 'Notification preferences' } },
+      },
+      patch: {
+        summary: 'Update notification preferences',
+        tags: ['Notifications'],
+        security: [{ bearerAuth: [] }],
+        responses: { '200': { description: 'Preferences updated' } },
+      },
+    },
   },
 } as const;
