@@ -54,10 +54,10 @@ lifeos/
 
 ---
 
-## Design System — Material 3 Expressive × Warm Minimal Editorial
+## Design System — Colorful Material 3 Expressive
 
-- **Tonal Palette**: Warm Minimal forest & sage hues mapped to Material 3 tonal roles (`#F7F8F5` surface, `#EEF1EA` surfaceContainer, `#253A32` primary, `#E6EEE7` primaryContainer, `#526F60` secondary, `#9C6A23` warm amber tertiary)
-- **Shapes & Motion**: Large squircle cards (`20–28px`), pill buttons & active tab indicators, Reanimated spring physics (`expressiveSpatial` / `expressiveEffects`)
+- **Triadic & Expressive Accents**: `#FAF8FF` surface, `#FFFFFF` / `#F4F1FB` tonal container hierarchy, `#4F46E5` Indigo primary, `#0F9D8A` Teal secondary, `#E85D3F` Coral tertiary, plus 6 hue pairs (`violet`, `teal`, `coral`, `amber`, `cobalt`, `berry`) across tabs and cards
+- **Shapes & Motion**: Large squircle cards (`20–28px`), full-pill search bars, buttons, and connected segmented controls, Reanimated spring physics (`expressiveSpatial` / `expressiveEffects`)
 - **Typography**: `Manrope` for headings, `Inter` for body text, `DM Serif Display` selectively for editorial titles
 
 ---
@@ -112,6 +112,14 @@ npm run test
 - **Day 2 (Completed)**: PostgreSQL + Prisma 22-table schema and `0001_init` migration SQL, Argon2id + JWT access/refresh-token rotation, mobile SecureStore + Axios refresh interceptor + auth/onboarding flow.
 - **Day 3 (Completed)**: Material 3 Expressive UI upgrade across mobile, 5-tab navigation (`M3NavigationBar`), database-backed Home Dashboard, Document Vault + custom categories, private S3/signed-local storage with magic-byte verification & audit logs, and real Android Camera Document Scanner (multi-page capture, rotate/crop, on-device PDF generation).
 - **Day 4 (Completed)**: Tasks, Life Calendar (Month/Week/Agenda), BullMQ-queued Reminders, Assets & Warranty Repairs (with linked Vault invoices), Subscriptions with monthly/annual spend summaries, and Notification Center & privacy-masking preferences.
-- **Day 5 (Next)**: Life Intelligence OCR/AI extraction verification, Expo SQLite offline sync, Universal Search, and Life AI Assistant.
+- **Day 5 (Completed)**: AI Provider abstraction (`none` heuristic / `openai` / `gemini`), OCR + Zod-validated Extraction Review with explicit user confirmation, PostgreSQL `pg_trgm` Universal Search, grounded Life AI Assistant with citations, Expo SQLite offline cache + `sync_operations` outbox with optimistic concurrency conflict checks, and EAS Android build config (`apps/mobile/eas.json`).
+
+### Production Android Build (EAS)
+
+```bash
+cd apps/mobile
+npx eas build --platform android --profile preview     # Internal APK
+npx eas build --platform android --profile production  # Google Play AAB
+```
 
 See [docs/DEVELOPMENT_LOG.md](docs/DEVELOPMENT_LOG.md) and [docs/IMPLEMENTATION_CHECKLIST.md](docs/IMPLEMENTATION_CHECKLIST.md) for detailed progress.

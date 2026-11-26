@@ -34,5 +34,6 @@ export interface IStorageService {
   createSignedUploadUrl(params: SignedUploadRequest): Promise<SignedUploadResult>;
   createSignedDownloadUrl(params: SignedDownloadRequest): Promise<SignedDownloadResult>;
   headObject(storageKey: string): Promise<StoredObjectInfo>;
+  getObjectBuffer?(storageKey: string): Promise<Buffer | null>;
   deleteObject(storageKey: string): Promise<void>;
 }

@@ -38,6 +38,24 @@ export default function AuthenticatedAppLayout() {
           animation: 'slide_from_right',
         }}
       />
+      <Stack.Screen
+        name="search"
+        options={{
+          animation: 'fade_from_bottom',
+        }}
+      />
+      <Stack.Screen
+        name="assistant"
+        options={{
+          animation: 'slide_from_bottom',
+        }}
+      />
+      <Stack.Screen
+        name="extraction/[id]"
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
     </Stack>
   );
 }

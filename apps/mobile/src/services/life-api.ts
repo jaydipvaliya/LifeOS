@@ -21,6 +21,8 @@ import type {
   CreateTaskInput,
   UpdateNotificationPreferenceInput,
 } from '@lifeos/validation';
+import { offlineStore } from '../offline/sqlite-store';
+import { useAppUiStore } from '../stores/app-store';
 import { apiClient } from './api-client';
 
 export const lifeApi = {
@@ -30,14 +32,26 @@ export const lifeApi = {
     overdueOnly?: boolean;
     search?: string;
   }): Promise<TaskDto[]> {
-    const res = await apiClient.get<ApiSuccessResponse<{ tasks: TaskDto[] }>>('/tasks', {
-      params: {
-        ...params,
-        overdueOnly: params?.overdueOnly !== undefined ? String(params.overdueOnly) : undefined,
-        limit: 50,
-      },
-    });
-    return res.data.data.tasks;
+    const cacheKey = `tasks:${JSON.stringify(params ?? {})}`;
+    try {
+      const res = await apiClient.get<ApiSuccessResponse<{ tasks: TaskDto[] }>>('/tasks', {
+        params: {
+          ...params,
+          overdueOnly: params?.overdueOnly !== undefined ? String(params.overdueOnly) : undefined,
+          limit: 50,
+        },
+      });
+      useAppUiStore.getState().setOffline(false);
+      await offlineStore.putCache(cacheKey, res.data.data.tasks);
+      return res.data.data.tasks;
+    } catch (err) {
+      const cached = await offlineStore.getCache<TaskDto[]>(cacheKey);
+      if (cached) {
+        useAppUiStore.getState().setOffline(true);
+        return cached;
+      }
+      throw err;
+    }
   },
 
   async createTask(input: CreateTaskInput): Promise<TaskDto> {

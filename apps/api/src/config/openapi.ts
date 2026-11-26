@@ -352,5 +352,69 @@ export const openApiSpec = {
         responses: { '200': { description: 'Preferences updated' } },
       },
     },
+    '/documents/{id}/extraction': {
+      get: {
+        summary: 'Get latest OCR and AI structured extraction for review',
+        tags: ['Intelligence'],
+        security: [{ bearerAuth: [] }],
+        responses: { '200': { description: 'Document extraction returned' } },
+      },
+    },
+    '/documents/{id}/extraction/analyze': {
+      post: {
+        summary: 'Run OCR + AI classification + Zod structured extraction on a document',
+        tags: ['Intelligence'],
+        security: [{ bearerAuth: [] }],
+        responses: { '200': { description: 'Extraction completed' } },
+      },
+    },
+    '/documents/{id}/extraction/confirm': {
+      post: {
+        summary: 'Explicitly verify extracted fields and optionally create confirmed actions',
+        tags: ['Intelligence'],
+        security: [{ bearerAuth: [] }],
+        responses: { '200': { description: 'Extraction verified' } },
+      },
+    },
+    '/search': {
+      get: {
+        summary: 'Universal search across documents, tasks, events, assets, and subscriptions',
+        tags: ['Search'],
+        security: [{ bearerAuth: [] }],
+        responses: { '200': { description: 'Grouped search results' } },
+      },
+    },
+    '/assistant/conversations': {
+      get: {
+        summary: 'List Life AI Assistant conversations',
+        tags: ['Assistant'],
+        security: [{ bearerAuth: [] }],
+        responses: { '200': { description: 'Conversations list' } },
+      },
+    },
+    '/assistant/ask': {
+      post: {
+        summary: 'Ask a grounded personal question to LifeOS AI Assistant',
+        tags: ['Assistant'],
+        security: [{ bearerAuth: [] }],
+        responses: { '200': { description: 'Grounded response with citations' } },
+      },
+    },
+    '/sync/status': {
+      get: {
+        summary: 'Check offline sync status and pending conflict counts',
+        tags: ['Sync'],
+        security: [{ bearerAuth: [] }],
+        responses: { '200': { description: 'Sync status' } },
+      },
+    },
+    '/sync/batch': {
+      post: {
+        summary: 'Flush offline outbox mutations with optimistic concurrency checks',
+        tags: ['Sync'],
+        security: [{ bearerAuth: [] }],
+        responses: { '200': { description: 'Batch sync results' } },
+      },
+    },
   },
 } as const;

@@ -10,6 +10,7 @@ import { prisma } from './config/prisma';
 import { errorHandler, notFoundHandler } from './middleware/error-handler';
 import { apiRateLimiter } from './middleware/rate-limit';
 import { requestIdMiddleware } from './middleware/request-id';
+import { createAiProvider, type IAiProvider } from './modules/ai/ai-provider';
 import { PrismaAssetsRepository } from './modules/assets/assets.repository';
 import { createAssetsRouter } from './modules/assets/assets.routes';
 import type { IAssetsRepository } from './modules/assets/assets.types';
@@ -31,6 +32,12 @@ import { PrismaEventsRepository } from './modules/events/events.repository';
 import { createEventsRouter } from './modules/events/events.routes';
 import type { IEventsRepository } from './modules/events/events.types';
 import { createHealthRouter } from './modules/health/health.routes';
+import { createAssistantRouter } from './modules/intelligence/assistant.routes';
+import { createExtractionRouter } from './modules/intelligence/extraction.routes';
+import type { IIntelligenceRepository } from './modules/intelligence/extraction.types';
+import { PrismaIntelligenceRepository } from './modules/intelligence/intelligence.repository';
+import { createSearchRouter } from './modules/intelligence/search.routes';
+import { createSyncRouter } from './modules/intelligence/sync.routes';
 import { PrismaNotificationsRepository } from './modules/notifications/notifications.repository';
 import { createNotificationsRouter } from './modules/notifications/notifications.routes';
 import type { INotificationsRepository } from './modules/notifications/notifications.types';
@@ -65,6 +72,8 @@ export interface AppDependencies {
   assetsRepository?: IAssetsRepository;
   subscriptionsRepository?: ISubscriptionsRepository;
   notificationsRepository?: INotificationsRepository;
+  intelligenceRepository?: IIntelligenceRepository;
+  aiProvider?: IAiProvider;
   storageService?: IStorageService;
   localStorageService?: LocalPrivateStorageService | null;
   passwordService?: PasswordService;
@@ -88,6 +97,9 @@ export function createApp(deps: AppDependencies = {}): Express {
     deps.subscriptionsRepository ?? new PrismaSubscriptionsRepository(prisma);
   const notificationsRepository =
     deps.notificationsRepository ?? new PrismaNotificationsRepository(prisma);
+  const intelligenceRepository =
+    deps.intelligenceRepository ?? new PrismaIntelligenceRepository(prisma);
+  const aiProvider = deps.aiProvider ?? createAiProvider();
   const passwordService = deps.passwordService ?? new PasswordService();
   const tokenService = deps.tokenService ?? new TokenService();
 
@@ -204,6 +216,39 @@ export function createApp(deps: AppDependencies = {}): Express {
     `${API_PREFIX}/notifications`,
     createNotificationsRouter({
       repository: notificationsRepository,
+      tokenService,
+    }),
+  );
+
+  app.use(
+    `${API_PREFIX}/documents`,
+    createExtractionRouter({
+      documentsRepository,
+      intelligenceRepository,
+      storageService: defaultStorage.storageService,
+      aiProvider,
+      tokenService,
+    }),
+  );
+  app.use(
+    `${API_PREFIX}/search`,
+    createSearchRouter({
+      intelligenceRepository,
+      tokenService,
+    }),
+  );
+  app.use(
+    `${API_PREFIX}/assistant`,
+    createAssistantRouter({
+      intelligenceRepository,
+      aiProvider,
+      tokenService,
+    }),
+  );
+  app.use(
+    `${API_PREFIX}/sync`,
+    createSyncRouter({
+      intelligenceRepository,
       tokenService,
     }),
   );

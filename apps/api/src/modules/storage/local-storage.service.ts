@@ -168,6 +168,15 @@ export class LocalPrivateStorageService implements IStorageService {
     }
   }
 
+  async getObjectBuffer(storageKey: string): Promise<Buffer | null> {
+    const filePath = this.resolveSafePath(storageKey);
+    try {
+      return await fs.readFile(filePath);
+    } catch {
+      return null;
+    }
+  }
+
   async deleteObject(storageKey: string): Promise<void> {
     const filePath = this.resolveSafePath(storageKey);
     await fs.rm(filePath, { force: true });

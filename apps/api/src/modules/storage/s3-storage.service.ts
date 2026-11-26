@@ -98,6 +98,22 @@ export class S3StorageService implements IStorageService {
     }
   }
 
+  async getObjectBuffer(storageKey: string): Promise<Buffer | null> {
+    try {
+      const response = await this.client.send(
+        new GetObjectCommand({
+          Bucket: this.bucket,
+          Key: storageKey,
+        }),
+      );
+      if (!response.Body) return null;
+      const bytes = await response.Body.transformToByteArray();
+      return Buffer.from(bytes);
+    } catch {
+      return null;
+    }
+  }
+
   async deleteObject(storageKey: string): Promise<void> {
     await this.client.send(
       new DeleteObjectCommand({

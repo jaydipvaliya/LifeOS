@@ -13,6 +13,8 @@ import type {
   DocumentUploadInitInput,
   UpdateDocumentInput,
 } from '@lifeos/validation';
+import { offlineStore } from '../offline/sqlite-store';
+import { useAppUiStore } from '../stores/app-store';
 import { apiClient } from './api-client';
 
 export interface ListDocumentsParams {
@@ -26,8 +28,19 @@ export interface ListDocumentsParams {
 
 export const vaultApi = {
   async getDashboard(): Promise<DashboardDataDto> {
-    const res = await apiClient.get<ApiSuccessResponse<DashboardDataDto>>('/dashboard');
-    return res.data.data;
+    try {
+      const res = await apiClient.get<ApiSuccessResponse<DashboardDataDto>>('/dashboard');
+      useAppUiStore.getState().setOffline(false);
+      await offlineStore.putCache('dashboard', res.data.data);
+      return res.data.data;
+    } catch (err) {
+      const cached = await offlineStore.getCache<DashboardDataDto>('dashboard');
+      if (cached) {
+        useAppUiStore.getState().setOffline(true);
+        return cached;
+      }
+      throw err;
+    }
   },
 
   async listCategories(): Promise<CategoryDto[]> {
@@ -48,19 +61,35 @@ export const vaultApi = {
     documents: DocumentListItemDto[];
     pagination: PaginationMeta | undefined;
   }> {
-    const res = await apiClient.get<ApiSuccessResponse<{ documents: DocumentListItemDto[] }>>(
-      '/documents',
-      {
-        params: {
-          ...params,
-          archived: params.archived !== undefined ? String(params.archived) : undefined,
+    const cacheKey = `documents:${JSON.stringify(params)}`;
+    try {
+      const res = await apiClient.get<ApiSuccessResponse<{ documents: DocumentListItemDto[] }>>(
+        '/documents',
+        {
+          params: {
+            ...params,
+            archived: params.archived !== undefined ? String(params.archived) : undefined,
+          },
         },
-      },
-    );
-    return {
-      documents: res.data.data.documents,
-      pagination: res.data.meta.pagination,
-    };
+      );
+      const payload = {
+        documents: res.data.data.documents,
+        pagination: res.data.meta.pagination,
+      };
+      useAppUiStore.getState().setOffline(false);
+      await offlineStore.putCache(cacheKey, payload);
+      return payload;
+    } catch (err) {
+      const cached = await offlineStore.getCache<{
+        documents: DocumentListItemDto[];
+        pagination: PaginationMeta | undefined;
+      }>(cacheKey);
+      if (cached) {
+        useAppUiStore.getState().setOffline(true);
+        return cached;
+      }
+      throw err;
+    }
   },
 
   async getDocumentDetail(id: string): Promise<DocumentDetailDto> {

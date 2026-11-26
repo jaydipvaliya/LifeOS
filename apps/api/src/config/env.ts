@@ -26,6 +26,10 @@ const envSchema = z
     JWT_REFRESH_SECRET: z.string().default('lifeos-dev-only-refresh-secret-change-in-prod-32c'),
     JWT_ACCESS_EXPIRES_IN: z.string().default('15m'),
     JWT_REFRESH_EXPIRES_DAYS: z.coerce.number().int().min(1).max(90).default(30),
+    AI_PROVIDER: z.enum(['none', 'openai', 'gemini']).default('none'),
+    AI_API_KEY: z.string().optional(),
+    AI_MODEL: z.string().optional(),
+    AI_BASE_URL: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.NODE_ENV === 'production') {

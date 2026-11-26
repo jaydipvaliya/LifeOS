@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
+import { processExtractionJob } from '../src/processors/extraction.processor';
 import { formatPrivacySafeNotification } from '../src/processors/reminder.processor';
 import { QUEUE_NAMES } from '../src/queues/queue-names';
 
-describe('Worker Foundation & Reminder Processor', () => {
+describe('Worker Foundation & Processors', () => {
   it('defines canonical BullMQ queue names', () => {
     expect(QUEUE_NAMES.DOCUMENT_EXTRACTION).toBe('lifeos.document.extraction');
     expect(QUEUE_NAMES.REMINDER_DISPATCH).toBe('lifeos.reminder.dispatch');
@@ -25,5 +26,14 @@ describe('Worker Foundation & Reminder Processor', () => {
       hideSensitiveDetails: false,
     });
     expect(unmasked.body).toBe('Renew laptop warranty');
+  });
+
+  it('processes document extraction jobs idempotently', async () => {
+    const res = await processExtractionJob({
+      id: 'job-ext-1',
+      data: { documentId: 'doc-1', userId: 'user-1' },
+    } as never);
+    expect(res.documentId).toBe('doc-1');
+    expect(res.status).toBe('queued_for_ai_review');
   });
 });

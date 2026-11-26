@@ -25,7 +25,7 @@ Tasks are marked `[x]` only after implementation and verification.
 - [x] Implement mobile auth screens (Welcome, Register, Login, Forgot/Reset Password, Onboarding) connected to `/api/v1/auth/*`
 - [x] Implement SecureStore token persistence and Axios refresh interceptor
 - [x] Add authentication integration and unit tests
-- [ ] Run `prisma migrate deploy` & `prisma:seed` against local PostgreSQL once `apps/api/.env` `DATABASE_URL` is configured
+- [x] Run `prisma migrate deploy` & `prisma:seed` against local PostgreSQL once `apps/api/.env` `DATABASE_URL` is configured
 
 ## Day 3 — Home Dashboard & Document Vault
 
@@ -48,9 +48,9 @@ Tasks are marked `[x]` only after implementation and verification.
 
 ## Day 5 — Life Intelligence, Offline-First & Quality Preparation
 
-- [ ] Implement AI Provider abstraction (`classifyDocument`, `extractDocumentData`, `summarizeDocument`, `answerLifeQuestion`)
-- [ ] Implement BullMQ OCR + AI classification + Zod-validated structured extraction pipeline
-- [ ] Build Extraction Review screen requiring explicit user confirmation before creating events/reminders/assets
-- [ ] Implement Expo SQLite local metadata cache and `sync_operations` outbox with optimistic concurrency checks
-- [ ] Implement Life AI Assistant & PostgreSQL full-text / `pg_trgm` Universal Search
-- [ ] Security audit, full test suite, EAS Android build configuration, and Day 5 milestone report
+- [x] Implement AI Provider abstraction (`classifyDocument`, `extractDocumentData`, `summarizeDocument`, `answerLifeQuestion`)
+- [x] Implement BullMQ OCR + AI classification + Zod-validated structured extraction pipeline
+- [x] Build Extraction Review screen requiring explicit user confirmation before creating events/reminders/assets
+- [x] Implement Expo SQLite local metadata cache and `sync_operations` outbox with optimistic concurrency checks
+- [x] Implement Life AI Assistant & PostgreSQL full-text / `pg_trgm` Universal Search
+- [x] Security audit, full test suite, EAS Android build configuration, and Day 5 milestone report

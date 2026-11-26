@@ -2,6 +2,7 @@ import { Worker } from 'bullmq';
 import IORedis from 'ioredis';
 import { workerEnv } from './config/env';
 import { logger } from './config/logger';
+import { processExtractionJob } from './processors/extraction.processor';
 import { processReminderJob } from './processors/reminder.processor';
 import { QUEUE_NAMES } from './queues/queue-names';
 
@@ -25,7 +26,16 @@ function bootstrap(): void {
       logger.error({ err, jobId: job?.id }, 'Reminder job failed');
     });
 
-    activeWorkers.push(reminderWorker);
+    const extractionWorker = new Worker(QUEUE_NAMES.DOCUMENT_EXTRACTION, processExtractionJob, {
+      connection: redisConnection,
+      concurrency: 3,
+    });
+
+    extractionWorker.on('failed', (job, err) => {
+      logger.error({ err, jobId: job?.id }, 'Extraction job failed');
+    });
+
+    activeWorkers.push(reminderWorker, extractionWorker);
   }
 
   logger.info(
