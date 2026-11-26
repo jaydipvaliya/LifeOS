@@ -33,6 +33,31 @@ export const resetPasswordSchema = z.object({
   newPassword: passwordSchema,
 });
 
+export const logoutSchema = z.object({
+  refreshToken: z.string().min(20).optional(),
+});
+
+export const deleteAccountSchema = z.object({
+  password: z.string().min(1, 'Password confirmation is required').max(128),
+});
+
+export const updateProfileSchema = z.object({
+  fullName: z.string().trim().min(2).max(120).optional(),
+  mode: userModeSchema.optional(),
+  timezone: z.string().trim().min(2).max(64).optional(),
+  locale: z.string().trim().min(2).max(16).optional(),
+  themePreference: z.enum(['light', 'dark', 'system']).optional(),
+  institutionName: z.string().trim().max(160).nullable().optional(),
+  graduationYear: z.number().int().min(1980).max(2040).nullable().optional(),
+  jobTitle: z.string().trim().max(120).nullable().optional(),
+  companyName: z.string().trim().max(160).nullable().optional(),
+  completeOnboarding: z.boolean().optional(),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>;
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+export type DeleteAccountInput = z.infer<typeof deleteAccountSchema>;
