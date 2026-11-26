@@ -15,7 +15,7 @@ export class HealthService {
       checks: {
         database: dbStatus,
         redis: env.REDIS_URL ? 'configured' : 'unconfigured',
-        storage: env.S3_BUCKET ? 'configured' : 'unconfigured',
+        storage: env.STORAGE_DRIVER === 'local' || env.S3_BUCKET ? 'configured' : 'unconfigured',
       },
     };
   }
