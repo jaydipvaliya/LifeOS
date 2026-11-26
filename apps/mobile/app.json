@@ -24,12 +24,36 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
-    "plugins": ["expo-router", "expo-font", "expo-splash-screen", "expo-secure-store"]
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-splash-screen",
+      "expo-secure-store",
+      "expo-sharing",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "LifeOS uses the camera to scan receipts, certificates, and documents."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "LifeOS accesses your selected photos to upload documents to your private Vault."
+        }
+      ]
+    ]
   }
 }
