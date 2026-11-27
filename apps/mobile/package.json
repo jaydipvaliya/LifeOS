@@ -9,7 +9,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "eas-build-post-install": "cd ../.. && npx tsc -b packages/config packages/shared-types packages/design-tokens packages/validation"
   },
   "dependencies": {
     "@expo-google-fonts/dm-serif-display": "^0.4.2",
