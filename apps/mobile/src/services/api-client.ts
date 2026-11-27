@@ -6,7 +6,7 @@ const baseURL = process.env.EXPO_PUBLIC_API_URL ?? 'http://10.0.2.2:4000/api/v1'
 
 export const apiClient = axios.create({
   baseURL,
-  timeout: 15_000,
+  timeout: 45_000,
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
@@ -37,7 +37,7 @@ async function performTokenRefresh(): Promise<string | null> {
           'Content-Type': 'application/json',
           Accept: 'application/json',
         },
-        timeout: 15_000,
+        timeout: 45_000,
       },
     );
 
