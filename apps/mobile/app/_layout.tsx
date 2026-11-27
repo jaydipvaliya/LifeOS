@@ -15,9 +15,16 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { Lock } from 'lucide-react-native';
-import React, { useEffect } from 'react';
-import { AppState, Pressable, StyleSheet, Text, useColorScheme, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { AppState, Image, Pressable, StyleSheet, Text, useColorScheme, View } from 'react-native';
+import Animated, {
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import brandIconSource from '../assets/android-icon-foreground.png';
 import { Button, EditorialCard, EditorialText, Screen } from '../src/components/ui';
 import { flushSyncOutbox } from '../src/offline/sync-engine';
 import { authApi } from '../src/services/auth-api';
@@ -46,6 +53,20 @@ function RootNavigator() {
   const { mode, theme } = useTheme();
   const router = useRouter();
   const segments = useSegments();
+  const [minSplashElapsed, setMinSplashElapsed] = useState(false);
+  const [splashDismissed, setSplashDismissed] = useState(false);
+  const splashOpacity = useSharedValue(1);
+
+  const splashAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: splashOpacity.value,
+  }));
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMinSplashElapsed(true);
+    }, 950);
+    return () => clearTimeout(timer);
+  }, []);
 
   const {
     isHydrated,
@@ -112,6 +133,15 @@ function RootNavigator() {
     }
   }, [isAuthenticated, isHydrated, router, segments]);
 
+  useEffect(() => {
+    if (!isHydrated || !minSplashElapsed || splashDismissed) return;
+    splashOpacity.value = withTiming(0, { duration: 320 }, (finished) => {
+      if (finished) {
+        runOnJS(setSplashDismissed)(true);
+      }
+    });
+  }, [isHydrated, minSplashElapsed, splashDismissed, splashOpacity]);
+
   const handleBiometricUnlock = async () => {
     const result = await LocalAuthentication.authenticateAsync({
       promptMessage: 'Unlock LifeOS',
@@ -163,6 +193,52 @@ function RootNavigator() {
           contentStyle: { backgroundColor: theme.colors.background.primary },
         }}
       />
+      {!splashDismissed ? (
+        <Animated.View
+          pointerEvents="auto"
+          style={[
+            StyleSheet.absoluteFill,
+            styles.brandSplash,
+            { backgroundColor: theme.colors.background.primary },
+            splashAnimatedStyle,
+          ]}
+        >
+          <View
+            style={[
+              styles.splashLogoTile,
+              {
+                backgroundColor: '#1E6B52',
+                borderColor: '#134937',
+                borderBottomColor: '#134937',
+              },
+            ]}
+          >
+            <Image source={brandIconSource} style={styles.splashLogoImage} resizeMode="contain" />
+          </View>
+          <EditorialText
+            variant="displayEditorial"
+            tone="primary"
+            style={{ marginTop: 22, textAlign: 'center' }}
+          >
+            LifeOS
+          </EditorialText>
+          <EditorialText
+            variant="editorialEyebrow"
+            tone="forest"
+            uppercase
+            style={{ marginTop: 8, textAlign: 'center' }}
+          >
+            Your Life, Organized
+          </EditorialText>
+          <EditorialText
+            variant="caption"
+            tone="muted"
+            style={{ marginTop: 6, textAlign: 'center' }}
+          >
+            Private Vault · Calendar · AI Intelligence
+          </EditorialText>
+        </Animated.View>
+      ) : null}
     </>
   );
 }
@@ -247,6 +323,30 @@ export function ErrorBoundary({ error, retry }: { error: Error; retry: () => voi
 }
 
 const styles = StyleSheet.create({
+  brandSplash: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+    zIndex: 50,
+  },
+  splashLogoTile: {
+    width: 96,
+    height: 96,
+    borderRadius: 28,
+    borderWidth: 1,
+    borderBottomWidth: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#1E6B52',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 18,
+    elevation: 6,
+  },
+  splashLogoImage: {
+    width: 78,
+    height: 78,
+  },
   lockScreen: {
     alignItems: 'center',
     justifyContent: 'center',
