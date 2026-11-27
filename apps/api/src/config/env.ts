@@ -10,9 +10,12 @@ const envSchema = z
     LOG_LEVEL: z
       .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])
       .default('info'),
-    PUBLIC_API_BASE_URL: z.string().default('http://127.0.0.1:4000'),
+    PUBLIC_API_BASE_URL: z
+      .string()
+      .default(process.env.RENDER_EXTERNAL_URL || 'http://127.0.0.1:4000'),
     DATABASE_URL: z.string().optional(),
     REDIS_URL: z.string().optional(),
+    RUN_EMBEDDED_WORKER: z.coerce.boolean().default(false),
     STORAGE_DRIVER: z.enum(['local', 's3']).default('local'),
     STORAGE_LOCAL_DIR: z.string().default('.storage'),
     STORAGE_SIGNING_SECRET: z.string().default('lifeos-dev-only-storage-signing-secret-32c'),

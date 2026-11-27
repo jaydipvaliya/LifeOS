@@ -138,7 +138,10 @@ export function createApp(deps: AppDependencies = {}): Express {
   app.use(helmet());
   app.use(
     cors({
-      origin: env.CORS_ORIGIN.split(',').map((origin) => origin.trim()),
+      origin:
+        env.CORS_ORIGIN.trim() === '*'
+          ? true
+          : env.CORS_ORIGIN.split(',').map((origin) => origin.trim()),
       credentials: true,
     }),
   );

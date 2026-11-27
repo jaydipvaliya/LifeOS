@@ -3,9 +3,11 @@ import { env } from './config/env';
 import { logger } from './config/logger';
 import { disconnectPrisma } from './config/prisma';
 import { captureApiException, initApiSentry } from './config/sentry';
+import { startEmbeddedWorkers } from './modules/worker/embedded-worker';
 
 initApiSentry();
 const app = createApp();
+const embeddedWorkers = startEmbeddedWorkers();
 
 const server = app.listen(env.PORT, env.HOST, () => {
   logger.info({ host: env.HOST, port: env.PORT, env: env.NODE_ENV }, 'LifeOS API server listening');
@@ -30,6 +32,9 @@ function shutdown(signal: string): void {
       process.exit(1);
     }
     try {
+      if (embeddedWorkers) {
+        await embeddedWorkers.close();
+      }
       await disconnectPrisma();
       logger.info('HTTP server and Prisma client closed cleanly');
       process.exit(0);

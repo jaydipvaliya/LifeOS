@@ -116,7 +116,7 @@ npm run test
 
 ### Production Deployment & Android Build
 
-- **Cloud API + Worker + PostgreSQL + Redis (Render)**: Deploy using [`infrastructure/render.yaml`](infrastructure/render.yaml). Configure S3/R2 storage, `AI_API_KEY`, `EMAIL_API_KEY` (Resend), `EXPO_ACCESS_TOKEN`, `INTERNAL_WORKER_SECRET` (shared between API and Worker), and `SENTRY_DSN`.
+- **Cloud API + PostgreSQL + Redis (Render Free Tier)**: Deploy directly using the root Blueprint [`render.yaml`](render.yaml) (runs the Express API with `RUN_EMBEDDED_WORKER=true`, PostgreSQL, and Redis on Render's free tier; swap `STORAGE_DRIVER=s3` and `EMAIL_PROVIDER=resend` when adding Cloudflare R2/S3 and Resend).
 - **Container Builds (Docker)**: Multi-stage Node 22 images are defined in [`infrastructure/Dockerfile.api`](infrastructure/Dockerfile.api) and [`infrastructure/Dockerfile.worker`](infrastructure/Dockerfile.worker) (with API readiness healthchecks on `/api/v1/health/ready`).
 - **Mobile Android Build (EAS)**:
 
