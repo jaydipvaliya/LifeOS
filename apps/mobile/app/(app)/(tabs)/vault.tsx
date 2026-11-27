@@ -26,6 +26,7 @@ import {
   ExpressiveSheetModal,
   FilterChip,
   LoadingState,
+  resolveDocStatusPresentation,
   Screen,
   SearchBar,
   SegmentedControl,
@@ -35,26 +36,7 @@ import { extractApiErrorMessage } from '../../../src/services/api-client';
 import { vaultApi } from '../../../src/services/vault-api';
 import { useTheme } from '../../../src/theme';
 
-const CATEGORY_ACCENTS = ['teal', 'violet', 'cobalt', 'coral', 'amber', 'berry'] as const;
 type VaultScope = 'active' | 'expiring' | 'archived';
-
-function formatVaultStatus(status: string, isArchived: boolean): string {
-  if (isArchived) return 'Archived';
-  switch (status) {
-    case 'completed':
-      return 'Indexed';
-    case 'uploaded':
-      return 'Saved';
-    case 'pending_extraction':
-      return 'Queued';
-    case 'processing':
-      return 'Analyzing';
-    case 'failed':
-      return 'Failed';
-    default:
-      return status.replace(/_/g, ' ');
-  }
-}
 
 export default function DocumentVaultScreen() {
   const { theme } = useTheme();
@@ -214,13 +196,13 @@ export default function DocumentVaultScreen() {
           <RefreshControl
             refreshing={documentsQuery.isRefetching}
             onRefresh={() => void documentsQuery.refetch()}
-            tintColor={theme.colors.m3.secondary}
+            tintColor={theme.colors.m3.primary}
           />
         }
       >
         <View style={styles.headerRow}>
           <View style={styles.flexText}>
-            <EditorialText variant="editorialEyebrow" tone="tealVibrant" uppercase>
+            <EditorialText variant="editorialEyebrow" tone="forest" uppercase>
               Private Storage
             </EditorialText>
             <EditorialText variant="pageHeadingEditorial" tone="primary" style={{ marginTop: 4 }}>
@@ -234,19 +216,15 @@ export default function DocumentVaultScreen() {
             style={[
               styles.newCatPill,
               {
-                backgroundColor: theme.colors.expressive.teal.container,
+                backgroundColor: theme.colors.m3.primaryContainer,
                 borderRadius: theme.shapes.full,
               },
             ]}
           >
-            <FolderPlus
-              size={15}
-              strokeWidth={2.1}
-              color={theme.colors.expressive.teal.onContainer}
-            />
+            <FolderPlus size={15} strokeWidth={2.1} color={theme.colors.m3.onPrimaryContainer} />
             <EditorialText
               variant="caption"
-              tone="teal"
+              tone="onPrimaryContainer"
               style={{ fontFamily: theme.fonts.bodySemiBold }}
             >
               Category
@@ -260,7 +238,7 @@ export default function DocumentVaultScreen() {
             value={searchText}
             onChangeText={setSearchText}
             placeholder="Search titles, filenames, tags..."
-            accentColor={theme.colors.expressive.teal.base}
+            accentColor={theme.colors.m3.primary}
             accessibilityLabel="Search Vault"
             style={styles.searchBarFlex}
           />
@@ -273,7 +251,7 @@ export default function DocumentVaultScreen() {
               {
                 backgroundColor:
                   filterBadgeCount > 0
-                    ? theme.colors.expressive.teal.container
+                    ? theme.colors.m3.primaryContainer
                     : theme.colors.m3.surfaceContainerHigh,
                 borderRadius: theme.shapes.full,
               },
@@ -284,7 +262,7 @@ export default function DocumentVaultScreen() {
               strokeWidth={2}
               color={
                 filterBadgeCount > 0
-                  ? theme.colors.expressive.teal.onContainer
+                  ? theme.colors.m3.onPrimaryContainer
                   : theme.colors.m3.onSurfaceVariant
               }
             />
@@ -293,14 +271,14 @@ export default function DocumentVaultScreen() {
                 style={[
                   styles.filterCountDot,
                   {
-                    backgroundColor: theme.colors.expressive.teal.base,
+                    backgroundColor: theme.colors.m3.primary,
                     borderRadius: theme.shapes.full,
                   },
                 ]}
               >
                 <EditorialText
                   variant="caption"
-                  tone="onSecondary"
+                  tone="onPrimary"
                   style={{ fontSize: 10, lineHeight: 12, fontFamily: theme.fonts.bodySemiBold }}
                 >
                   {filterBadgeCount}
@@ -316,9 +294,9 @@ export default function DocumentVaultScreen() {
             value={scope}
             onChange={setScope}
             options={[
-              { value: 'active', label: 'Active', accent: 'teal' },
+              { value: 'active', label: 'Active', accent: 'primary' },
               { value: 'expiring', label: 'Expiring 30d', accent: 'amber' },
-              { value: 'archived', label: 'Archived', accent: 'violet' },
+              { value: 'archived', label: 'Archived', accent: 'berry' },
             ]}
           />
         </View>
@@ -335,11 +313,11 @@ export default function DocumentVaultScreen() {
         >
           <FilterChip
             label="All"
-            accent="teal"
+            accent="primary"
             selected={!selectedCategoryId}
             onPress={() => setSelectedCategoryId(undefined)}
           />
-          {sortedCategories.map((cat, idx) => {
+          {sortedCategories.map((cat) => {
             const countLabel =
               cat.documentCount && cat.documentCount > 0
                 ? `${cat.name} (${cat.documentCount})`
@@ -348,7 +326,7 @@ export default function DocumentVaultScreen() {
               <FilterChip
                 key={cat.id}
                 label={countLabel}
-                accent={CATEGORY_ACCENTS[idx % CATEGORY_ACCENTS.length]}
+                accent="primary"
                 selected={selectedCategoryId === cat.id}
                 onPress={() =>
                   setSelectedCategoryId((prev) => (prev === cat.id ? undefined : cat.id))
@@ -426,9 +404,11 @@ export default function DocumentVaultScreen() {
               onAction={hasActiveFilters ? clearAllFilters : () => setUploadSheetOpen(true)}
             />
           ) : (
-            documents.map((doc, idx) => {
-              const accentKey = CATEGORY_ACCENTS[idx % CATEGORY_ACCENTS.length]!;
-              const accent = theme.colors.expressive[accentKey];
+            documents.map((doc) => {
+              const statusBadge = resolveDocStatusPresentation(
+                doc.processingStatus,
+                doc.isArchived,
+              );
               return (
                 <EditorialCard
                   key={doc.id}
@@ -441,12 +421,12 @@ export default function DocumentVaultScreen() {
                       style={[
                         styles.docIcon,
                         {
-                          backgroundColor: accent.container,
+                          backgroundColor: theme.colors.m3.primaryContainer,
                           borderRadius: theme.shapes.medium,
                         },
                       ]}
                     >
-                      <FileText size={20} strokeWidth={1.9} color={accent.base} />
+                      <FileText size={20} strokeWidth={1.9} color={theme.colors.m3.primary} />
                     </View>
                     <View style={styles.flexText}>
                       <EditorialText variant="cardHeading" tone="primary" numberOfLines={1}>
@@ -466,10 +446,7 @@ export default function DocumentVaultScreen() {
                         </EditorialText>
                       ) : null}
                     </View>
-                    <Badge
-                      label={formatVaultStatus(doc.processingStatus, doc.isArchived)}
-                      tone={doc.isArchived ? 'neutral' : accentKey}
-                    />
+                    <Badge label={statusBadge.label} tone={statusBadge.tone} />
                   </View>
                 </EditorialCard>
               );
@@ -481,7 +458,7 @@ export default function DocumentVaultScreen() {
       <ExpressiveFAB
         icon={(color) => <Plus size={24} strokeWidth={2.2} color={color} />}
         label="Add"
-        tone="secondary"
+        tone="primary"
         accessibilityLabel="Add document to vault"
         onPress={() => setUploadSheetOpen(true)}
         style={styles.fabPosition}
@@ -552,11 +529,11 @@ export default function DocumentVaultScreen() {
             <View style={styles.sheetChipsWrap}>
               <FilterChip
                 label="All Categories"
-                accent="teal"
+                accent="primary"
                 selected={!selectedCategoryId}
                 onPress={() => setSelectedCategoryId(undefined)}
               />
-              {categories.map((cat, idx) => (
+              {categories.map((cat) => (
                 <FilterChip
                   key={cat.id}
                   label={
@@ -564,7 +541,7 @@ export default function DocumentVaultScreen() {
                       ? `${cat.name} (${cat.documentCount})`
                       : cat.name
                   }
-                  accent={CATEGORY_ACCENTS[idx % CATEGORY_ACCENTS.length]}
+                  accent="primary"
                   selected={selectedCategoryId === cat.id}
                   onPress={() =>
                     setSelectedCategoryId((prev) => (prev === cat.id ? undefined : cat.id))
@@ -577,7 +554,6 @@ export default function DocumentVaultScreen() {
           <Button
             label={`Show ${documents.length} Document${documents.length === 1 ? '' : 's'}`}
             variant="filled"
-            accent="teal"
             shape="pill"
             fullWidth
             onPress={() => setFilterSheetOpen(false)}
@@ -586,7 +562,7 @@ export default function DocumentVaultScreen() {
       </ExpressiveSheetModal>
 
       <ExpressiveSheetModal visible={uploadSheetOpen} onClose={() => setUploadSheetOpen(false)}>
-        <EditorialText variant="editorialEyebrow" tone="tealVibrant" uppercase>
+        <EditorialText variant="editorialEyebrow" tone="forest" uppercase>
           Add to Vault
         </EditorialText>
         <EditorialText

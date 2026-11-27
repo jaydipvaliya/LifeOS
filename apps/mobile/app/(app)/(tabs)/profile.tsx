@@ -183,10 +183,10 @@ export default function ProfileTabScreen() {
     <Screen includeBottomInset={false} bottomSpacing={32}>
       <View style={[styles.header, { marginBottom: theme.spacing.xl }]}>
         <View style={styles.topRow}>
-          <EditorialText variant="editorialEyebrow" tone="berryVibrant" uppercase>
+          <EditorialText variant="editorialEyebrow" tone="forest" uppercase>
             Account & Privacy
           </EditorialText>
-          <Badge label={displayMode} tone="berry" />
+          <Badge label={displayMode} tone="primary" />
         </View>
 
         <View style={[styles.identityRow, { marginTop: theme.spacing.sm }]}>
@@ -194,12 +194,12 @@ export default function ProfileTabScreen() {
             style={[
               styles.avatarCircle,
               {
-                backgroundColor: theme.colors.expressive.berry.container,
+                backgroundColor: theme.colors.m3.primaryContainer,
                 borderRadius: theme.shapes.squircle,
               },
             ]}
           >
-            <EditorialText variant="titleLarge" tone="berryVibrant">
+            <EditorialText variant="titleLarge" tone="onPrimaryContainer">
               {getInitials(displayName)}
             </EditorialText>
           </View>
@@ -215,21 +215,26 @@ export default function ProfileTabScreen() {
         </View>
       </View>
 
-      <EditorialCard variant="violet" shape="extraLarge" style={{ marginBottom: theme.spacing.xl }}>
+      <EditorialCard
+        variant="primary"
+        shape="extraLarge"
+        depth="hero"
+        style={{ marginBottom: theme.spacing.xl }}
+      >
         <View style={styles.rowIcon}>
           <View
             style={[
               styles.iconTile,
               {
-                backgroundColor: theme.colors.surface.elevated,
+                backgroundColor: theme.colors.m3.primaryContainer,
                 borderRadius: theme.shapes.medium,
               },
             ]}
           >
-            <ShieldCheck size={20} strokeWidth={1.9} color={theme.colors.expressive.violet.base} />
+            <ShieldCheck size={20} strokeWidth={1.9} color={theme.colors.m3.primary} />
           </View>
           <View style={styles.flexText}>
-            <EditorialText variant="cardHeading" tone="violet">
+            <EditorialText variant="cardHeading" tone="primary">
               Preferences
             </EditorialText>
             <EditorialText variant="caption" tone="secondary">
@@ -243,7 +248,7 @@ export default function ProfileTabScreen() {
         <View style={{ gap: theme.spacing.md }}>
           <View style={{ gap: theme.spacing.xs }}>
             <View style={styles.rowIcon}>
-              <Palette size={17} color={theme.colors.expressive.amber.base} />
+              <Palette size={17} color={theme.colors.m3.primary} />
               <EditorialText variant="bodyMedium" tone="primary">
                 Theme Mode
               </EditorialText>
@@ -256,8 +261,8 @@ export default function ProfileTabScreen() {
               }}
               options={[
                 { value: 'light', label: 'Light', accent: 'amber' },
-                { value: 'dark', label: 'Dark', accent: 'violet' },
-                { value: 'system', label: 'Auto', accent: 'cobalt' },
+                { value: 'dark', label: 'Dark', accent: 'primary' },
+                { value: 'system', label: 'Auto', accent: 'teal' },
               ]}
             />
           </View>

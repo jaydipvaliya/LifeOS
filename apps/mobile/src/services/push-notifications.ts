@@ -45,7 +45,7 @@ export async function registerForPushNotificationsAsync(): Promise<PushRegistrat
         name: 'LifeOS Reminders',
         importance: Notifications.AndroidImportance.HIGH,
         vibrationPattern: [0, 200, 150, 200],
-        lightColor: '#5B4AE6',
+        lightColor: '#1E6B52',
       });
     }
 

@@ -7,9 +7,9 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
-    "backgroundColor": "#FAF8FF",
+    "backgroundColor": "#F7F4EE",
     "splash": {
-      "backgroundColor": "#FAF8FF",
+      "backgroundColor": "#F7F4EE",
       "resizeMode": "contain"
     },
     "ios": {
@@ -19,7 +19,7 @@
     "android": {
       "package": "com.lifeos.app",
       "adaptiveIcon": {
-        "backgroundColor": "#FAF8FF",
+        "backgroundColor": "#F7F4EE",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -58,7 +58,7 @@
       [
         "expo-notifications",
         {
-          "color": "#5B4AE6"
+          "color": "#1E6B52"
         }
       ],
       "@sentry/react-native"

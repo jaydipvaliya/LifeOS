@@ -24,8 +24,6 @@ import { extractApiErrorMessage } from '../../../src/services/api-client';
 import { lifeApi } from '../../../src/services/life-api';
 import { useTheme } from '../../../src/theme';
 
-const ASSET_ACCENTS = ['cobalt', 'teal', 'violet', 'amber', 'berry', 'coral'] as const;
-
 const ASSET_CATEGORIES = [
   { value: 'laptop', label: 'Laptop' },
   { value: 'smartphone', label: 'Phone' },
@@ -134,11 +132,11 @@ export default function AssetsAndSubscriptionsScreen() {
               void assetsQuery.refetch();
               void subsQuery.refetch();
             }}
-            tintColor={theme.colors.expressive.cobalt.base}
+            tintColor={theme.colors.m3.primary}
           />
         }
       >
-        <EditorialText variant="editorialEyebrow" tone="cobaltVibrant" uppercase>
+        <EditorialText variant="editorialEyebrow" tone="forest" uppercase>
           Ownership & Spend
         </EditorialText>
         <EditorialText
@@ -154,7 +152,7 @@ export default function AssetsAndSubscriptionsScreen() {
             value={section}
             onChange={setSection}
             options={[
-              { value: 'assets', label: `Assets (${assets.length})`, accent: 'cobalt' },
+              { value: 'assets', label: `Assets (${assets.length})`, accent: 'primary' },
               { value: 'subscriptions', label: `Subscriptions (${subs.length})`, accent: 'berry' },
             ]}
           />
@@ -166,7 +164,7 @@ export default function AssetsAndSubscriptionsScreen() {
               value={searchText}
               onChangeText={setSearchText}
               placeholder="Search laptops, phones, serials..."
-              accentColor={theme.colors.expressive.cobalt.base}
+              accentColor={theme.colors.m3.primary}
               accessibilityLabel="Search Assets"
             />
 
@@ -179,61 +177,57 @@ export default function AssetsAndSubscriptionsScreen() {
               />
             ) : assets.length === 0 ? (
               <EmptyState
-                icon={<Laptop size={28} color={theme.colors.expressive.cobalt.base} />}
+                icon={<Laptop size={28} color={theme.colors.m3.primary} />}
                 title="No assets tracked yet"
                 description="Add your laptop, smartphone, or appliances and attach purchase invoices from your Vault."
                 actionLabel="Add Asset"
                 onAction={() => setModalOpen(true)}
               />
             ) : (
-              <View style={{ gap: theme.spacing.xs }}>
-                {assets.map((asset, idx) => {
-                  const accentKey = ASSET_ACCENTS[idx % ASSET_ACCENTS.length]!;
-                  const accent = theme.colors.expressive[accentKey];
-                  return (
-                    <EditorialCard
-                      key={asset.id}
-                      variant="surface"
-                      padding="sm"
-                      onPress={() => router.push(`/(app)/assets/${asset.id}`)}
-                    >
-                      <View style={styles.rowBetween}>
-                        <View
-                          style={[
-                            styles.iconBox,
-                            {
-                              backgroundColor: accent.container,
-                              borderRadius: theme.shapes.medium,
-                            },
-                          ]}
-                        >
-                          <Laptop size={20} strokeWidth={1.9} color={accent.base} />
-                        </View>
-                        <View style={styles.flexText}>
-                          <EditorialText variant="cardHeading" tone="primary" numberOfLines={1}>
-                            {asset.name}
-                          </EditorialText>
-                          <EditorialText variant="caption" tone="muted" numberOfLines={1}>
-                            {asset.brand ?? asset.category} · {asset.linkedDocuments.length} doc(s)
-                            · {asset.repairsCount} repair(s)
-                          </EditorialText>
-                        </View>
-                        {asset.warrantyExpirationDate ? (
-                          <Badge label={asset.warrantyExpirationDate} tone={accentKey} />
-                        ) : (
-                          <Badge label={asset.category} tone="neutral" />
-                        )}
+              <View style={{ gap: theme.spacing.sm }}>
+                {assets.map((asset) => (
+                  <EditorialCard
+                    key={asset.id}
+                    variant="primary"
+                    padding="sm"
+                    onPress={() => router.push(`/(app)/assets/${asset.id}`)}
+                  >
+                    <View style={styles.rowBetween}>
+                      <View
+                        style={[
+                          styles.iconBox,
+                          {
+                            backgroundColor: theme.colors.m3.primaryContainer,
+                            borderRadius: theme.shapes.medium,
+                          },
+                        ]}
+                      >
+                        <Laptop size={20} strokeWidth={1.9} color={theme.colors.m3.primary} />
                       </View>
-                    </EditorialCard>
-                  );
-                })}
+                      <View style={styles.flexText}>
+                        <EditorialText variant="cardHeading" tone="primary" numberOfLines={1}>
+                          {asset.name}
+                        </EditorialText>
+                        <EditorialText variant="caption" tone="muted" numberOfLines={1}>
+                          {asset.brand ?? asset.category} · {asset.linkedDocuments.length} doc(s) ·{' '}
+                          {asset.repairsCount} repair(s)
+                        </EditorialText>
+                      </View>
+                      {asset.warrantyExpirationDate ? (
+                        <Badge label={asset.warrantyExpirationDate} tone="warning" />
+                      ) : (
+                        <Badge label={asset.category} tone="neutral" />
+                      )}
+                    </View>
+                  </EditorialCard>
+                ))}
               </View>
             )}
           </View>
         ) : (
           <View style={{ gap: theme.spacing.md }}>
             {spendSummary ? (
-              <EditorialCard variant="berry" shape="extraLarge">
+              <EditorialCard variant="berry" shape="extraLarge" depth="hero">
                 <View style={styles.rowGap}>
                   <ShieldCheck size={18} color={theme.colors.expressive.berry.base} />
                   <EditorialText variant="editorialEyebrow" tone="berryVibrant" uppercase>
@@ -271,55 +265,55 @@ export default function AssetsAndSubscriptionsScreen() {
               />
             ) : subs.length === 0 ? (
               <EmptyState
-                icon={<Repeat size={28} color={theme.colors.expressive.berry.base} />}
+                icon={<Repeat size={28} color={theme.colors.m3.primary} />}
                 title="No subscriptions tracked"
                 description="Track recurring services, billing amounts, and renewal dates in one place."
                 actionLabel="Add Subscription"
                 onAction={() => setModalOpen(true)}
               />
             ) : (
-              <View style={{ gap: theme.spacing.xs }}>
-                {subs.map((sub, idx) => {
-                  const accentKey = ASSET_ACCENTS[(idx + 3) % ASSET_ACCENTS.length]!;
-                  const accent = theme.colors.expressive[accentKey];
-                  return (
-                    <EditorialCard key={sub.id} variant="surface" padding="sm">
-                      <View style={styles.rowBetween}>
-                        <View
-                          style={[
-                            styles.iconBox,
-                            {
-                              backgroundColor: accent.container,
-                              borderRadius: theme.shapes.medium,
-                            },
-                          ]}
-                        >
-                          <Repeat size={18} strokeWidth={1.9} color={accent.base} />
-                        </View>
-                        <View style={styles.flexText}>
-                          <EditorialText variant="cardHeading" tone="primary" numberOfLines={1}>
-                            {sub.name}
-                          </EditorialText>
-                          <EditorialText variant="caption" tone="muted" numberOfLines={2}>
-                            {sub.provider} · {sub.currency} {sub.amount}/{sub.frequency} · Renews{' '}
-                            {sub.nextRenewalDate}
-                          </EditorialText>
-                        </View>
-                        {sub.status === 'active' ? (
-                          <Button
-                            label="Cancel"
-                            variant="outlined"
-                            size="sm"
-                            shape="pill"
-                            onPress={() => cancelSubMutation.mutate(sub.id)}
-                          />
-                        ) : (
-                          <Badge label={sub.status} tone="neutral" />
-                        )}
+              <View style={{ gap: theme.spacing.sm }}>
+                {subs.map((sub) => (
+                  <EditorialCard key={sub.id} variant="primary" padding="sm">
+                    <View style={styles.rowBetween}>
+                      <View
+                        style={[
+                          styles.iconBox,
+                          {
+                            backgroundColor: theme.colors.expressive.berry.container,
+                            borderRadius: theme.shapes.medium,
+                          },
+                        ]}
+                      >
+                        <Repeat
+                          size={18}
+                          strokeWidth={1.9}
+                          color={theme.colors.expressive.berry.base}
+                        />
                       </View>
-                    </EditorialCard>
-                  );
-                })}
+                      <View style={styles.flexText}>
+                        <EditorialText variant="cardHeading" tone="primary" numberOfLines={1}>
+                          {sub.name}
+                        </EditorialText>
+                        <EditorialText variant="caption" tone="muted" numberOfLines={2}>
+                          {sub.provider} · {sub.currency} {sub.amount}/{sub.frequency} · Renews{' '}
+                          {sub.nextRenewalDate}
+                        </EditorialText>
+                      </View>
+                      {sub.status === 'active' ? (
+                        <Button
+                          label="Cancel"
+                          variant="outlined"
+                          size="sm"
+                          shape="pill"
+                          onPress={() => cancelSubMutation.mutate(sub.id)}
+                        />
+                      ) : (
+                        <Badge label={sub.status} tone="neutral" />
+                      )}
+                    </View>
+                  </EditorialCard>
+                ))}
               </View>
             )}
           </View>
@@ -329,7 +323,7 @@ export default function AssetsAndSubscriptionsScreen() {
       <ExpressiveFAB
         icon={(color) => <Plus size={24} color={color} />}
         label={section === 'assets' ? 'Asset' : 'Sub'}
-        tone={section === 'assets' ? 'primary' : 'tertiary'}
+        tone="primary"
         accessibilityLabel="Add asset or subscription"
         onPress={() => setModalOpen(true)}
         style={styles.fabPosition}

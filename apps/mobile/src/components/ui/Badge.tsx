@@ -19,6 +19,27 @@ export type BadgeTone =
   | 'warning'
   | 'danger';
 
+export function resolveDocStatusPresentation(
+  status: string,
+  isArchived = false,
+): { label: string; tone: BadgeTone } {
+  if (isArchived) return { label: 'Archived', tone: 'neutral' };
+  switch (status) {
+    case 'completed':
+      return { label: 'Indexed', tone: 'success' };
+    case 'uploaded':
+      return { label: 'Saved', tone: 'primary' };
+    case 'pending_extraction':
+      return { label: 'Queued', tone: 'warning' };
+    case 'processing':
+      return { label: 'Analyzing', tone: 'warning' };
+    case 'failed':
+      return { label: 'Failed', tone: 'danger' };
+    default:
+      return { label: status.replace(/_/g, ' '), tone: 'neutral' };
+  }
+}
+
 interface BadgeProps {
   label: string;
   tone?: BadgeTone;

@@ -27,6 +27,7 @@ import {
   ExpressiveFAB,
   ExpressiveSheetModal,
   LoadingState,
+  resolveDocStatusPresentation,
   Screen,
   SectionHeader,
 } from '../../../src/components/ui';
@@ -36,25 +37,6 @@ import { flushSyncOutbox } from '../../../src/offline/sync-engine';
 import { useAppUiStore } from '../../../src/stores/app-store';
 import { useAuthStore } from '../../../src/stores/auth-store';
 import { useTheme } from '../../../src/theme';
-
-const DOC_ACCENTS = ['violet', 'teal', 'cobalt', 'coral', 'berry', 'amber'] as const;
-
-function formatDocStatus(status: string): string {
-  switch (status) {
-    case 'completed':
-      return 'Indexed';
-    case 'uploaded':
-      return 'Saved';
-    case 'pending_extraction':
-      return 'Queued';
-    case 'processing':
-      return 'Analyzing';
-    case 'failed':
-      return 'Failed';
-    default:
-      return status.replace(/_/g, ' ');
-  }
-}
 
 export default function HomeDashboardScreen() {
   const { theme } = useTheme();
@@ -265,7 +247,6 @@ export default function HomeDashboardScreen() {
                 <Button
                   label="Ask LifeOS AI"
                   variant="filled"
-                  accent="violet"
                   size="sm"
                   shape="pill"
                   leftIcon={<Sparkles size={14} color={theme.colors.m3.onPrimary} />}
@@ -273,11 +254,10 @@ export default function HomeDashboardScreen() {
                 />
                 <Button
                   label="Search All"
-                  variant="tonal"
-                  accent="cobalt"
+                  variant="outlined"
                   size="sm"
                   shape="pill"
-                  leftIcon={<Search size={14} color={theme.colors.expressive.cobalt.onContainer} />}
+                  leftIcon={<Search size={14} color={theme.colors.m3.primary} />}
                   onPress={() => router.push('/(app)/search')}
                 />
                 {isOffline || pendingSyncCount > 0 ? (
@@ -293,11 +273,11 @@ export default function HomeDashboardScreen() {
               </View>
             </EditorialCard>
 
-            {/* Symmetric 2x2 Colorful Bento Metrics Grid */}
+            {/* Symmetric 2x2 Calm Archival Bento Metrics Grid */}
             <View style={{ gap: theme.spacing.sm }}>
               <View style={styles.bentoRow}>
                 <EditorialCard
-                  variant="coral"
+                  variant="primary"
                   shape="extraLarge"
                   onPress={() => router.push('/(app)/(tabs)/vault')}
                   style={styles.bentoTile}
@@ -307,25 +287,39 @@ export default function HomeDashboardScreen() {
                       style={[
                         styles.bentoIcon,
                         {
-                          backgroundColor: theme.colors.surface.elevated,
+                          backgroundColor:
+                            data.summaryCounts.expiringDocumentsSoon > 0
+                              ? theme.colors.expressive.amber.container
+                              : theme.colors.m3.primaryContainer,
                           borderRadius: theme.shapes.small,
                         },
                       ]}
                     >
-                      <CalendarClock size={16} color={theme.colors.expressive.coral.base} />
+                      <CalendarClock
+                        size={16}
+                        color={
+                          data.summaryCounts.expiringDocumentsSoon > 0
+                            ? theme.colors.expressive.amber.base
+                            : theme.colors.m3.primary
+                        }
+                      />
                     </View>
-                    <ChevronRight size={16} color={theme.colors.expressive.coral.base} />
+                    <ChevronRight size={16} color={theme.colors.text.muted} />
                   </View>
-                  <EditorialText variant="display" tone="coralVibrant" style={{ marginTop: 12 }}>
+                  <EditorialText
+                    variant="display"
+                    tone={data.summaryCounts.expiringDocumentsSoon > 0 ? 'warning' : 'primary'}
+                    style={{ marginTop: 12 }}
+                  >
                     {data.summaryCounts.expiringDocumentsSoon}
                   </EditorialText>
-                  <EditorialText variant="label" tone="coral" style={{ marginTop: 2 }}>
+                  <EditorialText variant="label" tone="secondary" style={{ marginTop: 2 }}>
                     Expiring Soon
                   </EditorialText>
                 </EditorialCard>
 
                 <EditorialCard
-                  variant="cobalt"
+                  variant="primary"
                   shape="extraLarge"
                   onPress={() => router.push('/(app)/(tabs)/calendar')}
                   style={styles.bentoTile}
@@ -335,19 +329,19 @@ export default function HomeDashboardScreen() {
                       style={[
                         styles.bentoIcon,
                         {
-                          backgroundColor: theme.colors.surface.elevated,
+                          backgroundColor: theme.colors.m3.primaryContainer,
                           borderRadius: theme.shapes.small,
                         },
                       ]}
                     >
-                      <CheckSquare size={16} color={theme.colors.expressive.cobalt.base} />
+                      <CheckSquare size={16} color={theme.colors.m3.primary} />
                     </View>
-                    <ChevronRight size={16} color={theme.colors.expressive.cobalt.base} />
+                    <ChevronRight size={16} color={theme.colors.text.muted} />
                   </View>
-                  <EditorialText variant="display" tone="cobaltVibrant" style={{ marginTop: 12 }}>
+                  <EditorialText variant="display" tone="primary" style={{ marginTop: 12 }}>
                     {data.summaryCounts.pendingTasksToday}
                   </EditorialText>
-                  <EditorialText variant="label" tone="cobalt" style={{ marginTop: 2 }}>
+                  <EditorialText variant="label" tone="secondary" style={{ marginTop: 2 }}>
                     Tasks Today
                   </EditorialText>
                 </EditorialCard>
@@ -355,7 +349,7 @@ export default function HomeDashboardScreen() {
 
               <View style={styles.bentoRow}>
                 <EditorialCard
-                  variant="teal"
+                  variant="primary"
                   shape="extraLarge"
                   onPress={() => router.push('/(app)/(tabs)/assets')}
                   style={styles.bentoTile}
@@ -365,25 +359,25 @@ export default function HomeDashboardScreen() {
                       style={[
                         styles.bentoIcon,
                         {
-                          backgroundColor: theme.colors.surface.elevated,
+                          backgroundColor: theme.colors.m3.primaryContainer,
                           borderRadius: theme.shapes.small,
                         },
                       ]}
                     >
-                      <Laptop size={16} color={theme.colors.expressive.teal.base} />
+                      <Laptop size={16} color={theme.colors.m3.primary} />
                     </View>
-                    <ChevronRight size={16} color={theme.colors.expressive.teal.base} />
+                    <ChevronRight size={16} color={theme.colors.text.muted} />
                   </View>
-                  <EditorialText variant="display" tone="tealVibrant" style={{ marginTop: 12 }}>
+                  <EditorialText variant="display" tone="primary" style={{ marginTop: 12 }}>
                     {data.summaryCounts.activeAssetsCount}
                   </EditorialText>
-                  <EditorialText variant="label" tone="teal" style={{ marginTop: 2 }}>
+                  <EditorialText variant="label" tone="secondary" style={{ marginTop: 2 }}>
                     Tracked Assets
                   </EditorialText>
                 </EditorialCard>
 
                 <EditorialCard
-                  variant="berry"
+                  variant="primary"
                   shape="extraLarge"
                   onPress={() => router.push('/(app)/(tabs)/assets')}
                   style={styles.bentoTile}
@@ -393,19 +387,19 @@ export default function HomeDashboardScreen() {
                       style={[
                         styles.bentoIcon,
                         {
-                          backgroundColor: theme.colors.surface.elevated,
+                          backgroundColor: theme.colors.m3.primaryContainer,
                           borderRadius: theme.shapes.small,
                         },
                       ]}
                     >
-                      <Repeat size={16} color={theme.colors.expressive.berry.base} />
+                      <Repeat size={16} color={theme.colors.m3.primary} />
                     </View>
-                    <ChevronRight size={16} color={theme.colors.expressive.berry.base} />
+                    <ChevronRight size={16} color={theme.colors.text.muted} />
                   </View>
-                  <EditorialText variant="display" tone="berryVibrant" style={{ marginTop: 12 }}>
+                  <EditorialText variant="display" tone="primary" style={{ marginTop: 12 }}>
                     {data.summaryCounts.activeSubscriptionsCount}
                   </EditorialText>
-                  <EditorialText variant="label" tone="berry" style={{ marginTop: 2 }}>
+                  <EditorialText variant="label" tone="secondary" style={{ marginTop: 2 }}>
                     Active Renewals
                   </EditorialText>
                 </EditorialCard>
@@ -420,7 +414,7 @@ export default function HomeDashboardScreen() {
                 subtitle="Private files stored with short-lived access control."
                 actionLabel="Open Vault"
                 onActionPress={() => router.push('/(app)/(tabs)/vault')}
-                eyebrowTone="tealVibrant"
+                eyebrowTone="forest"
               />
 
               {data.recentDocuments.length === 0 ? (
@@ -432,14 +426,13 @@ export default function HomeDashboardScreen() {
                   onAction={() => router.push('/(app)/scanner')}
                 />
               ) : (
-                <View style={{ gap: theme.spacing.xs }}>
-                  {data.recentDocuments.map((doc, idx) => {
-                    const accentKey = DOC_ACCENTS[idx % DOC_ACCENTS.length]!;
-                    const accent = theme.colors.expressive[accentKey];
+                <View style={{ gap: theme.spacing.sm }}>
+                  {data.recentDocuments.map((doc) => {
+                    const statusBadge = resolveDocStatusPresentation(doc.processingStatus);
                     return (
                       <EditorialCard
                         key={doc.id}
-                        variant="surface"
+                        variant="primary"
                         padding="sm"
                         shape="large"
                         onPress={() => router.push(`/(app)/documents/${doc.id}`)}
@@ -449,12 +442,12 @@ export default function HomeDashboardScreen() {
                             style={[
                               styles.docIconBox,
                               {
-                                backgroundColor: accent.container,
+                                backgroundColor: theme.colors.m3.primaryContainer,
                                 borderRadius: theme.shapes.medium,
                               },
                             ]}
                           >
-                            <FileText size={19} strokeWidth={1.9} color={accent.base} />
+                            <FileText size={19} strokeWidth={1.9} color={theme.colors.m3.primary} />
                           </View>
                           <View style={styles.flexText}>
                             <EditorialText variant="cardHeading" tone="primary" numberOfLines={1}>
@@ -465,7 +458,7 @@ export default function HomeDashboardScreen() {
                               {Math.max(1, Math.round(doc.fileSizeBytes / 1024))} KB
                             </EditorialText>
                           </View>
-                          <Badge label={formatDocStatus(doc.processingStatus)} tone={accentKey} />
+                          <Badge label={statusBadge.label} tone={statusBadge.tone} />
                         </View>
                       </EditorialCard>
                     );
@@ -480,7 +473,7 @@ export default function HomeDashboardScreen() {
                 indexLabel="02 · Attention"
                 title="Deadlines & Expiring Items"
                 subtitle="Upcoming dates surfaced from your records."
-                eyebrowTone="coralVibrant"
+                eyebrowTone="amberVibrant"
               />
               {data.expiringDocuments.length === 0 &&
               data.todaysTasks.length === 0 &&
@@ -635,16 +628,15 @@ export default function HomeDashboardScreen() {
                   indexLabel="03 · Rhythm"
                   title="Weekly Activity"
                   subtitle="Documents filed and tasks completed over the past 7 days."
-                  eyebrowTone="cobaltVibrant"
+                  eyebrowTone="forest"
                 />
-                <EditorialCard variant="surface">
+                <EditorialCard variant="primary">
                   <View style={styles.weekGrid}>
                     {data.weeklyActivity.map((day, idx) => {
                       const total = day.documentsAdded + day.tasksCompleted;
                       const barHeight = total > 0 ? Math.min(54, 14 + total * 12) : 10;
-                      const barAccent =
-                        theme.colors.expressive[DOC_ACCENTS[idx % DOC_ACCENTS.length]!].base;
                       const isToday = idx === data.weeklyActivity.length - 1;
+                      const barAccent = isToday ? theme.colors.m3.primary : theme.colors.brand.sage;
                       return (
                         <View key={day.date} style={styles.weekCol}>
                           <EditorialText

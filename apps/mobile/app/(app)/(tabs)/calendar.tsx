@@ -217,11 +217,11 @@ export default function CalendarAndTasksScreen() {
               void eventsQuery.refetch();
               void remindersQuery.refetch();
             }}
-            tintColor={theme.colors.m3.tertiary}
+            tintColor={theme.colors.m3.primary}
           />
         }
       >
-        <EditorialText variant="editorialEyebrow" tone="coralVibrant" uppercase>
+        <EditorialText variant="editorialEyebrow" tone="forest" uppercase>
           Life Calendar & Tasks
         </EditorialText>
         <EditorialText
@@ -237,18 +237,19 @@ export default function CalendarAndTasksScreen() {
             value={viewMode}
             onChange={setViewMode}
             options={[
-              { value: 'agenda', label: 'Agenda', accent: 'coral' },
-              { value: 'week', label: 'Week', accent: 'violet' },
-              { value: 'month', label: 'Month', accent: 'cobalt' },
-              { value: 'tasks', label: `Tasks (${tasks.length})`, accent: 'teal' },
+              { value: 'agenda', label: 'Agenda', accent: 'primary' },
+              { value: 'week', label: 'Week', accent: 'primary' },
+              { value: 'month', label: 'Month', accent: 'primary' },
+              { value: 'tasks', label: `Tasks (${tasks.length})`, accent: 'primary' },
             ]}
           />
         </View>
 
         {viewMode === 'week' ? (
           <EditorialCard
-            variant="violet"
+            variant="primary"
             shape="extraLarge"
+            depth="hero"
             style={{ marginBottom: theme.spacing.lg }}
           >
             <View style={styles.weekStrip}>
@@ -298,8 +299,9 @@ export default function CalendarAndTasksScreen() {
 
         {viewMode === 'month' ? (
           <EditorialCard
-            variant="cobalt"
+            variant="primary"
             shape="extraLarge"
+            depth="hero"
             style={{ marginBottom: theme.spacing.lg }}
           >
             <View style={[styles.monthHeaderRow, { marginBottom: theme.spacing.sm }]}>
@@ -445,9 +447,9 @@ export default function CalendarAndTasksScreen() {
                   }}
                 />
               ) : (
-                <View style={{ gap: theme.spacing.xs }}>
+                <View style={{ gap: theme.spacing.sm }}>
                   {(viewMode === 'agenda' ? events : eventsForSelectedDay).map((evt) => (
-                    <EditorialCard key={evt.id} variant="surface" padding="sm">
+                    <EditorialCard key={evt.id} variant="primary" padding="sm">
                       <View style={styles.rowBetween}>
                         <View style={styles.flexText}>
                           <EditorialText variant="cardHeading" tone="primary" numberOfLines={2}>
@@ -485,7 +487,7 @@ export default function CalendarAndTasksScreen() {
                   </EditorialText>
                 </EditorialCard>
               ) : (
-                <View style={{ gap: theme.spacing.xs }}>
+                <View style={{ gap: theme.spacing.sm }}>
                   {reminders.map((rem) => (
                     <EditorialCard key={rem.id} variant="coral" padding="sm">
                       <View style={styles.rowBetween}>
@@ -525,7 +527,7 @@ export default function CalendarAndTasksScreen() {
                 value={taskFilter}
                 onChange={setTaskFilter}
                 options={[
-                  { value: 'all', label: 'All', accent: 'violet' },
+                  { value: 'all', label: 'All', accent: 'primary' },
                   { value: 'pending', label: 'Pending', accent: 'teal' },
                   { value: 'overdue', label: 'Overdue', accent: 'coral' },
                 ]}
@@ -551,11 +553,11 @@ export default function CalendarAndTasksScreen() {
                 }}
               />
             ) : (
-              <View style={{ gap: theme.spacing.xs }}>
+              <View style={{ gap: theme.spacing.sm }}>
                 {tasks.map((task) => {
                   const isDone = task.status === 'completed';
                   return (
-                    <EditorialCard key={task.id} variant="surface" padding="sm">
+                    <EditorialCard key={task.id} variant="primary" padding="sm">
                       <View style={styles.taskRow}>
                         <Pressable
                           onPress={() => !isDone && completeTaskMutation.mutate(task.id)}

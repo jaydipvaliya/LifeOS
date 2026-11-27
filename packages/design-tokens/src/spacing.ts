@@ -57,30 +57,30 @@ export const borderWidths = {
 
 export const shadows = {
   none: {
-    shadowColor: '#1B1564',
+    shadowColor: '#121815',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0,
     shadowRadius: 0,
     elevation: 0,
   },
   subtle: {
-    shadowColor: '#1B1564',
+    shadowColor: '#121815',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.07,
     shadowRadius: 10,
     elevation: 3,
   },
   tactile: {
-    shadowColor: '#1B1564',
+    shadowColor: '#121815',
     shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.11,
+    shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 4,
   },
   floating: {
-    shadowColor: '#1B1564',
+    shadowColor: '#121815',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.16,
+    shadowOpacity: 0.15,
     shadowRadius: 20,
     elevation: 6,
   },

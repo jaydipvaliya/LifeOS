@@ -45,7 +45,6 @@ export interface M3TabBarProps {
 }
 
 interface NavTabItemProps {
-  routeName: string;
   label: string;
   focused: boolean;
   icon: (color: string, focused: boolean) => React.ReactNode;
@@ -53,7 +52,7 @@ interface NavTabItemProps {
   onLongPress: () => void;
 }
 
-function NavTabItem({ routeName, label, focused, icon, onPress, onLongPress }: NavTabItemProps) {
+function NavTabItem({ label, focused, icon, onPress, onLongPress }: NavTabItemProps) {
   const { theme } = useTheme();
   const pillProgress = useSharedValue(focused ? 1 : 0);
 
@@ -66,23 +65,7 @@ function NavTabItem({ routeName, label, focused, icon, onPress, onLongPress }: N
     transform: [{ scaleX: 0.72 + pillProgress.value * 0.28 }],
   }));
 
-  const accent = (() => {
-    switch (routeName) {
-      case 'vault':
-        return theme.colors.expressive.teal;
-      case 'calendar':
-        return theme.colors.expressive.coral;
-      case 'assets':
-        return theme.colors.expressive.cobalt;
-      case 'profile':
-        return theme.colors.expressive.berry;
-      case 'index':
-      default:
-        return theme.colors.expressive.violet;
-    }
-  })();
-
-  const activeIconColor = accent.onContainer;
+  const activeIconColor = theme.colors.m3.onPrimaryContainer;
   const inactiveIconColor = theme.colors.m3.onSurfaceVariant;
 
   return (
@@ -99,8 +82,8 @@ function NavTabItem({ routeName, label, focused, icon, onPress, onLongPress }: N
           style={[
             styles.activePill,
             {
-              backgroundColor: accent.container,
-              borderColor: accent.bevel,
+              backgroundColor: theme.colors.m3.primaryContainer,
+              borderColor: theme.colors.expressive.teal.bevel,
               borderWidth: theme.borderWidths.hairline,
               borderRadius: theme.shapes.full,
             },
@@ -114,7 +97,7 @@ function NavTabItem({ routeName, label, focused, icon, onPress, onLongPress }: N
       <EditorialText
         variant="caption"
         style={{
-          color: focused ? accent.base : theme.colors.m3.onSurfaceVariant,
+          color: focused ? theme.colors.m3.primary : theme.colors.m3.onSurfaceVariant,
           fontFamily: focused ? theme.fonts.bodySemiBold : theme.fonts.bodyMedium,
           marginTop: 4,
         }}
@@ -190,7 +173,6 @@ export function M3NavigationBar({
         return (
           <NavTabItem
             key={route.key}
-            routeName={route.name}
             label={label}
             focused={focused}
             onPress={onPress}

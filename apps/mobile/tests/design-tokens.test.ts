@@ -2,15 +2,17 @@ import { darkTheme, lightTheme } from '@lifeos/design-tokens';
 import { describe, expect, it } from 'vitest';
 
 describe('LifeOS Design System Tokens', () => {
-  it('defines a colorful Material 3 Expressive triadic palette and tonal containers', () => {
-    expect(lightTheme.colors.m3.primary).toBe('#4F46E5');
-    expect(lightTheme.colors.m3.primaryContainer).toBe('#E3E0FF');
-    expect(lightTheme.colors.m3.secondary).toBe('#0F9D8A');
-    expect(lightTheme.colors.m3.secondaryContainer).toBe('#CCF7EE');
-    expect(lightTheme.colors.m3.tertiary).toBe('#E85D3F');
-    expect(lightTheme.colors.m3.tertiaryContainer).toBe('#FFE2DA');
-    expect(lightTheme.colors.background.primary).toBe('#FAF8FF');
+  it('defines the Archival Ivory and Deep Pine tonal palette across light and dark modes', () => {
+    expect(lightTheme.colors.m3.primary).toBe('#1E6B52');
+    expect(lightTheme.colors.m3.primaryContainer).toBe('#E2EEE9');
+    expect(lightTheme.colors.m3.secondary).toBe('#28665B');
+    expect(lightTheme.colors.m3.secondaryContainer).toBe('#E5EFEA');
+    expect(lightTheme.colors.m3.tertiary).toBe('#B86E22');
+    expect(lightTheme.colors.m3.tertiaryContainer).toBe('#F9EFE0');
+    expect(lightTheme.colors.background.primary).toBe('#F7F4EE');
     expect(lightTheme.colors.surface.primary).toBe('#FFFFFF');
+    expect(darkTheme.colors.background.primary).toBe('#101312');
+    expect(darkTheme.colors.m3.primary).toBe('#5ED3A8');
   });
 
   it('provides expressive multi-hue accent containers across light and dark themes', () => {
