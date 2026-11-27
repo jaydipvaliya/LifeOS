@@ -35,6 +35,11 @@ export interface AssistantAnswerResult {
   citations: AssistantCitationDto[];
 }
 
+export interface MultimodalBinaryInput {
+  mimeType: string;
+  base64: string;
+}
+
 export interface IAiProvider {
   readonly providerName: string;
   readonly modelName: string;
@@ -43,11 +48,13 @@ export interface IAiProvider {
     title: string;
     filename: string;
     mimeType: string;
+    binaryData?: MultimodalBinaryInput | null;
   }): Promise<ClassificationResult>;
   extractDocumentData(input: {
     text: string;
     documentType: DocumentTypeClassification;
     title: string;
+    binaryData?: MultimodalBinaryInput | null;
   }): Promise<StructuredExtractionOutput>;
   summarizeDocument(input: {
     text: string;
@@ -593,6 +600,7 @@ abstract class BaseLlmAiProvider implements IAiProvider {
     systemPrompt: string,
     userPrompt: string,
     schema: z.ZodType<T>,
+    binaryData?: MultimodalBinaryInput | null,
   ): Promise<T>;
 
   async classifyDocument(input: {
@@ -600,12 +608,14 @@ abstract class BaseLlmAiProvider implements IAiProvider {
     title: string;
     filename: string;
     mimeType: string;
+    binaryData?: MultimodalBinaryInput | null;
   }): Promise<ClassificationResult> {
     try {
       return await this.requestStructuredJson(
         'Classify the personal document into strict JSON matching {documentType, confidence, suggestedTitle, suggestedCategorySlug}. Never invent unsupported facts.',
         `Title: ${input.title}\nFilename: ${input.filename}\nMIME: ${input.mimeType}\nText:\n${input.text.slice(0, 4000)}`,
         documentClassificationSchema,
+        input.binaryData,
       );
     } catch (err) {
       logger.warn({ err, provider: this.providerName }, 'classifyDocument failed; using fallback');
@@ -617,12 +627,14 @@ abstract class BaseLlmAiProvider implements IAiProvider {
     text: string;
     documentType: DocumentTypeClassification;
     title: string;
+    binaryData?: MultimodalBinaryInput | null;
   }): Promise<StructuredExtractionOutput> {
     try {
       const parsed = await this.requestStructuredJson(
         'Extract structured JSON fields strictly as {summary, confidenceScore, fields:[{key,label,value,confidence,sourceLocation}], suggestedActions:{assetSuggestion,eventSuggestion,reminderSuggestion}}. Set unknown values to null.',
         `Document Type: ${input.documentType}\nTitle: ${input.title}\nText:\n${input.text.slice(0, 6000)}`,
         llmFieldArraySchema,
+        input.binaryData,
       );
       return {
         summary: parsed.summary,
@@ -694,7 +706,7 @@ abstract class BaseLlmAiProvider implements IAiProvider {
   }
 }
 
-class OpenAiCompatibleAiProvider extends BaseLlmAiProvider {
+export class OpenAiCompatibleAiProvider extends BaseLlmAiProvider {
   readonly providerName = 'openai';
   readonly modelName: string;
 
@@ -711,7 +723,19 @@ class OpenAiCompatibleAiProvider extends BaseLlmAiProvider {
     systemPrompt: string,
     userPrompt: string,
     schema: z.ZodType<T>,
+    binaryData?: MultimodalBinaryInput | null,
   ): Promise<T> {
+    const userContent =
+      binaryData && binaryData.mimeType.startsWith('image/')
+        ? [
+            { type: 'text', text: userPrompt },
+            {
+              type: 'image_url',
+              image_url: { url: `data:${binaryData.mimeType};base64,${binaryData.base64}` },
+            },
+          ]
+        : userPrompt;
+
     const response = await fetch(`${this.baseUrl.replace(/\/+$/, '')}/chat/completions`, {
       method: 'POST',
       headers: {
@@ -724,7 +748,7 @@ class OpenAiCompatibleAiProvider extends BaseLlmAiProvider {
         response_format: { type: 'json_object' },
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
+          { role: 'user', content: userContent },
         ],
       }),
     });
@@ -741,7 +765,7 @@ class OpenAiCompatibleAiProvider extends BaseLlmAiProvider {
   }
 }
 
-class GeminiAiProvider extends BaseLlmAiProvider {
+export class GeminiAiProvider extends BaseLlmAiProvider {
   readonly providerName = 'gemini';
   readonly modelName: string;
 
@@ -757,13 +781,30 @@ class GeminiAiProvider extends BaseLlmAiProvider {
     systemPrompt: string,
     userPrompt: string,
     schema: z.ZodType<T>,
+    binaryData?: MultimodalBinaryInput | null,
   ): Promise<T> {
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${this.modelName}:generateContent?key=${encodeURIComponent(this.apiKey)}`;
+    const parts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }> = [
+      { text: `${systemPrompt}\n\n${userPrompt}` },
+    ];
+    if (
+      binaryData &&
+      (binaryData.mimeType.startsWith('image/') || binaryData.mimeType === 'application/pdf')
+    ) {
+      const normalizedMime =
+        binaryData.mimeType === 'image/heic' ? 'image/jpeg' : binaryData.mimeType;
+      parts.push({
+        inlineData: {
+          mimeType: normalizedMime,
+          data: binaryData.base64,
+        },
+      });
+    }
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] }],
+        contents: [{ parts }],
         generationConfig: {
           temperature: 0.1,
           responseMimeType: 'application/json',

@@ -37,17 +37,25 @@ export class ExtractionService {
       expiryDate: doc.expiryDate ? doc.expiryDate.toISOString().slice(0, 10) : null,
     });
 
+    // Pass multimodal binary bytes for scanned images or PDFs (capped at 4MB base64 payload)
+    const binaryData =
+      buffer && buffer.length <= 4 * 1024 * 1024
+        ? { mimeType: doc.mimeType, base64: buffer.toString('base64') }
+        : null;
+
     const classification = await this.aiProvider.classifyDocument({
       text: rawText,
       title: doc.title,
       filename: doc.originalFilename,
       mimeType: doc.mimeType,
+      binaryData,
     });
 
     const structured = await this.aiProvider.extractDocumentData({
       text: rawText,
       documentType: classification.documentType,
       title: doc.title,
+      binaryData,
     });
 
     const durationMs = Math.max(1, Date.now() - startedAt);

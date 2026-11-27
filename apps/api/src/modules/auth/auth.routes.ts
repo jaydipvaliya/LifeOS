@@ -1,4 +1,5 @@
 import {
+  confirmEmailVerificationSchema,
   deleteAccountSchema,
   forgotPasswordSchema,
   loginSchema,
@@ -13,6 +14,7 @@ import { z } from 'zod';
 import { createRequireAuth } from '../../middleware/auth';
 import { authRateLimiter } from '../../middleware/rate-limit';
 import { validateRequest } from '../../middleware/validate';
+import type { IEmailService } from '../email/email.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import type { IAuthRepository } from './auth.types';
@@ -23,9 +25,15 @@ export function createAuthRouter(deps: {
   repository: IAuthRepository;
   passwordService: PasswordService;
   tokenService: TokenService;
+  emailService?: IEmailService;
 }): Router {
   const router = Router();
-  const authService = new AuthService(deps.repository, deps.passwordService, deps.tokenService);
+  const authService = new AuthService(
+    deps.repository,
+    deps.passwordService,
+    deps.tokenService,
+    deps.emailService,
+  );
   const controller = new AuthController(authService);
   const requireAuth = createRequireAuth(deps.tokenService);
 
@@ -53,6 +61,13 @@ export function createAuthRouter(deps: {
     authRateLimiter,
     validateRequest({ body: resetPasswordSchema }),
     controller.resetPassword,
+  );
+  router.post('/verify-email/request', requireAuth, controller.requestEmailVerification);
+  router.post(
+    '/verify-email/confirm',
+    authRateLimiter,
+    validateRequest({ body: confirmEmailVerificationSchema }),
+    controller.confirmEmailVerification,
   );
 
   router.post('/logout', requireAuth, validateRequest({ body: logoutSchema }), controller.logout);

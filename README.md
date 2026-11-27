@@ -114,7 +114,10 @@ npm run test
 - **Day 4 (Completed)**: Tasks, Life Calendar (Month/Week/Agenda), BullMQ-queued Reminders, Assets & Warranty Repairs (with linked Vault invoices), Subscriptions with monthly/annual spend summaries, and Notification Center & privacy-masking preferences.
 - **Day 5 (Completed)**: AI Provider abstraction (`none` heuristic / `openai` / `gemini`), OCR + Zod-validated Extraction Review with explicit user confirmation, PostgreSQL `pg_trgm` Universal Search, grounded Life AI Assistant with citations, Expo SQLite offline cache + `sync_operations` outbox with optimistic concurrency conflict checks, and EAS Android build config (`apps/mobile/eas.json`).
 
-### Production Android Build (EAS)
+### Production Deployment & Android Build
+
+- **Cloud API + Worker + PostgreSQL + Redis**: Deploy using the Render Blueprint in [`infrastructure/render.yaml`](infrastructure/render.yaml). Configure S3/R2 storage, `AI_API_KEY`, `EMAIL_API_KEY` (Resend), `EXPO_ACCESS_TOKEN`, and `SENTRY_DSN` in the Render dashboard.
+- **Mobile Android Build (EAS)**:
 
 ```bash
 cd apps/mobile

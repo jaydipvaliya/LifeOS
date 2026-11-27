@@ -92,6 +92,21 @@ export const openApiSpec = {
         },
       },
     },
+    '/auth/verify-email/request': {
+      post: {
+        summary: 'Send email verification token to the authenticated user',
+        tags: ['Auth'],
+        security: [{ bearerAuth: [] }],
+        responses: { '200': { description: 'Verification email queued' } },
+      },
+    },
+    '/auth/verify-email/confirm': {
+      post: {
+        summary: 'Verify user email address using issued verification token',
+        tags: ['Auth'],
+        responses: { '200': { description: 'Email verified' } },
+      },
+    },
     '/auth/sessions': {
       get: {
         summary: 'List active device sessions for the authenticated user',
@@ -144,6 +159,14 @@ export const openApiSpec = {
           '200': { description: 'Profile updated' },
           '401': { description: 'Unauthorized' },
         },
+      },
+    },
+    '/users/me/push-token': {
+      post: {
+        summary: 'Register Expo Push notification token for current device',
+        tags: ['Users'],
+        security: [{ bearerAuth: [] }],
+        responses: { '200': { description: 'Push token registered' } },
       },
     },
     '/dashboard': {

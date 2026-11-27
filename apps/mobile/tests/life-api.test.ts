@@ -48,4 +48,37 @@ describe('lifeApi client contracts', () => {
 
     getSpy.mockRestore();
   });
+
+  it('queues task create and completion mutations into offline outbox when network is unavailable', async () => {
+    const { offlineStore } = await import('../src/offline/sqlite-store');
+    const { useAppUiStore } = await import('../src/stores/app-store');
+
+    const networkErr = Object.assign(new Error('Network Error'), { isAxiosError: true });
+    const postSpy = vi.spyOn(apiClient, 'post').mockRejectedValue(networkErr);
+
+    const created = await lifeApi.createTask({
+      title: 'Offline Electricity Bill',
+      priority: 'high',
+      isRecurring: false,
+    });
+    expect(created.title).toBe('Offline Electricity Bill');
+    expect(created.id).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+    );
+
+    const completed = await lifeApi.completeTask(created.id);
+    expect(completed.status).toBe('completed');
+
+    const pending = await offlineStore.listPendingSyncOperations();
+    expect(pending.some((op) => op.entityId === created.id && op.operationType === 'create')).toBe(
+      true,
+    );
+    expect(pending.some((op) => op.entityId === created.id && op.operationType === 'update')).toBe(
+      true,
+    );
+    expect(useAppUiStore.getState().isOffline).toBe(true);
+    expect(useAppUiStore.getState().pendingSyncCount).toBeGreaterThanOrEqual(2);
+
+    postSpy.mockRestore();
+  });
 });

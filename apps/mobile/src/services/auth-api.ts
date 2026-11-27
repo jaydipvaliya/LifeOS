@@ -6,9 +6,11 @@ import type {
   UserMeResponse,
 } from '@lifeos/shared-types';
 import type {
+  ConfirmEmailVerificationInput,
   ForgotPasswordInput,
   LoginInput,
   RegisterInput,
+  RegisterPushTokenInput,
   ResetPasswordInput,
 } from '@lifeos/validation';
 import { apiClient } from './api-client';
@@ -44,6 +46,31 @@ export const authApi = {
   async resetPassword(input: ResetPasswordInput): Promise<{ passwordReset: boolean }> {
     const res = await apiClient.post<ApiSuccessResponse<{ passwordReset: boolean }>>(
       '/auth/reset-password',
+      input,
+    );
+    return res.data.data;
+  },
+
+  async requestEmailVerification(): Promise<{ sent: boolean; message: string }> {
+    const res = await apiClient.post<ApiSuccessResponse<{ sent: boolean; message: string }>>(
+      '/auth/verify-email/request',
+    );
+    return res.data.data;
+  },
+
+  async confirmEmailVerification(
+    input: ConfirmEmailVerificationInput,
+  ): Promise<{ emailVerified: boolean }> {
+    const res = await apiClient.post<ApiSuccessResponse<{ emailVerified: boolean }>>(
+      '/auth/verify-email/confirm',
+      input,
+    );
+    return res.data.data;
+  },
+
+  async registerPushToken(input: RegisterPushTokenInput): Promise<{ updated: boolean }> {
+    const res = await apiClient.post<ApiSuccessResponse<{ updated: boolean }>>(
+      '/users/me/push-token',
       input,
     );
     return res.data.data;

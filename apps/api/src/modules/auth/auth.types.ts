@@ -116,5 +116,6 @@ export interface IAuthRepository {
   ): Promise<void>;
   findUserByResetTokenHash(tokenHash: string): Promise<UserRecord | null>;
   completePasswordReset(userId: string, newPasswordHash: string, meta: RequestMeta): Promise<void>;
+  markEmailVerified(userId: string, meta: RequestMeta): Promise<void>;
   softDeleteAccount(userId: string, meta: RequestMeta): Promise<void>;
 }

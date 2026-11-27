@@ -63,4 +63,33 @@ export class PrismaRemindersRepository implements IRemindersRepository {
     await this.prisma.reminder.delete({ where: { id: reminderId } });
     return existing;
   }
+
+  async getDispatchContext(
+    userId: string,
+  ): Promise<{ pushTokens: string[]; hideSensitiveDetails: boolean }> {
+    const [devices, pref] = await Promise.all([
+      this.prisma.device.findMany({
+        where: { userId, revokedAt: null, pushToken: { not: null } },
+        select: { pushToken: true },
+      }),
+      this.prisma.notificationPreference.findUnique({
+        where: { userId },
+        select: { pushEnabled: true, privacyHideSensitiveContent: true },
+      }),
+    ]);
+
+    const hideSensitiveDetails = pref?.privacyHideSensitiveContent ?? true;
+    if (pref?.pushEnabled === false) {
+      return { pushTokens: [], hideSensitiveDetails };
+    }
+
+    const pushTokens = Array.from(
+      new Set(
+        devices
+          .map((device) => device.pushToken)
+          .filter((token): token is string => typeof token === 'string' && token.length > 0),
+      ),
+    );
+    return { pushTokens, hideSensitiveDetails };
+  }
 }

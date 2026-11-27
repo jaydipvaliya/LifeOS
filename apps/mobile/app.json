@@ -54,7 +54,14 @@
           "photosPermission": "LifeOS accesses your selected photos to upload documents to your private Vault."
         }
       ],
-      "expo-sqlite"
+      "expo-sqlite",
+      [
+        "expo-notifications",
+        {
+          "color": "#5B4AE6"
+        }
+      ],
+      "@sentry/react-native"
     ]
   }
 }

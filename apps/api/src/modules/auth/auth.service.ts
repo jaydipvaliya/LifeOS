@@ -14,6 +14,7 @@ import type {
 } from '@lifeos/validation';
 import { logger } from '../../config/logger';
 import { ConflictError, NotFoundError, UnauthorizedError } from '../../shared/errors';
+import { createEmailService, type IEmailService } from '../email/email.service';
 import type {
   DeviceRecord,
   IAuthRepository,
@@ -66,6 +67,7 @@ export class AuthService {
     private readonly repository: IAuthRepository,
     private readonly passwordService: PasswordService,
     private readonly tokenService: TokenService,
+    private readonly emailService: IEmailService = createEmailService(),
   ) {}
 
   async register(input: RegisterInput, meta: RequestMeta): Promise<AuthSessionResponse> {
@@ -235,6 +237,11 @@ export class AuthService {
       const tokenHash = this.tokenService.hashToken(rawToken);
       const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
       await this.repository.setPasswordResetToken(user.id, tokenHash, expiresAt, meta);
+      await this.emailService.sendEmail({
+        to: user.email,
+        subject: 'Reset your LifeOS password',
+        text: `Hi ${user.fullName},\n\nUse this recovery token in LifeOS to reset your password (expires in 30 minutes):\n\n${rawToken}\n\nIf you did not request this, you can safely ignore this email.`,
+      });
       logger.info({ userId: user.id }, 'Password reset token generated for user');
     }
 
@@ -258,6 +265,45 @@ export class AuthService {
     await this.repository.completePasswordReset(user.id, newPasswordHash, meta);
 
     return { passwordReset: true };
+  }
+
+  async requestEmailVerification(userId: string): Promise<{ sent: true; message: string }> {
+    const userWithProfile = await this.repository.findActiveUserById(userId);
+    if (!userWithProfile) {
+      throw new NotFoundError('User account not found');
+    }
+
+    if (userWithProfile.emailVerified) {
+      return { sent: true, message: 'Your email address is already verified.' };
+    }
+
+    const token = this.tokenService.signEmailVerificationToken(
+      userWithProfile.id,
+      userWithProfile.email,
+    );
+    await this.emailService.sendEmail({
+      to: userWithProfile.email,
+      subject: 'Verify your LifeOS email address',
+      text: `Hi ${userWithProfile.fullName},\n\nPaste this verification token inside LifeOS Profile to verify your email (valid for 24 hours):\n\n${token}`,
+    });
+
+    return {
+      sent: true,
+      message: 'Verification instructions have been sent to your email address.',
+    };
+  }
+
+  async confirmEmailVerification(
+    token: string,
+    meta: RequestMeta,
+  ): Promise<{ emailVerified: true }> {
+    const claims = this.tokenService.verifyEmailVerificationToken(token);
+    const user = await this.repository.findActiveUserByEmail(claims.email);
+    if (!user || user.id !== claims.userId) {
+      throw new UnauthorizedError('Verification token does not match an active user');
+    }
+    await this.repository.markEmailVerified(user.id, meta);
+    return { emailVerified: true };
   }
 
   async listSessions(userId: string): Promise<DeviceSessionDto[]> {

@@ -21,9 +21,45 @@ import type {
   CreateTaskInput,
   UpdateNotificationPreferenceInput,
 } from '@lifeos/validation';
+import axios from 'axios';
 import { offlineStore } from '../offline/sqlite-store';
 import { useAppUiStore } from '../stores/app-store';
 import { apiClient } from './api-client';
+
+function isNetworkFailure(err: unknown): boolean {
+  return axios.isAxiosError(err) && !err.response;
+}
+
+async function enqueueOfflineTaskMutation(params: {
+  operationId: string;
+  taskId: string;
+  operationType: 'create' | 'update';
+  payload: Record<string, unknown>;
+}): Promise<void> {
+  await offlineStore.enqueueSyncOperation({
+    id: params.operationId,
+    entityType: 'task',
+    entityId: params.taskId,
+    operationType: params.operationType,
+    clientVersion: 1,
+    payload: params.payload,
+  });
+  const pendingCount = await offlineStore.countPendingSyncOperations();
+  const uiStore = useAppUiStore.getState();
+  uiStore.setOffline(true);
+  uiStore.setPendingSyncCount(pendingCount);
+}
+
+function createClientUuid(): string {
+  if (typeof globalThis.crypto?.randomUUID === 'function') {
+    return globalThis.crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (char) => {
+    const r = Math.floor(Math.random() * 16);
+    const v = char === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
 
 export const lifeApi = {
   // Tasks
@@ -55,15 +91,94 @@ export const lifeApi = {
   },
 
   async createTask(input: CreateTaskInput): Promise<TaskDto> {
-    const res = await apiClient.post<ApiSuccessResponse<{ task: TaskDto }>>('/tasks', input);
-    return res.data.data.task;
+    try {
+      const res = await apiClient.post<ApiSuccessResponse<{ task: TaskDto }>>('/tasks', input);
+      useAppUiStore.getState().setOffline(false);
+      return res.data.data.task;
+    } catch (err) {
+      if (!isNetworkFailure(err)) {
+        throw err;
+      }
+
+      const now = new Date().toISOString();
+      const taskId = createClientUuid();
+      await enqueueOfflineTaskMutation({
+        operationId: `op-${taskId}`,
+        taskId,
+        operationType: 'create',
+        payload: {
+          title: input.title,
+          priority: input.priority ?? 'medium',
+          ...(input.dueAt ? { dueAt: input.dueAt } : {}),
+        },
+      });
+
+      return {
+        id: taskId,
+        title: input.title,
+        notes: input.notes ?? null,
+        priority: input.priority ?? 'medium',
+        status: 'pending',
+        category: input.category ?? null,
+        dueAt: input.dueAt ?? null,
+        snoozedUntil: null,
+        completedAt: null,
+        isRecurring: input.isRecurring ?? false,
+        recurrenceRule: input.recurrenceRule ?? null,
+        sourceDocumentId: input.sourceDocumentId ?? null,
+        sourceDocumentTitle: null,
+        linkedEventId: input.linkedEventId ?? null,
+        linkedEventTitle: null,
+        isOverdue: false,
+        version: 1,
+        createdAt: now,
+        updatedAt: now,
+      };
+    }
   },
 
   async completeTask(id: string): Promise<TaskDto> {
-    const res = await apiClient.post<ApiSuccessResponse<{ task: TaskDto }>>(
-      `/tasks/${id}/complete`,
-    );
-    return res.data.data.task;
+    try {
+      const res = await apiClient.post<ApiSuccessResponse<{ task: TaskDto }>>(
+        `/tasks/${id}/complete`,
+      );
+      useAppUiStore.getState().setOffline(false);
+      return res.data.data.task;
+    } catch (err) {
+      if (!isNetworkFailure(err)) {
+        throw err;
+      }
+
+      const now = new Date().toISOString();
+      await enqueueOfflineTaskMutation({
+        operationId: `op-complete-${id}-${Date.now()}`,
+        taskId: id,
+        operationType: 'update',
+        payload: { status: 'completed' },
+      });
+
+      return {
+        id,
+        title: 'Synced Task',
+        notes: null,
+        priority: 'medium',
+        status: 'completed',
+        category: null,
+        dueAt: null,
+        snoozedUntil: null,
+        completedAt: now,
+        isRecurring: false,
+        recurrenceRule: null,
+        sourceDocumentId: null,
+        sourceDocumentTitle: null,
+        linkedEventId: null,
+        linkedEventTitle: null,
+        isOverdue: false,
+        version: 2,
+        createdAt: now,
+        updatedAt: now,
+      };
+    }
   },
 
   async snoozeTask(id: string, snoozedUntil: string): Promise<TaskDto> {

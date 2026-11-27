@@ -2,7 +2,9 @@ import { createApp } from './app';
 import { env } from './config/env';
 import { logger } from './config/logger';
 import { disconnectPrisma } from './config/prisma';
+import { initApiSentry } from './config/sentry';
 
+initApiSentry();
 const app = createApp();
 
 const server = app.listen(env.PORT, env.HOST, () => {

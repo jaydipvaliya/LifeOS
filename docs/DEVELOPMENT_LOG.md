@@ -225,3 +225,36 @@
    - Built Extraction Review screen (`app/(app)/extraction/[id].tsx`), Universal Search (`app/(app)/search.tsx`), Life AI Assistant (`app/(app)/assistant.tsx`), and wired Home Dashboard & Document Detail.
    - Configured EAS Android build profiles (`apps/mobile/eas.json`) with APK preview and AAB production `app-bundle` targets.
    - Updated OpenAPI specification (`apps/api/src/config/openapi.ts`) and security verification across all endpoints.
+
+---
+
+## Production Hardening — Vision OCR, Transactional Email, Push Dispatch, Sentry & Offline Outbox
+
+- **Date**: 2026-11-27
+- **Status**: Completed and verified
+
+### Completed Tasks
+
+1. **Multimodal Vision OCR** (`apps/api/src/modules/ai/ai-provider.ts`, `apps/api/src/modules/intelligence/extraction.service.ts`):
+   - Added `MultimodalBinaryInput` streaming of image/PDF binaries to Gemini (`inlineData` with `image/heic` -> `image/jpeg` normalization) and OpenAI (`image_url`) when analyzing scanned documents and PDFs.
+2. **Transactional Email Delivery & Verification** (`apps/api/src/modules/email/`, `apps/api/src/modules/auth/`):
+   - Added `IEmailService` (`ResendEmailService` + `LoggedEmailService` local fallback), `POST /api/v1/auth/verify-email/request`, and `POST /api/v1/auth/verify-email/confirm` (`email-verify` scoped JWT claims).
+   - Wired email dispatch into password reset requests and mobile Profile verification UX.
+3. **Push Notification Registration & Worker Dispatch** (`apps/api/src/modules/users/`, `apps/api/src/modules/reminders/`, `apps/worker/src/processors/reminder.processor.ts`, `apps/mobile/src/services/push-notifications.ts`):
+   - Added `POST /api/v1/users/me/push-token`, device push-token + privacy-mask lookup in `RemindersService`, Expo Push API dispatch in `dispatchReminderNotification`, and `expo-notifications` registration on mobile onboarding, startup, and profile.
+4. **Error Monitoring & Offline Mutation Queue** (`apps/api/src/config/sentry.ts`, `apps/mobile/src/services/sentry.ts`, `apps/mobile/src/services/life-api.ts`):
+   - Integrated `@sentry/node` and `@sentry/react-native` (guarded gracefully when DSNs are unset).
+   - Updated `lifeApi.createTask` and `lifeApi.completeTask` to enqueue sync mutations into `offlineStore` when network errors occur, auto-flushing on startup and app foreground resume.
+5. **Cloud Blueprint** (`infrastructure/render.yaml`):
+   - Added Render Blueprint defining `@lifeos/api`, `@lifeos/worker`, PostgreSQL, and Redis (`noeviction`) services alongside updated `.env.example` templates.
+
+### Verification Executed
+
+- `npm run build`, `npm run typecheck`, `npm run lint` (`0` errors), `npm run format:check`: Passed
+- Workspace test suites:
+  - `@lifeos/api`: 18/18 passed (7 files)
+  - `@lifeos/mobile`: 12/12 passed (5 files)
+  - `@lifeos/worker`: 4/4 passed (1 file)
+  - `@lifeos/config`: 2/2 passed (1 file)
+  - `@lifeos/validation`: 3/3 passed (1 file)
+- Android Metro bundle export (`npx expo export --platform android --no-bytecode`): Bundled 4,545 modules (`7MB` JS bundle)

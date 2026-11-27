@@ -1,6 +1,6 @@
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useRouter } from 'expo-router';
-import { Fingerprint } from 'lucide-react-native';
+import { Bell, Fingerprint } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import {
@@ -14,6 +14,7 @@ import {
 } from '../../src/components/ui';
 import { extractApiErrorMessage } from '../../src/services/api-client';
 import { authApi } from '../../src/services/auth-api';
+import { registerForPushNotificationsAsync } from '../../src/services/push-notifications';
 import { useAuthStore } from '../../src/stores/auth-store';
 import { useTheme } from '../../src/theme';
 
@@ -27,6 +28,7 @@ export default function OnboardingScreen() {
   const [institutionName, setInstitutionName] = useState('');
   const [jobTitle, setJobTitle] = useState('');
   const [enableBiometrics, setEnableBiometrics] = useState(false);
+  const [enablePushReminders, setEnablePushReminders] = useState(true);
   const [saving, setSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -58,6 +60,9 @@ export default function OnboardingScreen() {
       });
       setUserAndProfile(me.user, me.profile);
       await setBiometricLockEnabled(enableBiometrics);
+      if (enablePushReminders) {
+        await registerForPushNotificationsAsync();
+      }
       router.replace('/(app)');
     } catch (err) {
       setErrorMessage(extractApiErrorMessage(err));
@@ -156,6 +161,38 @@ export default function OnboardingScreen() {
                 onValueChange={() => void handleToggleBiometrics()}
                 accent="teal"
                 accessibilityLabel="Toggle biometric app lock"
+              />
+            </View>
+          </EditorialCard>
+
+          <EditorialCard variant="cobalt" shape="extraLarge">
+            <View style={styles.biometricRow}>
+              <View style={styles.biometricLeft}>
+                <View
+                  style={[
+                    styles.iconTile,
+                    {
+                      backgroundColor: theme.colors.m3.surfaceContainerLowest,
+                      borderRadius: theme.shapes.medium,
+                    },
+                  ]}
+                >
+                  <Bell size={22} strokeWidth={1.9} color={theme.colors.expressive.cobalt.base} />
+                </View>
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <EditorialText variant="cardHeading" tone="cobalt">
+                    Reminder Push Alerts
+                  </EditorialText>
+                  <EditorialText variant="caption" tone="secondary">
+                    Receive timely alerts before deadlines, warranties, and renewals.
+                  </EditorialText>
+                </View>
+              </View>
+              <ExpressiveSwitch
+                value={enablePushReminders}
+                onValueChange={setEnablePushReminders}
+                accent="cobalt"
+                accessibilityLabel="Toggle push reminder alerts"
               />
             </View>
           </EditorialCard>

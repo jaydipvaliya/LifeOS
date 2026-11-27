@@ -3,6 +3,7 @@ import type { UpdateProfileInput } from '@lifeos/validation';
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
 import { createApp } from '../src/app';
+import type { IEmailService } from '../src/modules/email/email.service';
 import type {
   CreateLoginSessionParams,
   CreateUserParams,
@@ -24,6 +25,7 @@ class InMemoryAuthAndUsersRepository implements IAuthRepository, IUsersRepositor
   >();
   public profiles = new Map<string, UserProfileRecord>();
   public devices = new Map<string, DeviceRecord>();
+  public devicePushTokens = new Map<string, string>();
   public refreshTokens = new Map<string, RefreshTokenRecord>();
 
   async findActiveUserByEmail(email: string): Promise<UserRecord | null> {
@@ -242,6 +244,13 @@ class InMemoryAuthAndUsersRepository implements IAuthRepository, IUsersRepositor
     }
   }
 
+  async markEmailVerified(userId: string) {
+    const user = this.users.get(userId);
+    if (user) {
+      user.emailVerified = true;
+    }
+  }
+
   async softDeleteAccount(userId: string) {
     const now = new Date();
     const user = this.users.get(userId);
@@ -278,6 +287,25 @@ class InMemoryAuthAndUsersRepository implements IAuthRepository, IUsersRepositor
     if (input.completeOnboarding) profile.onboardingCompletedAt = new Date();
 
     return { ...user, profile };
+  }
+
+  async savePushToken(
+    userId: string,
+    pushToken: string,
+    deviceId?: string,
+  ): Promise<{ updated: boolean }> {
+    const activeDevices = Array.from(this.devices.values())
+      .filter((d) => d.userId === userId && d.revokedAt === null)
+      .sort((a, b) => b.lastSeenAt.getTime() - a.lastSeenAt.getTime());
+
+    const target = deviceId ? activeDevices.find((d) => d.id === deviceId) : activeDevices[0];
+
+    if (!target) {
+      return { updated: false };
+    }
+
+    this.devicePushTokens.set(target.id, pushToken);
+    return { updated: true };
   }
 }
 
@@ -416,5 +444,75 @@ describe('Authentication & User Profile Flows', () => {
       password: 'Password123',
     });
     expect(loginAfterDelete.status).toBe(401);
+  });
+
+  it('verifies email, dispatches password reset emails, and registers Expo push tokens', async () => {
+    const repo = new InMemoryAuthAndUsersRepository();
+    const sentEmails: Array<{ to: string; subject: string; text: string }> = [];
+    const emailService: IEmailService = {
+      providerName: 'test-spy',
+      async sendEmail(message) {
+        sentEmails.push({ to: message.to, subject: message.subject, text: message.text });
+        return { delivered: true, messageId: `msg-${sentEmails.length}` };
+      },
+    };
+    const app = createApp({ authRepository: repo, usersRepository: repo, emailService });
+
+    const reg = await request(app).post('/api/v1/auth/register').send({
+      email: 'kiran@example.com',
+      password: 'Password123',
+      fullName: 'Kiran Patel',
+      privacyConsentAccepted: true,
+    });
+    expect(reg.status).toBe(201);
+    const accessToken = reg.body.data.tokens.accessToken as string;
+    const userId = reg.body.data.user.id as string;
+
+    const reqVerify = await request(app)
+      .post('/api/v1/auth/verify-email/request')
+      .set('Authorization', `Bearer ${accessToken}`);
+    expect(reqVerify.status).toBe(200);
+    expect(reqVerify.body.data.sent).toBe(true);
+    expect(sentEmails).toHaveLength(1);
+    expect(sentEmails[0].to).toBe('kiran@example.com');
+
+    // Extract the signed JWT verification token from the verification email body.
+    const tokenMatch = sentEmails[0].text.match(/eyJ[\w-]+\.[\w-]+\.[\w-]+/);
+    expect(tokenMatch?.[0]).toBeTruthy();
+
+    const badConfirm = await request(app)
+      .post('/api/v1/auth/verify-email/confirm')
+      .send({ token: 'invalid-token-value-12345' });
+    expect(badConfirm.status).toBe(401);
+
+    const okConfirm = await request(app)
+      .post('/api/v1/auth/verify-email/confirm')
+      .send({ token: tokenMatch![0] });
+    expect(okConfirm.status).toBe(200);
+    expect(okConfirm.body.data.emailVerified).toBe(true);
+    expect(repo.users.get(userId)?.emailVerified).toBe(true);
+
+    const forgotRes = await request(app).post('/api/v1/auth/forgot-password').send({
+      email: 'kiran@example.com',
+    });
+    expect(forgotRes.status).toBe(200);
+    expect(sentEmails).toHaveLength(2);
+    expect(sentEmails[1].subject.toLowerCase()).toContain('reset');
+
+    const badPushRes = await request(app)
+      .post('/api/v1/users/me/push-token')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ pushToken: 'short' });
+    expect(badPushRes.status).toBe(400);
+
+    const pushRes = await request(app)
+      .post('/api/v1/users/me/push-token')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ pushToken: 'ExponentPushToken[test-device-token-123]' });
+    expect(pushRes.status).toBe(200);
+    expect(pushRes.body.data.updated).toBe(true);
+    expect(Array.from(repo.devicePushTokens.values())).toContain(
+      'ExponentPushToken[test-device-token-123]',
+    );
   });
 });

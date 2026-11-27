@@ -61,4 +61,12 @@ export class UsersService {
       },
     };
   }
+
+  async registerPushToken(
+    userId: string,
+    pushToken: string,
+    deviceId?: string,
+  ): Promise<{ updated: boolean }> {
+    return this.repository.savePushToken(userId, pushToken, deviceId);
+  }
 }

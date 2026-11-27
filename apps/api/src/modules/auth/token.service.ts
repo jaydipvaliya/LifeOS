@@ -77,4 +77,35 @@ export class TokenService {
   getRefreshTokenExpiresAt(): Date {
     return new Date(Date.now() + env.JWT_REFRESH_EXPIRES_DAYS * 24 * 60 * 60 * 1000);
   }
+
+  signEmailVerificationToken(userId: string, email: string): string {
+    return jwt.sign({ email, purpose: 'email_verification' }, env.JWT_ACCESS_SECRET, {
+      subject: userId,
+      jwtid: randomUUID(),
+      issuer: 'lifeos-api',
+      audience: 'lifeos-email-verify',
+      expiresIn: '24h',
+    });
+  }
+
+  verifyEmailVerificationToken(token: string): { userId: string; email: string } {
+    try {
+      const decoded = jwt.verify(token, env.JWT_ACCESS_SECRET, {
+        issuer: 'lifeos-api',
+        audience: 'lifeos-email-verify',
+      }) as JwtPayload & { email?: string; purpose?: string };
+
+      if (
+        !decoded.sub ||
+        typeof decoded.email !== 'string' ||
+        decoded.purpose !== 'email_verification'
+      ) {
+        throw new UnauthorizedError('Invalid email verification token');
+      }
+      return { userId: decoded.sub, email: decoded.email };
+    } catch (err) {
+      if (err instanceof UnauthorizedError) throw err;
+      throw new UnauthorizedError('Email verification token is invalid or expired');
+    }
+  }
 }

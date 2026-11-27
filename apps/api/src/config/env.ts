@@ -30,6 +30,11 @@ const envSchema = z
     AI_API_KEY: z.string().optional(),
     AI_MODEL: z.string().optional(),
     AI_BASE_URL: z.string().optional(),
+    EMAIL_PROVIDER: z.enum(['none', 'resend']).default('none'),
+    EMAIL_API_KEY: z.string().optional(),
+    EMAIL_FROM: z.string().default('LifeOS <noreply@lifeos.app>'),
+    SENTRY_DSN: z.string().optional(),
+    EXPO_ACCESS_TOKEN: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.NODE_ENV === 'production') {

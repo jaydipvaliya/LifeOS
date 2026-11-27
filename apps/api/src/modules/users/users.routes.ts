@@ -1,4 +1,4 @@
-import { updateProfileSchema } from '@lifeos/validation';
+import { registerPushTokenSchema, updateProfileSchema } from '@lifeos/validation';
 import { Router } from 'express';
 import { createRequireAuth } from '../../middleware/auth';
 import { validateRequest } from '../../middleware/validate';
@@ -22,6 +22,11 @@ export function createUsersRouter(deps: {
     '/me/profile',
     validateRequest({ body: updateProfileSchema }),
     controller.updateMyProfile,
+  );
+  router.post(
+    '/me/push-token',
+    validateRequest({ body: registerPushTokenSchema }),
+    controller.registerPushToken,
   );
 
   return router;

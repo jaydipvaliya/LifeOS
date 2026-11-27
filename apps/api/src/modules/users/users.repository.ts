@@ -82,4 +82,29 @@ export class PrismaUsersRepository implements IUsersRepository {
       };
     });
   }
+
+  async savePushToken(
+    userId: string,
+    pushToken: string,
+    deviceId?: string,
+  ): Promise<{ updated: boolean }> {
+    const targetDevice = deviceId
+      ? await this.prisma.device.findFirst({
+          where: { id: deviceId, userId, revokedAt: null },
+        })
+      : await this.prisma.device.findFirst({
+          where: { userId, revokedAt: null },
+          orderBy: { lastSeenAt: 'desc' },
+        });
+
+    if (!targetDevice) {
+      return { updated: false };
+    }
+
+    await this.prisma.device.update({
+      where: { id: targetDevice.id },
+      data: { pushToken, lastSeenAt: new Date() },
+    });
+    return { updated: true };
+  }
 }

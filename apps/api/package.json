@@ -21,6 +21,7 @@
     "@lifeos/shared-types": "*",
     "@lifeos/validation": "*",
     "@prisma/client": "^6.19.0",
+    "@sentry/node": "^11.19.0",
     "argon2": "^0.45.2",
     "bullmq": "^5.81.6",
     "cors": "^2.8.5",

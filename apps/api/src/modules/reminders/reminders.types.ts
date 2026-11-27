@@ -29,4 +29,7 @@ export interface IRemindersRepository {
     newJobId: string,
   ): Promise<ReminderRecord | null>;
   deleteForUser(reminderId: string, userId: string): Promise<ReminderRecord | null>;
+  getDispatchContext(
+    userId: string,
+  ): Promise<{ pushTokens: string[]; hideSensitiveDetails: boolean }>;
 }

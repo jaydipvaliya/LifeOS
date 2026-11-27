@@ -16,14 +16,22 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { Lock } from 'lucide-react-native';
 import React, { useEffect } from 'react';
-import { StyleSheet } from 'react-native';
+import { AppState, StyleSheet } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Button, EditorialCard, EditorialText, Screen } from '../src/components/ui';
+import { flushSyncOutbox } from '../src/offline/sync-engine';
 import { authApi } from '../src/services/auth-api';
+import {
+  configureForegroundNotifications,
+  registerForPushNotificationsAsync,
+} from '../src/services/push-notifications';
+import { initMobileSentry } from '../src/services/sentry';
 import { useAuthStore } from '../src/stores/auth-store';
 import { ThemeProvider, useTheme } from '../src/theme';
 
 void SplashScreen.preventAutoHideAsync();
+initMobileSentry();
+configureForegroundNotifications();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -66,6 +74,8 @@ function RootNavigator() {
         if (active) {
           setUserAndProfile(me.user, me.profile);
           markHydrated();
+          void flushSyncOutbox();
+          void registerForPushNotificationsAsync();
         }
       } catch {
         if (active) {
@@ -79,6 +89,16 @@ function RootNavigator() {
       active = false;
     };
   }, [clearSession, hydrateFromStorage, markHydrated, setUserAndProfile]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const sub = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') {
+        void flushSyncOutbox();
+      }
+    });
+    return () => sub.remove();
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (!isHydrated) return;

@@ -75,6 +75,38 @@ export class AuthController {
     }
   };
 
+  requestEmailVerification = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      if (!req.auth) {
+        throw new UnauthorizedError();
+      }
+      const result = await this.authService.requestEmailVerification(req.auth.userId);
+      sendSuccess(res, result, 200);
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  confirmEmailVerification = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const result = await this.authService.confirmEmailVerification(
+        req.body.token,
+        extractRequestMeta(req),
+      );
+      sendSuccess(res, result, 200);
+    } catch (err) {
+      next(err);
+    }
+  };
+
   listSessions = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       if (!req.auth) {

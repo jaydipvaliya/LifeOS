@@ -369,6 +369,29 @@ export class PrismaAuthRepository implements IAuthRepository {
     });
   }
 
+  async markEmailVerified(userId: string, meta: RequestMeta): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: userId },
+        data: {
+          emailVerified: true,
+          emailVerifiedAt: new Date(),
+        },
+      });
+
+      await tx.auditLog.create({
+        data: {
+          userId,
+          action: 'auth.email_verified',
+          resourceType: 'user',
+          resourceId: userId,
+          ipAddress: meta.ipAddress,
+          userAgent: meta.userAgent,
+        },
+      });
+    });
+  }
+
   async softDeleteAccount(userId: string, meta: RequestMeta): Promise<void> {
     await this.prisma.$transaction(async (tx) => {
       const now = new Date();

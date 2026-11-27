@@ -32,12 +32,17 @@ export class RemindersService {
   }
 
   async create(userId: string, input: CreateReminderInput): Promise<ReminderDto> {
-    const created = await this.repository.createForUser(userId, input);
+    const [created, dispatch] = await Promise.all([
+      this.repository.createForUser(userId, input),
+      this.repository.getDispatchContext(userId),
+    ]);
     const jobId = await this.queue.scheduleReminder({
       reminderId: created.id,
       userId,
       title: created.title,
       remindAt: created.remindAt,
+      pushTokens: dispatch.pushTokens,
+      hideSensitiveDetails: dispatch.hideSensitiveDetails,
     });
     const withJob = await this.repository.attachJobId(created.id, jobId);
     return toReminderDto(withJob);
@@ -52,11 +57,14 @@ export class RemindersService {
     }
 
     const nextDate = new Date(snoozedUntilIso);
+    const dispatch = await this.repository.getDispatchContext(userId);
     const nextJobId = await this.queue.scheduleReminder({
       reminderId: existing.id,
       userId,
       title: existing.title,
       remindAt: nextDate,
+      pushTokens: dispatch.pushTokens,
+      hideSensitiveDetails: dispatch.hideSensitiveDetails,
     });
 
     const updated = await this.repository.snoozeForUser(reminderId, userId, nextDate, nextJobId);

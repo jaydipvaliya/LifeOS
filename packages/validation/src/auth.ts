@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { emailSchema, passwordSchema } from './common';
+import { emailSchema, passwordSchema, uuidSchema } from './common';
 
 export const userModeSchema = z.enum(['student', 'professional', 'transitioning']);
 
@@ -54,10 +54,21 @@ export const updateProfileSchema = z.object({
   completeOnboarding: z.boolean().optional(),
 });
 
+export const confirmEmailVerificationSchema = z.object({
+  token: z.string().min(20, 'Verification token is required'),
+});
+
+export const registerPushTokenSchema = z.object({
+  pushToken: z.string().trim().min(10).max(255),
+  deviceId: uuidSchema.optional(),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+export type ConfirmEmailVerificationInput = z.infer<typeof confirmEmailVerificationSchema>;
+export type RegisterPushTokenInput = z.infer<typeof registerPushTokenSchema>;
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 export type DeleteAccountInput = z.infer<typeof deleteAccountSchema>;

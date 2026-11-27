@@ -1,6 +1,9 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { processExtractionJob } from '../src/processors/extraction.processor';
-import { formatPrivacySafeNotification } from '../src/processors/reminder.processor';
+import {
+  dispatchReminderNotification,
+  formatPrivacySafeNotification,
+} from '../src/processors/reminder.processor';
 import { QUEUE_NAMES } from '../src/queues/queue-names';
 
 describe('Worker Foundation & Processors', () => {
@@ -35,5 +38,40 @@ describe('Worker Foundation & Processors', () => {
     } as never);
     expect(res.documentId).toBe('doc-1');
     expect(res.status).toBe('queued_for_ai_review');
+  });
+
+  it('dispatches Expo push notifications for valid push tokens and respects privacy masking', async () => {
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
+      new Response(JSON.stringify({ data: [{ status: 'ok' }] }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+
+    const res = await dispatchReminderNotification(
+      {
+        reminderId: 'rem-42',
+        userId: 'user-1',
+        title: 'Renew Passport #Z999',
+        hideSensitiveDetails: true,
+        pushTokens: ['ExponentPushToken[abc123]', 'invalid-token', 'ExpoPushToken[xyz789]'],
+      },
+      'job-rem-1',
+      fetchMock,
+    );
+
+    expect(res.dispatchedCount).toBe(2);
+    expect(res.privacyMasked).toBe(true);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchMock.mock.calls[0]!;
+    expect(url).toBe('https://exp.host/--/api/v2/push/send');
+    const sentMessages = JSON.parse(String(init?.body)) as Array<{
+      to: string;
+      body: string;
+      channelId: string;
+    }>;
+    expect(sentMessages).toHaveLength(2);
+    expect(sentMessages[0].channelId).toBe('lifeos-reminders');
+    expect(sentMessages[0].body).not.toContain('Passport');
   });
 });

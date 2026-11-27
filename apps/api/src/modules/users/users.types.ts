@@ -9,4 +9,9 @@ export interface IUsersRepository {
     userId: string,
     input: UpdateProfileInput,
   ): Promise<UserRecord & { profile: UserProfileRecord }>;
+  savePushToken(
+    userId: string,
+    pushToken: string,
+    deviceId?: string,
+  ): Promise<{ updated: boolean }>;
 }

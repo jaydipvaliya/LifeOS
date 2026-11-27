@@ -29,4 +29,20 @@ export class UsersController {
       next(err);
     }
   };
+
+  registerPushToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.auth) {
+        throw new UnauthorizedError();
+      }
+      const result = await this.usersService.registerPushToken(
+        req.auth.userId,
+        req.body.pushToken,
+        req.body.deviceId ?? req.auth.deviceId ?? undefined,
+      );
+      sendSuccess(res, result, 200);
+    } catch (err) {
+      next(err);
+    }
+  };
 }

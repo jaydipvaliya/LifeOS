@@ -385,6 +385,10 @@ function createRepositories(store: InMemoryLifeAdminStore) {
       store.reminders.delete(id);
       return r;
     },
+    getDispatchContext: async (u) => ({
+      pushTokens: [],
+      hideSensitiveDetails: (await store.getPreferences(u)).privacyHideSensitiveContent,
+    }),
   };
 
   const assetsRepo: IAssetsRepository = {

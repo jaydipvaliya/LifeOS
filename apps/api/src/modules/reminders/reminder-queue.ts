@@ -10,6 +10,8 @@ export interface EnqueueReminderPayload {
   userId: string;
   title: string;
   remindAt: Date;
+  pushTokens?: string[];
+  hideSensitiveDetails?: boolean;
 }
 
 export interface IReminderQueue {
@@ -49,6 +51,8 @@ export class BullMqReminderQueue implements IReminderQueue {
         reminderId: payload.reminderId,
         userId: payload.userId,
         title: payload.title,
+        pushTokens: payload.pushTokens ?? [],
+        hideSensitiveDetails: payload.hideSensitiveDetails ?? true,
       },
       {
         delay,

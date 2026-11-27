@@ -11,6 +11,7 @@ import { errorHandler, notFoundHandler } from './middleware/error-handler';
 import { apiRateLimiter } from './middleware/rate-limit';
 import { requestIdMiddleware } from './middleware/request-id';
 import { createAiProvider, type IAiProvider } from './modules/ai/ai-provider';
+import { createEmailService, type IEmailService } from './modules/email/email.service';
 import { PrismaAssetsRepository } from './modules/assets/assets.repository';
 import { createAssetsRouter } from './modules/assets/assets.routes';
 import type { IAssetsRepository } from './modules/assets/assets.types';
@@ -74,6 +75,7 @@ export interface AppDependencies {
   notificationsRepository?: INotificationsRepository;
   intelligenceRepository?: IIntelligenceRepository;
   aiProvider?: IAiProvider;
+  emailService?: IEmailService;
   storageService?: IStorageService;
   localStorageService?: LocalPrivateStorageService | null;
   passwordService?: PasswordService;
@@ -100,6 +102,7 @@ export function createApp(deps: AppDependencies = {}): Express {
   const intelligenceRepository =
     deps.intelligenceRepository ?? new PrismaIntelligenceRepository(prisma);
   const aiProvider = deps.aiProvider ?? createAiProvider();
+  const emailService = deps.emailService ?? createEmailService();
   const passwordService = deps.passwordService ?? new PasswordService();
   const tokenService = deps.tokenService ?? new TokenService();
 
@@ -144,6 +147,7 @@ export function createApp(deps: AppDependencies = {}): Express {
       repository: authRepository,
       passwordService,
       tokenService,
+      emailService,
     }),
   );
   app.use(
