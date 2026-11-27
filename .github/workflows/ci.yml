@@ -27,6 +27,11 @@ jobs:
       - name: Generate Prisma Client
         run: npx prisma generate --schema=apps/api/prisma/schema.prisma
 
+      - name: Validate Prisma Schema
+        env:
+          DATABASE_URL: postgresql://lifeos:lifeos@localhost:5432/lifeos?schema=public
+        run: npx prisma validate --schema=apps/api/prisma/schema.prisma
+
       - name: Build shared packages and services
         run: npm run build
 
@@ -41,3 +46,9 @@ jobs:
 
       - name: Run tests
         run: npm run test
+
+      - name: Verify Android Metro bundle export
+        working-directory: apps/mobile
+        run: |
+          npx expo export --platform android --no-bytecode --output-dir .expo-verify
+          rm -rf .expo-verify

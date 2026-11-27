@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
-import { processExtractionJob } from '../src/processors/extraction.processor';
+import {
+  dispatchExtractionJob,
+  processExtractionJob,
+} from '../src/processors/extraction.processor';
 import {
   dispatchReminderNotification,
   formatPrivacySafeNotification,
@@ -73,5 +76,39 @@ describe('Worker Foundation & Processors', () => {
     expect(sentMessages).toHaveLength(2);
     expect(sentMessages[0].channelId).toBe('lifeos-reminders');
     expect(sentMessages[0].body).not.toContain('Passport');
+  });
+
+  it('invokes internal API extraction callback with hostport URL normalization and handles errors', async () => {
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ success: true }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      )
+      .mockResolvedValueOnce(new Response('Unauthorized', { status: 401 }));
+
+    const okRes = await dispatchExtractionJob(
+      { documentId: 'doc-99', userId: 'user-77' },
+      'job-ext-99',
+      fetchMock,
+      { apiUrl: 'lifeos-api:4000', workerSecret: 'super-secret-token' },
+    );
+
+    expect(okRes.status).toBe('extracted');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [targetUrl, init] = fetchMock.mock.calls[0]!;
+    expect(targetUrl).toBe('http://lifeos-api:4000/api/v1/internal/documents/doc-99/extract');
+    expect((init?.headers as Record<string, string>)?.Authorization).toBe(
+      'Bearer super-secret-token',
+    );
+
+    await expect(
+      dispatchExtractionJob({ documentId: 'doc-99', userId: 'user-77' }, 'job-ext-100', fetchMock, {
+        apiUrl: 'https://api.lifeos.app',
+        workerSecret: 'wrong-secret',
+      }),
+    ).rejects.toThrow(/HTTP 401/);
   });
 });

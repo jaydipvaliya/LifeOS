@@ -11,6 +11,7 @@ import { createRequireAuth } from '../../middleware/auth';
 import { validateRequest } from '../../middleware/validate';
 import type { TokenService } from '../auth/token.service';
 import type { ICategoriesRepository } from '../categories/categories.types';
+import type { IExtractionQueue } from '../intelligence/extraction.queue';
 import type { IStorageService } from '../storage/storage.types';
 import { DocumentsController } from './documents.controller';
 import { DocumentsService } from './documents.service';
@@ -23,12 +24,14 @@ export function createDocumentsRouter(deps: {
   categoriesRepository: ICategoriesRepository;
   storageService: IStorageService;
   tokenService: TokenService;
+  extractionQueue?: IExtractionQueue;
 }): Router {
   const router = Router();
   const service = new DocumentsService(
     deps.documentsRepository,
     deps.categoriesRepository,
     deps.storageService,
+    deps.extractionQueue,
   );
   const controller = new DocumentsController(service);
   const requireAuth = createRequireAuth(deps.tokenService);

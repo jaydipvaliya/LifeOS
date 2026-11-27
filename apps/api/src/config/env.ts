@@ -35,6 +35,7 @@ const envSchema = z
     EMAIL_FROM: z.string().default('LifeOS <noreply@lifeos.app>'),
     SENTRY_DSN: z.string().optional(),
     EXPO_ACCESS_TOKEN: z.string().optional(),
+    INTERNAL_WORKER_SECRET: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.NODE_ENV === 'production') {
@@ -52,6 +53,16 @@ const envSchema = z
           message: 'Production JWT_REFRESH_SECRET must be a strong 32+ character secret',
         });
       }
+      if (
+        data.STORAGE_SIGNING_SECRET.includes('dev-only') ||
+        data.STORAGE_SIGNING_SECRET.length < 32
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['STORAGE_SIGNING_SECRET'],
+          message: 'Production STORAGE_SIGNING_SECRET must be a strong 32+ character secret',
+        });
+      }
       if (!data.DATABASE_URL) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -64,6 +75,20 @@ const envSchema = z
           code: z.ZodIssueCode.custom,
           path: ['S3_BUCKET'],
           message: 'S3_BUCKET is required when STORAGE_DRIVER=s3',
+        });
+      }
+      if (data.EMAIL_PROVIDER === 'resend' && !data.EMAIL_API_KEY) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['EMAIL_API_KEY'],
+          message: 'EMAIL_API_KEY is required when EMAIL_PROVIDER=resend',
+        });
+      }
+      if (data.AI_PROVIDER !== 'none' && !data.AI_API_KEY) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['AI_API_KEY'],
+          message: 'AI_API_KEY is required when AI_PROVIDER is enabled',
         });
       }
     }

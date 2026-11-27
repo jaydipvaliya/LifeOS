@@ -16,6 +16,7 @@ import type {
 import { BadRequestError, NotFoundError } from '../../shared/errors';
 import type { RequestMeta } from '../auth/auth.types';
 import type { ICategoriesRepository } from '../categories/categories.types';
+import type { IExtractionQueue } from '../intelligence/extraction.queue';
 import { buildSafeStorageKey, sanitizeOriginalFilename } from '../storage/file-signature';
 import type { IStorageService } from '../storage/storage.types';
 import type { DocumentDetailRecord, DocumentRecord, IDocumentsRepository } from './documents.types';
@@ -63,6 +64,7 @@ export class DocumentsService {
     private readonly documentsRepository: IDocumentsRepository,
     private readonly categoriesRepository: ICategoriesRepository,
     private readonly storageService: IStorageService,
+    private readonly extractionQueue?: IExtractionQueue,
   ) {}
 
   async initiateUpload(
@@ -130,6 +132,13 @@ export class DocumentsService {
       checksumSha256: input.checksumSha256 ?? stored.checksumSha256 ?? null,
       meta,
     });
+
+    if (this.extractionQueue) {
+      await this.extractionQueue.enqueueExtraction({
+        documentId: doc.id,
+        userId,
+      });
+    }
 
     return toDocumentListItemDto(completed);
   }

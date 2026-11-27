@@ -54,11 +54,11 @@ lifeos/
 
 ---
 
-## Design System — Colorful Material 3 Expressive
+## Design System — Archival Ivory & Deep Pine (Tactile M3)
 
-- **Triadic & Expressive Accents**: `#FAF8FF` surface, `#FFFFFF` / `#F4F1FB` tonal container hierarchy, `#4F46E5` Indigo primary, `#0F9D8A` Teal secondary, `#E85D3F` Coral tertiary, plus 6 hue pairs (`violet`, `teal`, `coral`, `amber`, `cobalt`, `berry`) across tabs and cards
-- **Shapes & Motion**: Large squircle cards (`20–28px`), full-pill search bars, buttons, and connected segmented controls, Reanimated spring physics (`expressiveSpatial` / `expressiveEffects`)
-- **Typography**: `Manrope` for headings, `Inter` for body text, `DM Serif Display` selectively for editorial titles
+- **Archival Palette**: Warm archival ivory (`#F7F4EE`) and elevated paper cards (`#FFFFFF`) in Light mode; deep botanical obsidian (`#101312`) and charcoal-pine cards (`#1A201E`) in Dark mode, anchored by signature **Deep Botanical Pine (`#1E6B52` / `#5ED3A8`)** and semantic ochre/crimson alerts
+- **Shapes & Tactile Depth**: Squircle cards (`20–28px`) with 4px hue-matched bottom bevels, full-pill search bars, buttons, and connected segmented controls, Reanimated spring press physics
+- **Typography**: `DM Serif Display` selectively for editorial titles, `Manrope` for headings, `Inter` for body text
 
 ---
 
@@ -116,7 +116,8 @@ npm run test
 
 ### Production Deployment & Android Build
 
-- **Cloud API + Worker + PostgreSQL + Redis**: Deploy using the Render Blueprint in [`infrastructure/render.yaml`](infrastructure/render.yaml). Configure S3/R2 storage, `AI_API_KEY`, `EMAIL_API_KEY` (Resend), `EXPO_ACCESS_TOKEN`, and `SENTRY_DSN` in the Render dashboard.
+- **Cloud API + Worker + PostgreSQL + Redis (Render)**: Deploy using [`infrastructure/render.yaml`](infrastructure/render.yaml). Configure S3/R2 storage, `AI_API_KEY`, `EMAIL_API_KEY` (Resend), `EXPO_ACCESS_TOKEN`, `INTERNAL_WORKER_SECRET` (shared between API and Worker), and `SENTRY_DSN`.
+- **Container Builds (Docker)**: Multi-stage Node 22 images are defined in [`infrastructure/Dockerfile.api`](infrastructure/Dockerfile.api) and [`infrastructure/Dockerfile.worker`](infrastructure/Dockerfile.worker) (with API readiness healthchecks on `/api/v1/health/ready`).
 - **Mobile Android Build (EAS)**:
 
 ```bash

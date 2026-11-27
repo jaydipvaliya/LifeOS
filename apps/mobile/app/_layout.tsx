@@ -16,8 +16,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { Lock } from 'lucide-react-native';
 import React, { useEffect } from 'react';
-import { AppState, StyleSheet } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { AppState, Pressable, StyleSheet, Text, useColorScheme, View } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { Button, EditorialCard, EditorialText, Screen } from '../src/components/ui';
 import { flushSyncOutbox } from '../src/offline/sync-engine';
 import { authApi } from '../src/services/auth-api';
@@ -25,7 +25,7 @@ import {
   configureForegroundNotifications,
   registerForPushNotificationsAsync,
 } from '../src/services/push-notifications';
-import { initMobileSentry } from '../src/services/sentry';
+import { captureMobileException, initMobileSentry } from '../src/services/sentry';
 import { useAuthStore } from '../src/stores/auth-store';
 import { ThemeProvider, useTheme } from '../src/theme';
 
@@ -200,6 +200,52 @@ export default function RootLayout() {
   );
 }
 
+export function ErrorBoundary({ error, retry }: { error: Error; retry: () => void }) {
+  const isDark = useColorScheme() === 'dark';
+
+  useEffect(() => {
+    captureMobileException(error, { boundary: 'RootLayout' });
+  }, [error]);
+
+  return (
+    <SafeAreaView style={[styles.errorRoot, { backgroundColor: isDark ? '#101312' : '#F7F4EE' }]}>
+      <View
+        style={[
+          styles.errorCard,
+          {
+            backgroundColor: isDark ? '#1A201E' : '#FFFFFF',
+            borderColor: isDark ? '#2B3531' : '#E7E1D6',
+            borderBottomColor: isDark ? '#090C0B' : '#DDD5C5',
+          },
+        ]}
+      >
+        <Text style={[styles.errorTitle, { color: isDark ? '#F2F4F2' : '#191917' }]}>
+          Something went wrong
+        </Text>
+        <Text style={[styles.errorBody, { color: isDark ? '#B8C2BD' : '#57544D' }]}>
+          LifeOS encountered an unexpected screen error. Your saved documents and offline queue
+          remain safe.
+        </Text>
+        <Pressable
+          onPress={retry}
+          accessibilityRole="button"
+          style={[
+            styles.errorBtn,
+            {
+              backgroundColor: isDark ? '#5ED3A8' : '#1E6B52',
+              borderBottomColor: isDark ? '#3AA37D' : '#134937',
+            },
+          ]}
+        >
+          <Text style={[styles.errorBtnText, { color: isDark ? '#082E20' : '#FFFFFF' }]}>
+            Reload App
+          </Text>
+        </Pressable>
+      </View>
+    </SafeAreaView>
+  );
+}
+
 const styles = StyleSheet.create({
   lockScreen: {
     alignItems: 'center',
@@ -212,5 +258,39 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 0,
+  },
+  errorRoot: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  errorCard: {
+    width: '100%',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderBottomWidth: 4,
+    padding: 24,
+    gap: 12,
+  },
+  errorTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+  },
+  errorBody: {
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  errorBtn: {
+    marginTop: 8,
+    height: 48,
+    borderRadius: 999,
+    borderBottomWidth: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  errorBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
   },
 });

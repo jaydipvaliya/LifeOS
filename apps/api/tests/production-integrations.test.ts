@@ -1,5 +1,8 @@
+import request from 'supertest';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { createApp } from '../src/app';
 import { GeminiAiProvider, OpenAiCompatibleAiProvider } from '../src/modules/ai/ai-provider';
+import { DocumentsService } from '../src/modules/documents/documents.service';
 import { LoggedEmailService, ResendEmailService } from '../src/modules/email/email.service';
 
 describe('Multimodal Vision AI & Email Delivery Integrations', () => {
@@ -184,5 +187,101 @@ describe('Multimodal Vision AI & Email Delivery Integrations', () => {
       text: 'Token: abc',
     });
     expect(failRes.delivered).toBe(false);
+  });
+
+  it('enqueues background extraction upon document completion and guards internal worker route', async () => {
+    const docId = '11111111-1111-4111-8111-111111111111';
+    const userId = '22222222-2222-4222-8222-222222222222';
+    const enqueued: Array<{ documentId: string; userId: string }> = [];
+
+    const service = new DocumentsService(
+      {
+        findOwnedById: async () => ({
+          id: docId,
+          userId,
+          categoryId: 'cat-1',
+          category: {
+            id: 'cat-1',
+            userId: null,
+            slug: 'receipts',
+            name: 'Receipts',
+            isSystem: true,
+            iconName: null,
+          },
+          title: 'Warranty PDF',
+          originalFilename: 'warranty.pdf',
+          mimeType: 'application/pdf',
+          fileSizeBytes: 1200,
+          storageKey: 'users/test/warranty.pdf',
+          checksumSha256: null,
+          expiryDate: null,
+          processingStatus: 'pending_upload',
+          tags: [],
+          isArchived: false,
+          archivedAt: null,
+          version: 1,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }),
+        markUploadComplete: async () => ({
+          id: docId,
+          userId,
+          categoryId: 'cat-1',
+          category: {
+            id: 'cat-1',
+            userId: null,
+            slug: 'receipts',
+            name: 'Receipts',
+            isSystem: true,
+            iconName: null,
+          },
+          title: 'Warranty PDF',
+          originalFilename: 'warranty.pdf',
+          mimeType: 'application/pdf',
+          fileSizeBytes: 1200,
+          storageKey: 'users/test/warranty.pdf',
+          checksumSha256: null,
+          expiryDate: null,
+          processingStatus: 'uploaded',
+          tags: [],
+          isArchived: false,
+          archivedAt: null,
+          version: 1,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }),
+      } as never,
+      {} as never,
+      {
+        headObject: async () => ({ exists: true, sizeBytes: 1200 }),
+      } as never,
+      {
+        enqueueExtraction: async (payload) => {
+          enqueued.push(payload);
+          return `job-${payload.documentId}`;
+        },
+      },
+    );
+
+    const dto = await service.completeUpload(
+      userId,
+      docId,
+      { checksumSha256: undefined },
+      { ipAddress: '127.0.0.1', userAgent: 'vitest' },
+    );
+    expect(dto.processingStatus).toBe('uploaded');
+    expect(enqueued).toEqual([{ documentId: docId, userId }]);
+
+    const app = createApp({ internalWorkerSecret: 'worker-secret-test-32-characters!!' });
+    const unauth = await request(app)
+      .post(`/api/v1/internal/documents/${docId}/extract`)
+      .send({ userId });
+    expect(unauth.status).toBe(401);
+
+    const badSecret = await request(app)
+      .post(`/api/v1/internal/documents/${docId}/extract`)
+      .set('Authorization', 'Bearer wrong-secret')
+      .send({ userId });
+    expect(badSecret.status).toBe(401);
   });
 });

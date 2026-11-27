@@ -16,6 +16,15 @@ describe('API Foundation', () => {
     expect(response.body.meta.requestId).toBe(response.headers['x-request-id']);
   });
 
+  it('GET /api/v1/health/ready returns 200 readiness payload when healthy', async () => {
+    const response = await request(app).get('/api/v1/health/ready');
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.data.status).toBe('ok');
+    expect(response.body.data.checks.storage).toBe('configured');
+  });
+
   it('GET /api/v1/docs/openapi.json returns OpenAPI 3.1 spec', async () => {
     const response = await request(app).get('/api/v1/docs/openapi.json');
 

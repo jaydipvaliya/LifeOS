@@ -34,7 +34,14 @@ import { createEventsRouter } from './modules/events/events.routes';
 import type { IEventsRepository } from './modules/events/events.types';
 import { createHealthRouter } from './modules/health/health.routes';
 import { createAssistantRouter } from './modules/intelligence/assistant.routes';
-import { createExtractionRouter } from './modules/intelligence/extraction.routes';
+import {
+  createExtractionQueue,
+  type IExtractionQueue,
+} from './modules/intelligence/extraction.queue';
+import {
+  createExtractionRouter,
+  createInternalExtractionRouter,
+} from './modules/intelligence/extraction.routes';
 import type { IIntelligenceRepository } from './modules/intelligence/extraction.types';
 import { PrismaIntelligenceRepository } from './modules/intelligence/intelligence.repository';
 import { createSearchRouter } from './modules/intelligence/search.routes';
@@ -70,6 +77,8 @@ export interface AppDependencies {
   eventsRepository?: IEventsRepository;
   remindersRepository?: IRemindersRepository;
   reminderQueue?: IReminderQueue;
+  extractionQueue?: IExtractionQueue;
+  internalWorkerSecret?: string;
   assetsRepository?: IAssetsRepository;
   subscriptionsRepository?: ISubscriptionsRepository;
   notificationsRepository?: INotificationsRepository;
@@ -94,6 +103,7 @@ export function createApp(deps: AppDependencies = {}): Express {
   const eventsRepository = deps.eventsRepository ?? new PrismaEventsRepository(prisma);
   const remindersRepository = deps.remindersRepository ?? new PrismaRemindersRepository(prisma);
   const reminderQueue = deps.reminderQueue ?? createReminderQueue();
+  const extractionQueue = deps.extractionQueue ?? createExtractionQueue();
   const assetsRepository = deps.assetsRepository ?? new PrismaAssetsRepository(prisma);
   const subscriptionsRepository =
     deps.subscriptionsRepository ?? new PrismaSubscriptionsRepository(prisma);
@@ -115,6 +125,7 @@ export function createApp(deps: AppDependencies = {}): Express {
       : createStorageService();
 
   app.disable('x-powered-by');
+  app.set('trust proxy', 1);
   app.use(requestIdMiddleware);
   app.use(
     pinoHttp({
@@ -171,6 +182,7 @@ export function createApp(deps: AppDependencies = {}): Express {
       categoriesRepository,
       storageService: defaultStorage.storageService,
       tokenService,
+      extractionQueue,
     }),
   );
   app.use(
@@ -232,6 +244,16 @@ export function createApp(deps: AppDependencies = {}): Express {
       storageService: defaultStorage.storageService,
       aiProvider,
       tokenService,
+    }),
+  );
+  app.use(
+    `${API_PREFIX}/internal/documents`,
+    createInternalExtractionRouter({
+      documentsRepository,
+      intelligenceRepository,
+      storageService: defaultStorage.storageService,
+      aiProvider,
+      workerSecret: deps.internalWorkerSecret,
     }),
   );
   app.use(

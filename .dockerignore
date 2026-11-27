@@ -1,0 +1,12 @@
+node_modules
+.git
+.github
+.expo
+.expo-verify
+apps/mobile
+.storage
+*.log
+.env
+apps/**/.env
+coverage
+dist

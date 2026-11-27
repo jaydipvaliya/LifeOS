@@ -1,0 +1,35 @@
+FROM node:22-slim AS builder
+
+WORKDIR /app
+RUN apt-get update -y && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
+
+COPY package.json package-lock.json tsconfig.base.json tsconfig.json ./
+COPY packages/config/package.json packages/config/
+COPY packages/shared-types/package.json packages/shared-types/
+COPY packages/validation/package.json packages/validation/
+COPY packages/design-tokens/package.json packages/design-tokens/
+COPY apps/api/package.json apps/api/
+COPY apps/worker/package.json apps/worker/
+
+RUN npm ci --ignore-scripts
+
+COPY packages ./packages
+COPY apps/worker ./apps/worker
+
+RUN npm run build --workspace=@lifeos/config --workspace=@lifeos/shared-types --workspace=@lifeos/worker
+
+FROM node:22-slim AS runner
+
+WORKDIR /app
+RUN apt-get update -y && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
+ENV NODE_ENV=production
+ENV WORKER_CONNECT_REDIS=true
+
+COPY --from=builder --chown=node:node /app/node_modules ./node_modules
+COPY --from=builder --chown=node:node /app/package.json ./
+COPY --from=builder --chown=node:node /app/packages ./packages
+COPY --from=builder --chown=node:node /app/apps/worker ./apps/worker
+
+USER node
+
+CMD ["npm", "run", "start", "--workspace=@lifeos/worker"]

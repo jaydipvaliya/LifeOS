@@ -17,7 +17,7 @@ services:
     plan: free
     buildCommand: npm ci && npm run prisma:generate --workspace=@lifeos/api && npm run build
     startCommand: npm run prisma:deploy --workspace=@lifeos/api && npm run start --workspace=@lifeos/api
-    healthCheckPath: /api/v1/health
+    healthCheckPath: /api/v1/health/ready
     envVars:
       - key: NODE_ENV
         value: production
@@ -78,6 +78,8 @@ services:
         sync: false
       - key: EXPO_ACCESS_TOKEN
         sync: false
+      - key: INTERNAL_WORKER_SECRET
+        sync: false
 
   - type: worker
     name: lifeos-worker
@@ -97,6 +99,13 @@ services:
           type: keyvalue
           name: lifeos-redis
           property: connectionString
+      - key: API_INTERNAL_URL
+        fromService:
+          type: web
+          name: lifeos-api
+          property: hostport
+      - key: INTERNAL_WORKER_SECRET
+        sync: false
       - key: AI_PROVIDER
         value: gemini
       - key: AI_API_KEY
