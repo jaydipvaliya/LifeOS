@@ -52,6 +52,7 @@ export const motion = {
 export const borderWidths = {
   hairline: 1,
   medium: 1.5,
+  tactileLip: 4,
 } as const;
 
 export const shadows = {
@@ -64,16 +65,23 @@ export const shadows = {
   },
   subtle: {
     shadowColor: '#1B1564',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
     shadowRadius: 10,
-    elevation: 2,
+    elevation: 3,
+  },
+  tactile: {
+    shadowColor: '#1B1564',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.11,
+    shadowRadius: 12,
+    elevation: 4,
   },
   floating: {
     shadowColor: '#1B1564',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.14,
+    shadowOpacity: 0.16,
     shadowRadius: 20,
-    elevation: 5,
+    elevation: 6,
   },
 } as const;

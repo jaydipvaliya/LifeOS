@@ -208,14 +208,14 @@ export default function HomeDashboardScreen() {
         ) : data ? (
           <View style={{ gap: theme.spacing.xl }}>
             {/* Expressive Hero Intelligence Card */}
-            <EditorialCard variant="violet" shape="extraLarge">
+            <EditorialCard variant="violet" shape="extraLarge" depth="hero">
               <View style={styles.heroHeader}>
                 <View style={styles.heroTitleGroup}>
                   <View
                     style={[
                       styles.heroIconPill,
                       {
-                        backgroundColor: theme.colors.m3.surfaceContainerLowest,
+                        backgroundColor: theme.colors.surface.elevated,
                         borderRadius: theme.shapes.small,
                       },
                     ]}
@@ -234,7 +234,7 @@ export default function HomeDashboardScreen() {
                   style={[
                     styles.heroCountPill,
                     {
-                      backgroundColor: theme.colors.m3.surfaceContainerLowest,
+                      backgroundColor: theme.colors.surface.elevated,
                       borderRadius: theme.shapes.full,
                     },
                   ]}
@@ -307,7 +307,7 @@ export default function HomeDashboardScreen() {
                       style={[
                         styles.bentoIcon,
                         {
-                          backgroundColor: theme.colors.m3.surfaceContainerLowest,
+                          backgroundColor: theme.colors.surface.elevated,
                           borderRadius: theme.shapes.small,
                         },
                       ]}
@@ -335,7 +335,7 @@ export default function HomeDashboardScreen() {
                       style={[
                         styles.bentoIcon,
                         {
-                          backgroundColor: theme.colors.m3.surfaceContainerLowest,
+                          backgroundColor: theme.colors.surface.elevated,
                           borderRadius: theme.shapes.small,
                         },
                       ]}
@@ -365,7 +365,7 @@ export default function HomeDashboardScreen() {
                       style={[
                         styles.bentoIcon,
                         {
-                          backgroundColor: theme.colors.m3.surfaceContainerLowest,
+                          backgroundColor: theme.colors.surface.elevated,
                           borderRadius: theme.shapes.small,
                         },
                       ]}
@@ -393,7 +393,7 @@ export default function HomeDashboardScreen() {
                       style={[
                         styles.bentoIcon,
                         {
-                          backgroundColor: theme.colors.m3.surfaceContainerLowest,
+                          backgroundColor: theme.colors.surface.elevated,
                           borderRadius: theme.shapes.small,
                         },
                       ]}

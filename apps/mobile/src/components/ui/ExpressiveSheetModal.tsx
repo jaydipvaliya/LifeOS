@@ -18,7 +18,7 @@ interface ExpressiveSheetModalProps {
 }
 
 export function ExpressiveSheetModal({ visible, onClose, children }: ExpressiveSheetModalProps) {
-  const { theme } = useTheme();
+  const { theme, mode } = useTheme();
   const insets = useSafeAreaInsets();
 
   return (
@@ -27,13 +27,27 @@ export function ExpressiveSheetModal({ visible, onClose, children }: ExpressiveS
         style={styles.keyboard}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <Pressable style={styles.backdrop} onPress={onClose}>
+        <Pressable
+          style={[
+            styles.backdrop,
+            {
+              backgroundColor: mode === 'dark' ? 'rgba(5, 4, 12, 0.74)' : 'rgba(20, 18, 29, 0.44)',
+            },
+          ]}
+          onPress={onClose}
+        >
           <Pressable
             onPress={(e) => e.stopPropagation()}
             style={[
               styles.sheet,
               {
-                backgroundColor: theme.colors.m3.surfaceContainerLowest,
+                backgroundColor: theme.colors.surface.elevated,
+                borderTopColor: theme.colors.border.topHighlight,
+                borderLeftColor: theme.colors.border.subtle,
+                borderRightColor: theme.colors.border.subtle,
+                borderTopWidth: theme.borderWidths.hairline,
+                borderLeftWidth: mode === 'dark' ? theme.borderWidths.hairline : 0,
+                borderRightWidth: mode === 'dark' ? theme.borderWidths.hairline : 0,
                 borderTopLeftRadius: theme.shapes.extraLarge,
                 borderTopRightRadius: theme.shapes.extraLarge,
                 paddingBottom: Math.max(insets.bottom, theme.spacing.lg),

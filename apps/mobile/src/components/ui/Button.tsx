@@ -51,15 +51,15 @@ export function Button({
   style,
   accessibilityLabel,
 }: ButtonProps) {
-  const { theme } = useTheme();
+  const { theme, mode } = useTheme();
   const isDisabled = disabled || loading;
-  const scale = useSharedValue(1);
+  const press = useSharedValue(0);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
+    transform: [{ translateY: press.value * 3 }, { scale: 1 - press.value * 0.035 }],
   }));
 
-  const height = size === 'lg' ? 54 : size === 'sm' ? 38 : 48;
+  const height = size === 'lg' ? 56 : size === 'sm' ? 40 : 50;
   const borderRadius =
     shape === 'pill' ? theme.shapes.full : size === 'lg' ? theme.shapes.medium : theme.shapes.small;
 
@@ -71,26 +71,52 @@ export function Button({
       case 'filled':
         return {
           backgroundColor: accentPair ? accentPair.base : theme.colors.m3.primary,
+          borderWidth: theme.borderWidths.hairline,
+          borderColor: accentPair ? accentPair.solidBevel : theme.colors.border.primaryBevel,
+          borderTopColor:
+            mode === 'dark' ? theme.colors.border.topHighlight : 'rgba(255, 255, 255, 0.24)',
+          borderBottomWidth: theme.borderWidths.tactileLip,
+          borderBottomColor: accentPair ? accentPair.solidBevel : theme.colors.border.primaryBevel,
+          ...theme.shadows.subtle,
+          shadowColor: accentPair ? accentPair.shadow : theme.colors.m3.primary,
         };
       case 'tonal':
         return {
           backgroundColor: accentPair ? accentPair.container : theme.colors.m3.secondaryContainer,
+          borderWidth: theme.borderWidths.hairline,
+          borderColor: accentPair ? accentPair.bevel : theme.colors.expressive.teal.bevel,
+          borderTopColor:
+            mode === 'dark' ? theme.colors.border.topHighlight : theme.colors.border.topHighlight,
+          borderBottomWidth: theme.borderWidths.tactileLip,
+          borderBottomColor: accentPair ? accentPair.bevel : theme.colors.expressive.teal.bevel,
         };
       case 'tertiary':
         return {
           backgroundColor: theme.colors.m3.tertiaryContainer,
+          borderWidth: theme.borderWidths.hairline,
+          borderColor: theme.colors.expressive.coral.bevel,
+          borderBottomWidth: theme.borderWidths.tactileLip,
+          borderBottomColor: theme.colors.expressive.coral.bevel,
         };
       case 'elevated':
         return {
-          backgroundColor: theme.colors.m3.surfaceContainerLow,
-          ...theme.shadows.subtle,
+          backgroundColor: theme.colors.surface.elevated,
+          borderWidth: theme.borderWidths.hairline,
+          borderColor: theme.colors.border.subtle,
+          borderTopColor: theme.colors.border.topHighlight,
+          borderBottomWidth: theme.borderWidths.tactileLip,
+          borderBottomColor: theme.colors.border.bevel,
+          ...theme.shadows.tactile,
         };
       case 'secondary':
       case 'outlined':
         return {
-          backgroundColor: theme.colors.m3.surfaceContainerLowest,
+          backgroundColor: theme.colors.surface.elevated,
           borderWidth: theme.borderWidths.hairline,
-          borderColor: theme.colors.m3.outlineVariant,
+          borderColor: theme.colors.border.strong,
+          borderTopColor: theme.colors.border.topHighlight,
+          borderBottomWidth: theme.borderWidths.tactileLip,
+          borderBottomColor: theme.colors.border.bevel,
         };
       case 'ghost':
       case 'text':
@@ -100,6 +126,10 @@ export function Button({
       case 'destructive':
         return {
           backgroundColor: theme.colors.m3.errorContainer,
+          borderWidth: theme.borderWidths.hairline,
+          borderColor: theme.colors.border.dangerBevel,
+          borderBottomWidth: theme.borderWidths.tactileLip,
+          borderBottomColor: theme.colors.border.dangerBevel,
         };
     }
   };
@@ -128,11 +158,11 @@ export function Button({
       onPress={onPress}
       onPressIn={() => {
         if (!isDisabled) {
-          scale.value = withSpring(0.96, theme.motion.expressiveEffects);
+          press.value = withSpring(1, theme.motion.expressiveEffects);
         }
       }}
       onPressOut={() => {
-        scale.value = withSpring(1, theme.motion.expressiveSpatial);
+        press.value = withSpring(0, theme.motion.expressiveSpatial);
       }}
       disabled={isDisabled}
       accessibilityRole="button"

@@ -39,11 +39,11 @@ export function SearchBar({
       style={[
         styles.bar,
         {
-          backgroundColor: focused
-            ? theme.colors.m3.surfaceContainerLowest
-            : theme.colors.m3.surfaceContainerHigh,
-          borderColor: focused ? iconColor : 'transparent',
-          borderWidth: focused ? theme.borderWidths.medium : 0,
+          backgroundColor: focused ? theme.colors.surface.elevated : theme.colors.surface.primary,
+          borderColor: focused ? iconColor : theme.colors.border.subtle,
+          borderWidth: focused ? theme.borderWidths.medium : theme.borderWidths.hairline,
+          borderBottomWidth: focused ? 3 : 2.5,
+          borderBottomColor: focused ? iconColor : theme.colors.border.bevel,
           borderRadius: theme.shapes.full,
         },
         style,

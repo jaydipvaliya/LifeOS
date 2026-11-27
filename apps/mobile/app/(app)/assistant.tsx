@@ -207,8 +207,8 @@ export default function LifeAssistantScreen() {
                             style={[
                               styles.citationPill,
                               {
-                                backgroundColor: theme.colors.m3.surfaceContainerLowest,
-                                borderColor: theme.colors.m3.outlineVariant,
+                                backgroundColor: theme.colors.surface.elevated,
+                                borderColor: theme.colors.border.subtle,
                                 borderWidth: theme.borderWidths.hairline,
                                 borderRadius: theme.shapes.full,
                               },

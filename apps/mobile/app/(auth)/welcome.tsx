@@ -131,7 +131,7 @@ export default function WelcomeScreen() {
               style={[
                 styles.iconPill,
                 {
-                  backgroundColor: theme.colors.m3.surfaceContainerLowest,
+                  backgroundColor: theme.colors.surface.elevated,
                   borderRadius: theme.shapes.medium,
                 },
               ]}
@@ -188,7 +188,9 @@ export default function WelcomeScreen() {
               style={[
                 styles.nextPill,
                 {
-                  backgroundColor: theme.colors.m3.surfaceContainerLowest,
+                  backgroundColor: theme.colors.surface.elevated,
+                  borderColor: theme.colors.border.subtle,
+                  borderWidth: theme.borderWidths.hairline,
                   borderRadius: theme.shapes.full,
                 },
               ]}

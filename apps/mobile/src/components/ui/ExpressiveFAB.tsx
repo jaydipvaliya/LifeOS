@@ -23,12 +23,21 @@ export function ExpressiveFAB({
   accessibilityLabel,
   style,
 }: ExpressiveFABProps) {
-  const { theme } = useTheme();
-  const scale = useSharedValue(1);
+  const { theme, mode } = useTheme();
+  const press = useSharedValue(0);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
+    transform: [{ translateY: press.value * 3.5 }, { scale: 1 - press.value * 0.06 }],
   }));
+
+  const fabLip =
+    tone === 'secondary'
+      ? theme.colors.border.secondaryBevel
+      : tone === 'tertiary'
+        ? theme.colors.expressive.coral.solidBevel
+        : tone === 'container'
+          ? theme.colors.expressive.violet.bevel
+          : theme.colors.border.primaryBevel;
 
   const bgColor =
     tone === 'secondary'
@@ -61,10 +70,10 @@ export function ExpressiveFAB({
     <AnimatedPressable
       onPress={onPress}
       onPressIn={() => {
-        scale.value = withSpring(0.92, theme.motion.expressiveEffects);
+        press.value = withSpring(1, theme.motion.expressiveEffects);
       }}
       onPressOut={() => {
-        scale.value = withSpring(1, theme.motion.expressiveSpatial);
+        press.value = withSpring(0, theme.motion.expressiveSpatial);
       }}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
@@ -75,8 +84,15 @@ export function ExpressiveFAB({
           borderRadius: theme.shapes.squircle,
           paddingHorizontal: label ? theme.spacing.lg : 0,
           width: label ? undefined : 56,
-          height: 56,
+          height: 58,
+          borderWidth: theme.borderWidths.hairline,
+          borderColor: fabLip,
+          borderTopColor:
+            mode === 'dark' ? theme.colors.border.topHighlight : 'rgba(255,255,255,0.28)',
+          borderBottomWidth: theme.borderWidths.tactileLip,
+          borderBottomColor: fabLip,
           ...theme.shadows.floating,
+          shadowColor: bgColor,
         },
         animatedStyle,
         style,

@@ -399,7 +399,7 @@ export default function DocumentVaultScreen() {
           </View>
         ) : null}
 
-        <View style={{ marginTop: theme.spacing.md, gap: theme.spacing.xs }}>
+        <View style={{ marginTop: theme.spacing.md, gap: theme.spacing.sm }}>
           {documentsQuery.isLoading ? (
             <LoadingState message="Opening your encrypted vault..." />
           ) : documentsQuery.isError ? (
@@ -432,7 +432,7 @@ export default function DocumentVaultScreen() {
               return (
                 <EditorialCard
                   key={doc.id}
-                  variant="surface"
+                  variant="primary"
                   padding="sm"
                   onPress={() => router.push(`/(app)/documents/${doc.id}`)}
                 >

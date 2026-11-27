@@ -32,11 +32,13 @@ export function SegmentedControl<T extends string>({
     if (accent === 'primary') {
       return {
         bg: theme.colors.m3.primaryContainer,
+        bevel: theme.colors.expressive.violet.bevel,
         textTone: 'onPrimaryContainer' as TextColorTone,
       };
     }
     return {
       bg: theme.colors.expressive[accent].container,
+      bevel: theme.colors.expressive[accent].bevel,
       textTone: accent as TextColorTone,
     };
   };
@@ -58,9 +60,11 @@ export function SegmentedControl<T extends string>({
             style={[
               styles.segment,
               {
-                backgroundColor: selected ? activeStyle.bg : theme.colors.m3.surfaceContainerLow,
-                borderColor: selected ? activeStyle.bg : theme.colors.m3.outlineVariant,
-                borderWidth: selected ? 0 : theme.borderWidths.hairline,
+                backgroundColor: selected ? activeStyle.bg : theme.colors.surface.primary,
+                borderColor: selected ? activeStyle.bevel : theme.colors.border.subtle,
+                borderWidth: theme.borderWidths.hairline,
+                borderBottomWidth: selected ? 3 : 2,
+                borderBottomColor: selected ? activeStyle.bevel : theme.colors.border.bevel,
                 borderTopLeftRadius:
                   selected || isFirst ? theme.shapes.full : theme.shapes.extraSmall,
                 borderBottomLeftRadius:

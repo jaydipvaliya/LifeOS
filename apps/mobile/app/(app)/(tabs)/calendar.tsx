@@ -264,7 +264,7 @@ export default function CalendarAndTasksScreen() {
                       {
                         backgroundColor: selected
                           ? theme.colors.m3.primary
-                          : theme.colors.m3.surfaceContainerLowest,
+                          : theme.colors.surface.elevated,
                         borderRadius: theme.shapes.large,
                       },
                     ]}
@@ -319,7 +319,7 @@ export default function CalendarAndTasksScreen() {
                   style={[
                     styles.monthNavBtn,
                     {
-                      backgroundColor: theme.colors.m3.surfaceContainerLowest,
+                      backgroundColor: theme.colors.surface.elevated,
                       borderRadius: theme.shapes.full,
                     },
                   ]}
@@ -334,7 +334,7 @@ export default function CalendarAndTasksScreen() {
                   style={[
                     styles.monthNavBtn,
                     {
-                      backgroundColor: theme.colors.m3.surfaceContainerLowest,
+                      backgroundColor: theme.colors.surface.elevated,
                       borderRadius: theme.shapes.full,
                     },
                   ]}
@@ -373,7 +373,7 @@ export default function CalendarAndTasksScreen() {
                           {
                             backgroundColor: selected
                               ? theme.colors.expressive.cobalt.base
-                              : theme.colors.m3.surfaceContainerLowest,
+                              : theme.colors.surface.elevated,
                             borderColor:
                               isToday && !selected
                                 ? theme.colors.expressive.cobalt.base
@@ -494,7 +494,7 @@ export default function CalendarAndTasksScreen() {
                             style={[
                               styles.remIconBox,
                               {
-                                backgroundColor: theme.colors.m3.surfaceContainerLowest,
+                                backgroundColor: theme.colors.surface.elevated,
                                 borderRadius: theme.shapes.small,
                               },
                             ]}

@@ -48,10 +48,11 @@ export function TextField({
           styles.inputWrapper,
           {
             backgroundColor: isFocused
-              ? theme.colors.m3.surfaceContainerLowest
+              ? theme.colors.surface.elevated
               : theme.colors.m3.surfaceContainerLow,
             borderColor,
             borderWidth,
+            borderBottomWidth: isFocused ? 3 : theme.borderWidths.hairline,
             borderRadius: theme.shapes.medium,
             paddingHorizontal: theme.spacing.md,
           },

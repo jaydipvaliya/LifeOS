@@ -2,6 +2,9 @@ export interface ExpressiveAccentPair {
   base: string;
   container: string;
   onContainer: string;
+  bevel: string;
+  solidBevel: string;
+  shadow: string;
 }
 
 export interface ExpressiveAccents {
@@ -71,6 +74,11 @@ export interface ColorPalette {
   border: {
     subtle: string;
     strong: string;
+    bevel: string;
+    topHighlight: string;
+    primaryBevel: string;
+    secondaryBevel: string;
+    dangerBevel: string;
   };
   status: {
     success: string;
@@ -113,6 +121,11 @@ export const lightColors: ColorPalette = {
   border: {
     subtle: '#E6E1F2',
     strong: '#CFC7E4',
+    bevel: '#D5CCE8',
+    topHighlight: 'rgba(255, 255, 255, 0.92)',
+    primaryBevel: '#3730A3',
+    secondaryBevel: '#0B7567',
+    dangerBevel: '#F0BDC5',
   },
   status: {
     success: '#0F9D8A',
@@ -155,12 +168,54 @@ export const lightColors: ColorPalette = {
     onErrorContainer: '#670D1D',
   },
   expressive: {
-    violet: { base: '#6D28D9', container: '#EDE5FF', onContainer: '#2E0F66' },
-    teal: { base: '#0D9488', container: '#D2F7F2', onContainer: '#083A36' },
-    coral: { base: '#EA580C', container: '#FFE8DC', onContainer: '#5A2004' },
-    amber: { base: '#D97706', container: '#FEF1D2', onContainer: '#522B02' },
-    cobalt: { base: '#2563EB', container: '#DDEAFF', onContainer: '#0E2B6B' },
-    berry: { base: '#DB2777', container: '#FCE2EE', onContainer: '#5C0D31' },
+    violet: {
+      base: '#6D28D9',
+      container: '#EDE5FF',
+      onContainer: '#2E0F66',
+      bevel: '#CFC0FA',
+      solidBevel: '#521CA8',
+      shadow: '#6D28D9',
+    },
+    teal: {
+      base: '#0D9488',
+      container: '#D2F7F2',
+      onContainer: '#083A36',
+      bevel: '#9CE3D8',
+      solidBevel: '#0A6E65',
+      shadow: '#0D9488',
+    },
+    coral: {
+      base: '#EA580C',
+      container: '#FFE8DC',
+      onContainer: '#5A2004',
+      bevel: '#F7C4AA',
+      solidBevel: '#BA4306',
+      shadow: '#EA580C',
+    },
+    amber: {
+      base: '#D97706',
+      container: '#FEF1D2',
+      onContainer: '#522B02',
+      bevel: '#F2D08A',
+      solidBevel: '#AD5B03',
+      shadow: '#D97706',
+    },
+    cobalt: {
+      base: '#2563EB',
+      container: '#DDEAFF',
+      onContainer: '#0E2B6B',
+      bevel: '#B2CEFC',
+      solidBevel: '#1B4BB8',
+      shadow: '#2563EB',
+    },
+    berry: {
+      base: '#DB2777',
+      container: '#FCE2EE',
+      onContainer: '#5C0D31',
+      bevel: '#F2B8D3',
+      solidBevel: '#AD1C5C',
+      shadow: '#DB2777',
+    },
   },
 };
 
@@ -169,13 +224,13 @@ export const lightColors: ColorPalette = {
  */
 export const darkColors: ColorPalette = {
   background: {
-    primary: '#14121D',
-    secondary: '#1D1A29',
+    primary: '#0F0D18',
+    secondary: '#171424',
   },
   surface: {
-    primary: '#231F31',
-    secondary: '#2B263D',
-    elevated: '#312B47',
+    primary: '#1E1A2E',
+    secondary: '#26213A',
+    elevated: '#2D2745',
   },
   brand: {
     primaryForest: '#B9B4FF',
@@ -187,11 +242,16 @@ export const darkColors: ColorPalette = {
     primary: '#F3F0FA',
     secondary: '#C6C0D8',
     muted: '#9891AE',
-    inverse: '#14121D',
+    inverse: '#0F0D18',
   },
   border: {
-    subtle: '#352F4B',
-    strong: '#494266',
+    subtle: '#362F50',
+    strong: '#4C436E',
+    bevel: '#090810',
+    topHighlight: 'rgba(255, 255, 255, 0.10)',
+    primaryBevel: '#7D74E8',
+    secondaryBevel: '#37B09E',
+    dangerBevel: '#450B16',
   },
   status: {
     success: '#5CE1CC',
@@ -214,31 +274,73 @@ export const darkColors: ColorPalette = {
     onTertiary: '#5C180A',
     tertiaryContainer: '#6E2414',
     onTertiaryContainer: '#FFE8E2',
-    surface: '#14121D',
-    surfaceDim: '#100E17',
-    surfaceBright: '#312B47',
-    surfaceContainerLowest: '#0D0B14',
-    surfaceContainerLow: '#1D1A29',
-    surfaceContainer: '#252136',
-    surfaceContainerHigh: '#2E2A42',
-    surfaceContainerHighest: '#37324F',
+    surface: '#0F0D18',
+    surfaceDim: '#0B0912',
+    surfaceBright: '#352F52',
+    surfaceContainerLowest: '#090810',
+    surfaceContainerLow: '#171424',
+    surfaceContainer: '#1E1A2E',
+    surfaceContainerHigh: '#26213A',
+    surfaceContainerHighest: '#302A4A',
     onSurface: '#F3F0FA',
     onSurfaceVariant: '#C6C0D8',
     outline: '#9891AE',
-    outlineVariant: '#352F4B',
+    outlineVariant: '#362F50',
     inverseSurface: '#F3F0FA',
-    inverseOnSurface: '#14121D',
+    inverseOnSurface: '#0F0D18',
     error: '#FF8697',
     onError: '#540B17',
     errorContainer: '#691523',
     onErrorContainer: '#FFE4E8',
   },
   expressive: {
-    violet: { base: '#C4B5FD', container: '#3B2378', onContainer: '#EFEAFF' },
-    teal: { base: '#5EEAD4', container: '#114A43', onContainer: '#D5FCF5' },
-    coral: { base: '#FDBA74', container: '#63290B', onContainer: '#FFEBE0' },
-    amber: { base: '#FCD34D', container: '#573607', onContainer: '#FFF3D1' },
-    cobalt: { base: '#93C5FD', container: '#173775', onContainer: '#E1EDFF' },
-    berry: { base: '#F9A8D4', container: '#69193F', onContainer: '#FFE4F1' },
+    violet: {
+      base: '#C4B5FD',
+      container: '#331F69',
+      onContainer: '#F1ECFF',
+      bevel: '#1D1045',
+      solidBevel: '#8D7AE0',
+      shadow: '#080414',
+    },
+    teal: {
+      base: '#5EEAD4',
+      container: '#10443D',
+      onContainer: '#DBFDF7',
+      bevel: '#072723',
+      solidBevel: '#2FB8A3',
+      shadow: '#031210',
+    },
+    coral: {
+      base: '#FDBA74',
+      container: '#57250C',
+      onContainer: '#FFEDE3',
+      bevel: '#331405',
+      solidBevel: '#D98D45',
+      shadow: '#140702',
+    },
+    amber: {
+      base: '#FCD34D',
+      container: '#4D3008',
+      onContainer: '#FFF4D6',
+      bevel: '#2C1B03',
+      solidBevel: '#CE9F26',
+      shadow: '#120B01',
+    },
+    cobalt: {
+      base: '#93C5FD',
+      container: '#153168',
+      onContainer: '#E6F0FF',
+      bevel: '#0A1B40',
+      solidBevel: '#5C96E0',
+      shadow: '#040B1A',
+    },
+    berry: {
+      base: '#F9A8D4',
+      container: '#5B1637',
+      onContainer: '#FFE6F2',
+      bevel: '#360A1F',
+      solidBevel: '#D472A7',
+      shadow: '#17040D',
+    },
   },
 };

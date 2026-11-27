@@ -38,8 +38,8 @@ export function ExpressiveSwitch({
         }
       : {
           activeTrack: theme.colors.expressive[accent].base,
-          activeThumb: theme.colors.m3.surfaceContainerLowest,
-          checkColor: theme.colors.expressive[accent].base,
+          activeThumb: '#FFFFFF',
+          checkColor: theme.colors.expressive[accent].bevel,
         };
 
   const thumbAnimatedStyle = useAnimatedStyle(() => {

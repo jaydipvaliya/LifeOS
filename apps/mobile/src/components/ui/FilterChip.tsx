@@ -25,46 +25,56 @@ export function FilterChip({
   accent = 'primary',
 }: FilterChipProps) {
   const { theme } = useTheme();
-  const scale = useSharedValue(1);
+  const press = useSharedValue(0);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
+    transform: [{ translateY: press.value * 2 }, { scale: 1 - press.value * 0.05 }],
   }));
 
-  const selectedColors: Record<ChipAccent, { bg: string; fg: string; textTone: TextColorTone }> = {
+  const selectedColors: Record<
+    ChipAccent,
+    { bg: string; fg: string; bevel: string; textTone: TextColorTone }
+  > = {
     primary: {
       bg: theme.colors.m3.primaryContainer,
       fg: theme.colors.m3.onPrimaryContainer,
+      bevel: theme.colors.expressive.violet.bevel,
       textTone: 'onPrimaryContainer',
     },
     violet: {
       bg: theme.colors.expressive.violet.container,
       fg: theme.colors.expressive.violet.onContainer,
+      bevel: theme.colors.expressive.violet.bevel,
       textTone: 'violet',
     },
     teal: {
       bg: theme.colors.expressive.teal.container,
       fg: theme.colors.expressive.teal.onContainer,
+      bevel: theme.colors.expressive.teal.bevel,
       textTone: 'teal',
     },
     coral: {
       bg: theme.colors.expressive.coral.container,
       fg: theme.colors.expressive.coral.onContainer,
+      bevel: theme.colors.expressive.coral.bevel,
       textTone: 'coral',
     },
     amber: {
       bg: theme.colors.expressive.amber.container,
       fg: theme.colors.expressive.amber.onContainer,
+      bevel: theme.colors.expressive.amber.bevel,
       textTone: 'amber',
     },
     cobalt: {
       bg: theme.colors.expressive.cobalt.container,
       fg: theme.colors.expressive.cobalt.onContainer,
+      bevel: theme.colors.expressive.cobalt.bevel,
       textTone: 'cobalt',
     },
     berry: {
       bg: theme.colors.expressive.berry.container,
       fg: theme.colors.expressive.berry.onContainer,
+      bevel: theme.colors.expressive.berry.bevel,
       textTone: 'berry',
     },
   };
@@ -75,19 +85,21 @@ export function FilterChip({
     <AnimatedPressable
       onPress={onPress}
       onPressIn={() => {
-        scale.value = withSpring(0.94, theme.motion.expressiveEffects);
+        press.value = withSpring(1, theme.motion.expressiveEffects);
       }}
       onPressOut={() => {
-        scale.value = withSpring(1, theme.motion.expressiveSpatial);
+        press.value = withSpring(0, theme.motion.expressiveSpatial);
       }}
       accessibilityRole="button"
       accessibilityState={{ selected }}
       style={[
         styles.chip,
         {
-          backgroundColor: selected ? active.bg : theme.colors.m3.surfaceContainerLow,
-          borderColor: selected ? active.bg : theme.colors.m3.outlineVariant,
+          backgroundColor: selected ? active.bg : theme.colors.surface.primary,
+          borderColor: selected ? active.bevel : theme.colors.border.subtle,
           borderWidth: theme.borderWidths.hairline,
+          borderBottomWidth: 3,
+          borderBottomColor: selected ? active.bevel : theme.colors.border.bevel,
           borderRadius: selected ? theme.shapes.full : theme.shapes.medium,
           paddingHorizontal: theme.spacing.md,
           paddingVertical: theme.spacing.xs,

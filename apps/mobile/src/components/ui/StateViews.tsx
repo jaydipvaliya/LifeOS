@@ -38,7 +38,11 @@ export function EmptyState({
           style={[
             styles.iconCircle,
             {
-              backgroundColor: theme.colors.m3.surfaceContainerLowest,
+              backgroundColor: theme.colors.surface.elevated,
+              borderColor: theme.colors.border.subtle,
+              borderWidth: theme.borderWidths.hairline,
+              borderBottomWidth: 3,
+              borderBottomColor: theme.colors.border.bevel,
               borderRadius: theme.shapes.squircle,
               marginBottom: theme.spacing.md,
             },
@@ -78,7 +82,8 @@ export function ErrorState({ message, onRetry }: { message: string; onRetry?: ()
       style={{
         backgroundColor: theme.colors.m3.errorContainer,
         borderColor: theme.colors.m3.error,
-        borderWidth: theme.borderWidths.hairline,
+        borderBottomColor: theme.colors.border.dangerBevel,
+        borderBottomWidth: theme.borderWidths.tactileLip,
       }}
     >
       <EditorialText variant="bodySmall" tone="danger">

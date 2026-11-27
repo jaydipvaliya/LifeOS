@@ -221,7 +221,7 @@ export default function ProfileTabScreen() {
             style={[
               styles.iconTile,
               {
-                backgroundColor: theme.colors.m3.surfaceContainerLowest,
+                backgroundColor: theme.colors.surface.elevated,
                 borderRadius: theme.shapes.medium,
               },
             ]}
@@ -250,7 +250,10 @@ export default function ProfileTabScreen() {
             </View>
             <SegmentedControl
               value={preference}
-              onChange={setMode}
+              onChange={(next) => {
+                setMode(next);
+                void authApi.updateProfile({ themePreference: next }).catch(() => undefined);
+              }}
               options={[
                 { value: 'light', label: 'Light', accent: 'amber' },
                 { value: 'dark', label: 'Dark', accent: 'violet' },

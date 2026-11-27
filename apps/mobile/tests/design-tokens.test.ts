@@ -18,9 +18,15 @@ describe('LifeOS Design System Tokens', () => {
     for (const key of accentKeys) {
       expect(lightTheme.colors.expressive[key].base).toBeTruthy();
       expect(lightTheme.colors.expressive[key].container).toBeTruthy();
+      expect(lightTheme.colors.expressive[key].bevel).toBeTruthy();
+      expect(lightTheme.colors.expressive[key].solidBevel).toBeTruthy();
       expect(darkTheme.colors.expressive[key].base).toBeTruthy();
       expect(darkTheme.colors.expressive[key].container).toBeTruthy();
+      expect(darkTheme.colors.expressive[key].bevel).toBeTruthy();
+      expect(darkTheme.colors.expressive[key].solidBevel).toBeTruthy();
     }
+    expect(lightTheme.borderWidths.tactileLip).toBe(4);
+    expect(darkTheme.shadows.tactile.elevation).toBe(4);
   });
 
   it('provides a semantic dark theme scaffold with identical structure', () => {

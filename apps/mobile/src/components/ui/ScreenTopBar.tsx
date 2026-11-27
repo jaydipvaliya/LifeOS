@@ -27,10 +27,10 @@ export function ScreenTopBar({
   rightSlot,
 }: ScreenTopBarProps) {
   const { theme } = useTheme();
-  const scale = useSharedValue(1);
+  const press = useSharedValue(0);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
+    transform: [{ translateY: press.value * 2 }, { scale: 1 - press.value * 0.05 }],
   }));
 
   return (
@@ -38,10 +38,10 @@ export function ScreenTopBar({
       <AnimatedPressable
         onPress={onBack}
         onPressIn={() => {
-          scale.value = withSpring(0.93, theme.motion.expressiveEffects);
+          press.value = withSpring(1, theme.motion.expressiveEffects);
         }}
         onPressOut={() => {
-          scale.value = withSpring(1, theme.motion.expressiveSpatial);
+          press.value = withSpring(0, theme.motion.expressiveSpatial);
         }}
         accessibilityRole="button"
         accessibilityLabel={backLabel}
@@ -49,7 +49,11 @@ export function ScreenTopBar({
         style={[
           styles.backPill,
           {
-            backgroundColor: theme.colors.m3.surfaceContainer,
+            backgroundColor: theme.colors.surface.primary,
+            borderColor: theme.colors.border.subtle,
+            borderWidth: theme.borderWidths.hairline,
+            borderBottomWidth: 3,
+            borderBottomColor: theme.colors.border.bevel,
             borderRadius: theme.shapes.full,
           },
           animatedStyle,

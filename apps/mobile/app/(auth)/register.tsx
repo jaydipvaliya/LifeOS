@@ -217,7 +217,7 @@ export default function RegisterScreen() {
                         borderColor: value ? theme.colors.m3.primary : theme.colors.m3.outline,
                         backgroundColor: value
                           ? theme.colors.m3.primary
-                          : theme.colors.m3.surfaceContainerLowest,
+                          : theme.colors.surface.elevated,
                       },
                     ]}
                   >

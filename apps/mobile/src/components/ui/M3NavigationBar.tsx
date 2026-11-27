@@ -100,6 +100,8 @@ function NavTabItem({ routeName, label, focused, icon, onPress, onLongPress }: N
             styles.activePill,
             {
               backgroundColor: accent.container,
+              borderColor: accent.bevel,
+              borderWidth: theme.borderWidths.hairline,
               borderRadius: theme.shapes.full,
             },
             pillAnimatedStyle,
@@ -131,7 +133,7 @@ export function M3NavigationBar({
   navigateToTab,
   navigation,
 }: M3TabBarProps) {
-  const { theme } = useTheme();
+  const { theme, mode } = useTheme();
   const insets = useSafeAreaInsets();
 
   return (
@@ -139,8 +141,10 @@ export function M3NavigationBar({
       style={[
         styles.bar,
         {
-          backgroundColor: theme.colors.m3.surfaceContainerLow,
-          borderTopColor: theme.colors.m3.outlineVariant,
+          backgroundColor:
+            mode === 'dark' ? theme.colors.surface.primary : theme.colors.m3.surfaceContainerLow,
+          borderTopColor:
+            mode === 'dark' ? theme.colors.border.subtle : theme.colors.m3.outlineVariant,
           borderTopWidth: theme.borderWidths.hairline,
           paddingBottom: Math.max(insets.bottom, 10),
         },

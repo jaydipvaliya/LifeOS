@@ -82,7 +82,7 @@ export default function NotificationsScreen() {
                 style={[
                   styles.iconTile,
                   {
-                    backgroundColor: theme.colors.m3.surfaceContainerLowest,
+                    backgroundColor: theme.colors.surface.elevated,
                     borderRadius: theme.shapes.medium,
                   },
                 ]}
@@ -116,7 +116,7 @@ export default function NotificationsScreen() {
                 style={[
                   styles.iconTile,
                   {
-                    backgroundColor: theme.colors.m3.surfaceContainerLowest,
+                    backgroundColor: theme.colors.surface.elevated,
                     borderRadius: theme.shapes.medium,
                   },
                 ]}
